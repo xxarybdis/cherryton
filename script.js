@@ -45,6 +45,8 @@ let capsuleIsOpening = false;
 
 let currentGachaResult = null;
 
+let rarityImage = null;
+
 
 /* =========================================
    TOKEN - DATOS DE ARRASTRE
@@ -80,26 +82,54 @@ const NORMAL_GACHA_CAPSULES = [
 
     {
         name: "dog",
-        closed: "assets/capsule-dog.png",
-        opened: "assets/capsule-dog2.png"
+
+        closed:
+            "assets/capsule-dog.png",
+
+        rarity:
+            "assets/normal.png",
+
+        opened:
+            "assets/capsule-dog2.png"
     },
 
     {
         name: "cat",
-        closed: "assets/capsule-cat.png",
-        opened: "assets/capsule-cat2.png"
+
+        closed:
+            "assets/capsule-cat.png",
+
+        rarity:
+            "assets/normal.png",
+
+        opened:
+            "assets/capsule-cat2.png"
     },
 
     {
         name: "candy",
-        closed: "assets/capsule-candy.png",
-        opened: "assets/capsule-candy2.png"
+
+        closed:
+            "assets/capsule-candy.png",
+
+        rarity:
+            "assets/normal.png",
+
+        opened:
+            "assets/capsule-candy2.png"
     },
 
     {
         name: "friends",
-        closed: "assets/capsule-friends.png",
-        opened: "assets/capsule-friends2.png"
+
+        closed:
+            "assets/capsule-friends.png",
+
+        rarity:
+            "assets/rare.png",
+
+        opened:
+            "assets/capsule-friends2.png"
     }
 
 ];
@@ -111,19 +141,24 @@ const NORMAL_GACHA_CAPSULES = [
 
 const LETTER_CAPSULE = {
 
-    name: "letter",
+    name:
+        "letter",
 
     /*
-       La cápsula especial sale
-       directamente como letter2.
+       Letter sale directamente
+       como letter2.
     */
 
     closed:
         "assets/capsule-letter2.png",
 
     /*
-       Al hacer click cambia a letter3.
+       Antes de letter3 aparecerá
+       el letrero ultra-rare.
     */
+
+    rarity:
+        "assets/ultra-rare.png",
 
     opened:
         "assets/capsule-letter3.png"
@@ -149,7 +184,8 @@ function createNewGachaRound() {
 
 
     /*
-       Mezclar las cuatro normales.
+       Mezclamos únicamente
+       las cuatro normales.
     */
 
     for (
@@ -181,7 +217,7 @@ function createNewGachaRound() {
 
 
     /*
-       Letter SIEMPRE queda
+       Letter siempre queda
        como quinta y última.
     */
 
@@ -195,10 +231,6 @@ function createNewGachaRound() {
 
 }
 
-
-/*
-   Crear primera ronda.
-*/
 
 createNewGachaRound();
 
@@ -228,8 +260,7 @@ function getNextGachaResult() {
    ========================================= */
 
 /*
-   NO CAMBIAR:
-   posición ya calibrada.
+   VALORES YA CALIBRADOS.
 */
 
 const DISPENSER_X = 62;
@@ -244,10 +275,22 @@ const CAPSULE_MOVE_Y = 64;
 
 
 /* =========================================
-   TAMAÑO CENTRAL
+   CÁPSULA CENTRAL
    ========================================= */
 
 const CENTER_CAPSULE_SIZE = 34;
+
+
+/* =========================================
+   DURACIÓN DEL LETRERO
+   ========================================= */
+
+/*
+   Tiempo que NORMAL / RARE /
+   ULTRA-RARE permanece visible.
+*/
+
+const RARITY_DISPLAY_TIME = 1900;
 
 
 /* =========================================
@@ -712,6 +755,18 @@ function createDispensedCapsule() {
 
 
     if (
+        rarityImage
+    ) {
+
+        rarityImage.remove();
+
+        rarityImage =
+            null;
+
+    }
+
+
+    if (
         dispensedCapsule
     ) {
 
@@ -780,11 +835,6 @@ function createDispensedCapsule() {
     capsule.style.opacity =
         "0";
 
-
-    /*
-       La cápsula cerrada NO lleva
-       la sombra del resultado.
-    */
 
     capsule.style.filter =
         "none";
@@ -1430,10 +1480,6 @@ function openCapsule() {
         true;
 
 
-    /*
-       Detener agitación.
-    */
-
     if (
         capsuleShakeAnimation
     ) {
@@ -1459,8 +1505,8 @@ function openCapsule() {
 
 
     /*
-       Pequeña anticipación antes
-       de revelar el resultado.
+       Primero la cápsula reacciona
+       al click y desaparece.
     */
 
     const anticipation =
@@ -1489,7 +1535,7 @@ function openCapsule() {
                             -50%,
                             -50%
                         )
-                        scale(0.95)
+                        scale(0.94)
                         rotate(-2deg)
                         `,
 
@@ -1497,7 +1543,7 @@ function openCapsule() {
                         1,
 
                     offset:
-                        0.45
+                        0.40
                 },
 
                 {
@@ -1507,7 +1553,7 @@ function openCapsule() {
                             -50%,
                             -50%
                         )
-                        scale(1.08)
+                        scale(1.10)
                         rotate(2deg)
                         `,
 
@@ -1523,7 +1569,7 @@ function openCapsule() {
             {
 
                 duration:
-                    280,
+                    300,
 
                 easing:
                     "ease-out",
@@ -1540,59 +1586,342 @@ function openCapsule() {
 
 
             /*
-               Cambiar por imagen abierta.
-
-               dog     -> dog2
-               cat     -> cat2
-               candy   -> candy2
-               friends -> friends2
-
-               letter2 -> letter3
+               Ocultamos temporalmente
+               la cápsula para mostrar
+               el letrero de rareza.
             */
 
-            capsule.src =
-                currentGachaResult.opened;
+            capsule.style.visibility =
+                "hidden";
+
+
+            showRarity();
+
+        };
+
+}
+
+
+/* =========================================
+   MOSTRAR LETRERO DE RAREZA
+   ========================================= */
+
+function showRarity() {
+
+    if (
+        !currentGachaResult
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        rarityImage
+    ) {
+
+        rarityImage.remove();
+
+        rarityImage =
+            null;
+
+    }
+
+
+    const badge =
+        document.createElement(
+            "img"
+        );
+
+
+    badge.src =
+        currentGachaResult.rarity;
+
+
+    badge.alt =
+        "Rareza";
+
+
+    badge.draggable =
+        false;
+
+
+    badge.style.position =
+        "fixed";
+
+
+    badge.style.left =
+        "50%";
+
+
+    badge.style.top =
+        "50%";
+
+
+    /*
+       Tamaño responsive.
+       Se adapta a celular y PC.
+    */
+
+    badge.style.width =
+        "min(48vw, 380px)";
+
+
+    badge.style.maxHeight =
+        "42vh";
+
+
+    badge.style.height =
+        "auto";
+
+
+    badge.style.objectFit =
+        "contain";
+
+
+    badge.style.zIndex =
+        "10001";
+
+
+    badge.style.opacity =
+        "0";
+
+
+    badge.style.pointerEvents =
+        "none";
+
+
+    badge.style.userSelect =
+        "none";
+
+
+    badge.style.webkitUserDrag =
+        "none";
+
+
+    badge.style.transformOrigin =
+        "center center";
+
+
+    badge.style.transform =
+        `
+        translate(
+            -50%,
+            -50%
+        )
+        scale(0.25)
+        `;
+
+
+    /*
+       Sombra muy suave debajo
+       del letrero.
+    */
+
+    badge.style.filter =
+        `
+        drop-shadow(
+            0 8px 14px
+            rgba(0, 0, 0, 0.15)
+        )
+        `;
+
+
+    document.body.appendChild(
+        badge
+    );
+
+
+    rarityImage =
+        badge;
+
+
+    const startRarityAnimation =
+        () => {
 
 
             /*
-               Mostrar resultado abierto
-               cuando la imagen termine
-               de cargar.
+               POP DE ENTRADA
             */
 
-            const revealOpenedCapsule =
+            const popIn =
+                badge.animate(
+                    [
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                scale(0.25)
+                                rotate(-5deg)
+                                `,
+
+                            opacity:
+                                0
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                scale(1.14)
+                                rotate(3deg)
+                                `,
+
+                            opacity:
+                                1,
+
+                            offset:
+                                0.65
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                scale(0.96)
+                                rotate(-1deg)
+                                `,
+
+                            opacity:
+                                1,
+
+                            offset:
+                                0.82
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                scale(1)
+                                rotate(0deg)
+                                `,
+
+                            opacity:
+                                1
+                        }
+
+                    ],
+
+                    {
+
+                        duration:
+                            520,
+
+                        easing:
+                            "cubic-bezier(0.22, 1, 0.36, 1)",
+
+                        fill:
+                            "forwards"
+
+                    }
+                );
+
+
+            popIn.onfinish =
                 () => {
 
 
-                    capsule.getAnimations().forEach(
-                        animation =>
-                            animation.cancel()
-                    );
-
-
-                    capsule.style.height =
-                        "auto";
-
-
-                    capsule.style.opacity =
-                        "1";
-
-
                     /*
-                       SOMBRA FINAL.
-
-                       Es un drop-shadow,
-                       por lo que sigue la
-                       silueta transparente
-                       del PNG en lugar de
-                       crear una caja.
+                       El letrero permanece
+                       visible un par de
+                       segundos.
                     */
 
-                    capsule.style.filter =
-                        "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.30))";
+                    setTimeout(
+                        () => {
+
+                            hideRarityAndRevealResult(
+                                badge
+                            );
+
+                        },
+
+                        RARITY_DISPLAY_TIME
+                    );
+
+                };
+
+        };
 
 
-                    capsule.style.transform =
+    if (
+        badge.complete &&
+        badge.naturalWidth > 0
+    ) {
+
+        startRarityAnimation();
+
+    } else {
+
+        badge.addEventListener(
+            "load",
+            startRarityAnimation,
+            {
+                once:
+                    true
+            }
+        );
+
+
+        /*
+           Si hubiese algún problema
+           cargando el PNG, no dejamos
+           bloqueado el resultado.
+        */
+
+        badge.addEventListener(
+            "error",
+            () => {
+
+                badge.remove();
+
+                rarityImage =
+                    null;
+
+                revealOpenedCapsule();
+
+            },
+
+            {
+                once:
+                    true
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   QUITAR RAREZA Y MOSTRAR RESULTADO
+   ========================================= */
+
+function hideRarityAndRevealResult(
+    badge
+) {
+
+    const popOut =
+        badge.animate(
+            [
+
+                {
+                    transform:
                         `
                         translate(
                             -50%,
@@ -1600,117 +1929,318 @@ function openCapsule() {
                         )
                         scale(1)
                         rotate(0deg)
-                        `;
+                        `,
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1.10)
+                        rotate(2deg)
+                        `,
+
+                    opacity:
+                        1,
+
+                    offset:
+                        0.35
+                },
+
+                {
+                    transform:
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(0.60)
+                        rotate(-4deg)
+                        `,
+
+                    opacity:
+                        0
+                }
+
+            ],
+
+            {
+
+                duration:
+                    340,
+
+                easing:
+                    "ease-in",
+
+                fill:
+                    "forwards"
+
+            }
+        );
 
 
-                    /*
-                       Aparición del resultado.
+    popOut.onfinish =
+        () => {
 
-                       La sombra también aparece
-                       progresivamente para que
-                       no aparezca de golpe.
-                    */
 
-                    capsule.animate(
-                        [
-
-                            {
-                                transform:
-                                    `
-                                    translate(
-                                        -50%,
-                                        -50%
-                                    )
-                                    scale(0.82)
-                                    rotate(-3deg)
-                                    `,
-
-                                opacity:
-                                    0,
-
-                                filter:
-                                    "drop-shadow(0 2px 4px rgba(0, 0, 0, 0))"
-                            },
-
-                            {
-                                transform:
-                                    `
-                                    translate(
-                                        -50%,
-                                        -50%
-                                    )
-                                    scale(1.07)
-                                    rotate(2deg)
-                                    `,
-
-                                opacity:
-                                    1,
-
-                                filter:
-                                    "drop-shadow(0 12px 22px rgba(0, 0, 0, 0.24))",
-
-                                offset:
-                                    0.65
-                            },
-
-                            {
-                                transform:
-                                    `
-                                    translate(
-                                        -50%,
-                                        -50%
-                                    )
-                                    scale(1)
-                                    rotate(0deg)
-                                    `,
-
-                                opacity:
-                                    1,
-
-                                filter:
-                                    "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.22))"
-                            }
-
-                        ],
-
-                        {
-
-                            duration:
-                                520,
-
-                            easing:
-                                "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                            fill:
-                                "forwards"
-
-                        }
-                    );
-
-                };
+            badge.remove();
 
 
             if (
-                capsule.complete &&
-                capsule.naturalWidth > 0
+                rarityImage === badge
             ) {
 
-                revealOpenedCapsule();
-
-            } else {
-
-                capsule.addEventListener(
-                    "load",
-                    revealOpenedCapsule,
-                    {
-                        once:
-                            true
-                    }
-                );
+                rarityImage =
+                    null;
 
             }
 
+
+            revealOpenedCapsule();
+
         };
+
+}
+
+
+/* =========================================
+   MOSTRAR IMAGEN ABIERTA
+   ========================================= */
+
+function revealOpenedCapsule() {
+
+    if (
+        !dispensedCapsule
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !currentGachaResult
+    ) {
+
+        return;
+
+    }
+
+
+    const capsule =
+        dispensedCapsule;
+
+
+    /*
+       Cambiar por:
+
+       dog2
+       cat2
+       candy2
+       friends2
+
+       o letter3.
+    */
+
+    capsule.src =
+        currentGachaResult.opened;
+
+
+    const showResult =
+        () => {
+
+
+            capsule.getAnimations().forEach(
+                animation =>
+                    animation.cancel()
+            );
+
+
+            capsule.style.visibility =
+                "visible";
+
+
+            capsule.style.height =
+                "auto";
+
+
+            capsule.style.opacity =
+                "1";
+
+
+            /*
+               SOMBRA SUTIL DEL RESULTADO.
+            */
+
+            capsule.style.filter =
+                `
+                drop-shadow(
+                    0 10px 18px
+                    rgba(0, 0, 0, 0.50)
+                )
+                `;
+
+
+            capsule.style.transform =
+                `
+                translate(
+                    -50%,
+                    -50%
+                )
+                scale(1)
+                rotate(0deg)
+                `;
+
+
+            /*
+               POP DEL RESULTADO ABIERTO.
+            */
+
+            capsule.animate(
+                [
+
+                    {
+                        transform:
+                            `
+                            translate(
+                                -50%,
+                                -50%
+                            )
+                            scale(0.72)
+                            rotate(-3deg)
+                            `,
+
+                        opacity:
+                            0,
+
+                        filter:
+                            `
+                            drop-shadow(
+                                0 2px 4px
+                                rgba(0, 0, 0, 0)
+                            )
+                            `
+                    },
+
+                    {
+                        transform:
+                            `
+                            translate(
+                                -50%,
+                                -50%
+                            )
+                            scale(1.10)
+                            rotate(2deg)
+                            `,
+
+                        opacity:
+                            1,
+
+                        filter:
+                            `
+                            drop-shadow(
+                                0 12px 22px
+                                rgba(0, 0, 0, 0.24)
+                            )
+                            `,
+
+                        offset:
+                            0.62
+                    },
+
+                    {
+                        transform:
+                            `
+                            translate(
+                                -50%,
+                                -50%
+                            )
+                            scale(0.97)
+                            rotate(-1deg)
+                            `,
+
+                        opacity:
+                            1,
+
+                        filter:
+                            `
+                            drop-shadow(
+                                0 10px 19px
+                                rgba(0, 0, 0, 0.22)
+                            )
+                            `,
+
+                        offset:
+                            0.82
+                    },
+
+                    {
+                        transform:
+                            `
+                            translate(
+                                -50%,
+                                -50%
+                            )
+                            scale(1)
+                            rotate(0deg)
+                            `,
+
+                        opacity:
+                            1,
+
+                        filter:
+                            `
+                            drop-shadow(
+                                0 10px 18px
+                                rgba(0, 0, 0, 0.22)
+                            )
+                            `
+                    }
+
+                ],
+
+                {
+
+                    duration:
+                        600,
+
+                    easing:
+                        "cubic-bezier(0.22, 1, 0.36, 1)",
+
+                    fill:
+                        "forwards"
+
+                }
+            );
+
+        };
+
+
+    if (
+        capsule.complete &&
+        capsule.naturalWidth > 0
+    ) {
+
+        showResult();
+
+    } else {
+
+        capsule.addEventListener(
+            "load",
+            showResult,
+            {
+                once:
+                    true
+            }
+        );
+
+    }
 
 }
 
@@ -1778,7 +2308,7 @@ function getTokenCenter() {
 
 
 /* =========================================
-   TOKEN - DISTANCIA A LA RANURA
+   TOKEN - DISTANCIA
    ========================================= */
 
 function getTokenDistanceFromSlot() {
@@ -2458,10 +2988,6 @@ function moveKnob(
 
     }
 
-
-    /*
-       Giro antihorario.
-    */
 
     knobRotation +=
         -difference;
