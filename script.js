@@ -86,8 +86,8 @@ const GACHA_CAPSULES = [
    tenemos calibrada.
 */
 
-const DISPENSER_X = 62.2;
-const DISPENSER_Y = 72;
+const DISPENSER_X = 62;
+const DISPENSER_Y = 76;
 
 
 /*
