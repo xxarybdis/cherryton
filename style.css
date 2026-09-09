@@ -138,10 +138,8 @@ body {
 
 .capsule-10 {
     width: 23%;
-
     left: 8%;
     bottom: 55%;
-
     z-index: 1;
 
     transform:
@@ -151,10 +149,8 @@ body {
 
 .capsule-11 {
     width: 25%;
-
     left: 34%;
     bottom: 57%;
-
     z-index: 2;
 
     transform:
@@ -164,10 +160,8 @@ body {
 
 .capsule-12 {
     width: 22%;
-
     left: 65%;
     bottom: 54%;
-
     z-index: 1;
 
     transform:
@@ -182,10 +176,8 @@ body {
 
 .capsule-6 {
     width: 29%;
-
     left: 0%;
     bottom: 27%;
-
     z-index: 5;
 
     transform:
@@ -195,10 +187,8 @@ body {
 
 .capsule-7 {
     width: 26%;
-
     left: 20%;
     bottom: 34%;
-
     z-index: 3;
 
     transform:
@@ -208,10 +198,8 @@ body {
 
 .capsule-8 {
     width: 31%;
-
     left: 42%;
     bottom: 28%;
-
     z-index: 6;
 
     transform:
@@ -220,10 +208,8 @@ body {
 
 .capsule-9 {
     width: 27%;
-
     left: 70%;
     bottom: 31%;
-
     z-index: 4;
 
     transform:
@@ -238,10 +224,8 @@ body {
 
 .capsule-1 {
     width: 31%;
-
     left: 2%;
     bottom: 3%;
-
     z-index: 10;
 
     transform:
@@ -250,10 +234,8 @@ body {
 
 .capsule-2 {
     width: 28%;
-
     left: 16%;
     bottom: 4%;
-
     z-index: 8;
 
     transform:
@@ -263,10 +245,8 @@ body {
 
 .capsule-3 {
     width: 34%;
-
     left: 34%;
     bottom: 0%;
-
     z-index: 12;
 
     transform:
@@ -275,10 +255,8 @@ body {
 
 .capsule-4 {
     width: 29%;
-
     left: 57%;
     bottom: 5%;
-
     z-index: 9;
 
     transform:
@@ -288,10 +266,8 @@ body {
 
 .capsule-5 {
     width: 32%;
-
     left: 74%;
     bottom: 1%;
-
     z-index: 11;
 
     transform:
@@ -300,29 +276,14 @@ body {
 
 
 /* =========================
-   RANURA DEL TOKEN
+   RANURA INVISIBLE ANTIGUA
+
+   Ya no se utiliza para detectar
+   el token, pero la dejamos oculta.
    ========================= */
 
-/*
-   Esta zona invisible coincide ahora
-   con el pequeño óvalo vertical que
-   marcaste en rojo.
-*/
-
 .token-slot {
-    position: absolute;
-
-    z-index: 30;
-
-    left: 8.5%;
-    top: 66%;
-
-    width: 12%;
-    height: 8%;
-
-    background: transparent;
-
-    pointer-events: none;
+    display: none;
 }
 
 
@@ -338,7 +299,13 @@ body {
     left: -8%;
     top: 67%;
 
-    width: 12%;
+    /*
+       Antes era 12%.
+       Ahora es un poco más pequeño.
+    */
+
+    width: 9.5%;
+
     height: auto;
 
     user-select: none;
@@ -376,7 +343,7 @@ body {
 }
 
 
-/* Token encima de la ranura */
+/* Token cerca de la ranura */
 
 .token.near-slot {
     filter:
@@ -404,8 +371,13 @@ body {
         padding: 10px;
     }
 
+    /*
+       Sigue siendo un poquito más grande
+       en celular para poder agarrarlo.
+    */
+
     .token {
-        width: 14%;
+        width: 11%;
         left: -5%;
     }
 }
