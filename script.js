@@ -19,18 +19,25 @@ const capsules =
 const token =
     document.querySelector(".token");
 
+const knob =
+    document.querySelector(".knob");
+
 
 /* =========================================
-   ESTADOS
+   ESTADO GENERAL
    ========================================= */
 
 let machineIsRunning = false;
+
 let tokenInserted = false;
+
 let tokenIsDragging = false;
+
+let knobIsTurning = false;
 
 
 /* =========================================
-   DATOS DEL ARRASTRE
+   TOKEN - DATOS DE ARRASTRE
    ========================================= */
 
 let startPointerX = 0;
@@ -38,6 +45,26 @@ let startPointerY = 0;
 
 let tokenMoveX = 0;
 let tokenMoveY = 0;
+
+
+/* =========================================
+   PERILLA - DATOS DE GIRO
+   ========================================= */
+
+let knobRotation = 0;
+
+let knobLastPointerAngle = 0;
+
+
+/*
+   Cuánto giro consideramos suficiente
+   para completar una jugada.
+
+   No exigimos 360° completos porque
+   con mouse/dedo se sentiría incómodo.
+*/
+
+const KNOB_REQUIRED_TURN = 280;
 
 
 /* =========================================
@@ -116,7 +143,7 @@ window.addEventListener(
 
 
 /* =========================================
-   NÚMERO ALEATORIO
+   UTILIDAD ALEATORIA
    ========================================= */
 
 function random(min, max) {
@@ -129,7 +156,7 @@ function random(min, max) {
 
 
 /* =========================================
-   LÍMITES DE CÁPSULAS
+   CÁPSULAS - LÍMITES
    ========================================= */
 
 function getCapsuleLimits(capsule) {
@@ -209,7 +236,7 @@ function getCapsuleLimits(capsule) {
 
 
 /* =========================================
-   ANIMAR CÁPSULA
+   CÁPSULAS - ANIMACIÓN
    ========================================= */
 
 function animateCapsule(
@@ -381,7 +408,7 @@ function runGacha() {
 
 
 /* =========================================
-   POSICIÓN DE LA RANURA
+   TOKEN - POSICIÓN DE LA RANURA
    ========================================= */
 
 function getTokenSlotPosition() {
@@ -392,31 +419,13 @@ function getTokenSlotPosition() {
 
     return {
 
-        /*
-           La movimos un poco
-           más hacia la derecha.
-
-           Antes: 0.30
-           Ahora: 0.32
-        */
-
         x:
             machineRect.left +
             machineRect.width * 0.32,
 
-
-        /*
-           La altura queda igual.
-        */
-
         y:
             machineRect.top +
             machineRect.height * 0.71,
-
-
-        /*
-           Área de tolerancia.
-        */
 
         radiusX:
             machineRect.width * 0.055,
@@ -430,7 +439,7 @@ function getTokenSlotPosition() {
 
 
 /* =========================================
-   ¿TOKEN CERCA DE LA RANURA?
+   TOKEN - DETECCIÓN
    ========================================= */
 
 function tokenIsNearSlot() {
@@ -474,7 +483,7 @@ function tokenIsNearSlot() {
 
 
 /* =========================================
-   AGARRAR TOKEN
+   TOKEN - AGARRAR
    ========================================= */
 
 function startTokenDrag(event) {
@@ -509,7 +518,7 @@ function startTokenDrag(event) {
 
 
 /* =========================================
-   MOVER TOKEN
+   TOKEN - MOVER
    ========================================= */
 
 function moveToken(event) {
@@ -553,7 +562,7 @@ function moveToken(event) {
 
 
 /* =========================================
-   SOLTAR TOKEN
+   TOKEN - SOLTAR
    ========================================= */
 
 function endTokenDrag(event) {
@@ -598,7 +607,7 @@ function endTokenDrag(event) {
 
 
 /* =========================================
-   REGRESAR TOKEN
+   TOKEN - REGRESAR
    ========================================= */
 
 function returnTokenHome() {
@@ -648,7 +657,7 @@ function returnTokenHome() {
 
 
 /* =========================================
-   INSERTAR TOKEN
+   TOKEN - INSERTAR
    ========================================= */
 
 function insertToken() {
@@ -759,15 +768,406 @@ function insertToken() {
             "hidden";
 
 
+        /*
+           Ahora sí desbloqueamos
+           la perilla.
+        */
+
+        knob.classList.remove(
+            "locked"
+        );
+
+        knob.classList.add(
+            "ready"
+        );
+
+
         console.log(
             "Token insertado 🍒"
         );
 
         console.log(
-            "Máquina con 1 crédito."
+            "Perilla desbloqueada 🩷"
         );
 
     };
+
+}
+
+
+/* =========================================
+   PERILLA - ÁNGULO DEL PUNTERO
+   ========================================= */
+
+function getPointerAngle(event) {
+
+    const knobRect =
+        knob.getBoundingClientRect();
+
+
+    const centerX =
+        knobRect.left +
+        knobRect.width / 2;
+
+    const centerY =
+        knobRect.top +
+        knobRect.height / 2;
+
+
+    const radians =
+        Math.atan2(
+            event.clientY - centerY,
+            event.clientX - centerX
+        );
+
+
+    return radians *
+        180 / Math.PI;
+
+}
+
+
+/* =========================================
+   PERILLA - EMPEZAR GIRO
+   ========================================= */
+
+function startKnobTurn(event) {
+
+    /*
+       Sin token no funciona.
+    */
+
+    if (!tokenInserted) {
+        return;
+    }
+
+
+    /*
+       Tampoco permitimos usarla
+       mientras el gachapón funciona.
+    */
+
+    if (machineIsRunning) {
+        return;
+    }
+
+
+    knobIsTurning = true;
+
+    knobRotation = 0;
+
+
+    knobLastPointerAngle =
+        getPointerAngle(event);
+
+
+    knob.classList.add(
+        "turning"
+    );
+
+
+    knob.setPointerCapture(
+        event.pointerId
+    );
+
+
+    event.preventDefault();
+
+}
+
+
+/* =========================================
+   PERILLA - GIRAR
+   ========================================= */
+
+function moveKnob(event) {
+
+    if (!knobIsTurning) {
+        return;
+    }
+
+
+    const currentAngle =
+        getPointerAngle(event);
+
+
+    let difference =
+        currentAngle -
+        knobLastPointerAngle;
+
+
+    /*
+       Corregimos el salto que ocurre
+       al pasar de 180° a -180°.
+    */
+
+    if (difference > 180) {
+        difference -= 360;
+    }
+
+    if (difference < -180) {
+        difference += 360;
+    }
+
+
+    /*
+       Solo acumulamos giro horario.
+
+       Si el usuario retrocede un poco,
+       permitimos que la perilla también
+       retroceda.
+    */
+
+    knobRotation += difference;
+
+
+    /*
+       No dejamos girar hacia atrás
+       más allá de la posición inicial.
+    */
+
+    knobRotation =
+        Math.max(
+            0,
+            knobRotation
+        );
+
+
+    /*
+       Tampoco necesitamos más
+       de un giro completo.
+    */
+
+    knobRotation =
+        Math.min(
+            360,
+            knobRotation
+        );
+
+
+    knob.style.transform =
+        `translate(-50%, -50%)
+         rotate(${knobRotation}deg)`;
+
+
+    knobLastPointerAngle =
+        currentAngle;
+
+
+    /*
+       En cuanto alcanza el giro necesario,
+       completamos la jugada.
+    */
+
+    if (
+        knobRotation >=
+        KNOB_REQUIRED_TURN
+    ) {
+
+        completeKnobTurn(
+            event.pointerId
+        );
+
+    }
+
+
+    event.preventDefault();
+
+}
+
+
+/* =========================================
+   PERILLA - SOLTAR ANTES DE TERMINAR
+   ========================================= */
+
+function endKnobTurn(event) {
+
+    if (!knobIsTurning) {
+        return;
+    }
+
+
+    knobIsTurning = false;
+
+
+    knob.classList.remove(
+        "turning"
+    );
+
+
+    if (
+        knob.hasPointerCapture(
+            event.pointerId
+        )
+    ) {
+
+        knob.releasePointerCapture(
+            event.pointerId
+        );
+
+    }
+
+
+    /*
+       Si soltó antes de completar
+       el giro, vuelve suavemente.
+    */
+
+    resetKnob();
+
+}
+
+
+/* =========================================
+   PERILLA - VOLVER A POSICIÓN INICIAL
+   ========================================= */
+
+function resetKnob() {
+
+    const startingRotation =
+        knobRotation;
+
+
+    const animation =
+        knob.animate(
+            [
+                {
+                    transform:
+                        `translate(-50%, -50%)
+                         rotate(${startingRotation}deg)`
+                },
+
+                {
+                    transform:
+                        `translate(-50%, -50%)
+                         rotate(0deg)`
+                }
+            ],
+
+            {
+                duration: 450,
+
+                easing:
+                    "cubic-bezier(0.22, 1, 0.36, 1)"
+            }
+        );
+
+
+    animation.onfinish = () => {
+
+        knobRotation = 0;
+
+        knob.style.transform =
+            `translate(-50%, -50%)
+             rotate(0deg)`;
+
+    };
+
+}
+
+
+/* =========================================
+   PERILLA - GIRO COMPLETO
+   ========================================= */
+
+function completeKnobTurn(
+    pointerId
+) {
+
+    knobIsTurning = false;
+
+
+    knob.classList.remove(
+        "turning"
+    );
+
+
+    if (
+        knob.hasPointerCapture(
+            pointerId
+        )
+    ) {
+
+        knob.releasePointerCapture(
+            pointerId
+        );
+
+    }
+
+
+    /*
+       Consumimos el token.
+
+       Ya no se podrá volver a girar
+       hasta que más adelante iniciemos
+       una nueva jugada.
+    */
+
+    tokenInserted = false;
+
+
+    knob.classList.remove(
+        "ready"
+    );
+
+    knob.classList.add(
+        "locked"
+    );
+
+
+    /*
+       Terminamos automáticamente
+       el giro hasta 360 grados.
+    */
+
+    const animation =
+        knob.animate(
+            [
+                {
+                    transform:
+                        `translate(-50%, -50%)
+                         rotate(${knobRotation}deg)`
+                },
+
+                {
+                    transform:
+                        `translate(-50%, -50%)
+                         rotate(360deg)`
+                }
+            ],
+
+            {
+                duration: 220,
+
+                easing:
+                    "ease-out"
+            }
+        );
+
+
+    animation.onfinish = () => {
+
+        knobRotation = 0;
+
+        knob.style.transform =
+            `translate(-50%, -50%)
+             rotate(0deg)`;
+
+    };
+
+
+    /*
+       Aquí ocurre la magia:
+       activamos el movimiento
+       suave de las cápsulas.
+    */
+
+    runGacha();
+
+
+    console.log(
+        "¡Giro completado! 🎰"
+    );
 
 }
 
@@ -794,4 +1194,29 @@ token.addEventListener(
 token.addEventListener(
     "pointercancel",
     endTokenDrag
+);
+
+
+/* =========================================
+   EVENTOS DE LA PERILLA
+   ========================================= */
+
+knob.addEventListener(
+    "pointerdown",
+    startKnobTurn
+);
+
+knob.addEventListener(
+    "pointermove",
+    moveKnob
+);
+
+knob.addEventListener(
+    "pointerup",
+    endKnobTurn
+);
+
+knob.addEventListener(
+    "pointercancel",
+    endKnobTurn
 );
