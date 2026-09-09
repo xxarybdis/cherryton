@@ -67,7 +67,7 @@ body {
 
 .machine-img {
     position: relative;
-    z-index: 2;
+    z-index: 20;
 
     display: block;
 
@@ -118,104 +118,188 @@ body {
 
 
 /* =========================
-   CÁPSULAS
+   AJUSTES GENERALES
+   DE LAS CÁPSULAS
    ========================= */
 
 .capsule {
     position: absolute;
 
-    width: 27%;
     height: auto;
 
     user-select: none;
     pointer-events: none;
+
+    transform-origin: center center;
 }
 
 
 /* =========================
-   FILA SUPERIOR
+   CÁPSULAS DEL FONDO
+   más pequeñas
    ========================= */
 
 .capsule-10 {
-    left: 12%;
-    bottom: 52%;
-    transform: rotate(-16deg);
+    width: 23%;
+
+    left: 8%;
+    bottom: 54%;
+
+    z-index: 1;
+
+    transform:
+        rotate(-28deg)
+        scaleX(0.94);
 }
 
 .capsule-11 {
-    left: 36%;
-    bottom: 55%;
-    transform: rotate(13deg);
+    width: 25%;
+
+    left: 34%;
+    bottom: 57%;
+
+    z-index: 2;
+
+    transform:
+        rotate(19deg)
+        scaleY(0.93);
 }
 
 .capsule-12 {
-    left: 61%;
-    bottom: 51%;
-    transform: rotate(-11deg);
+    width: 22%;
+
+    left: 65%;
+    bottom: 53%;
+
+    z-index: 1;
+
+    transform:
+        rotate(-36deg)
+        scaleX(0.90);
 }
 
 
 /* =========================
-   ZONA MEDIA
+   CÁPSULAS INTERMEDIAS
    ========================= */
 
 .capsule-6 {
-    left: 2%;
-    bottom: 28%;
-    transform: rotate(-20deg);
+    width: 29%;
+
+    left: -3%;
+    bottom: 25%;
+
+    z-index: 5;
+
+    transform:
+        rotate(-32deg)
+        scaleY(0.96);
 }
 
 .capsule-7 {
-    left: 22%;
-    bottom: 31%;
-    transform: rotate(17deg);
+    width: 26%;
+
+    left: 20%;
+    bottom: 34%;
+
+    z-index: 3;
+
+    transform:
+        rotate(27deg)
+        scaleX(0.92);
 }
 
 .capsule-8 {
-    left: 45%;
-    bottom: 27%;
-    transform: rotate(-13deg);
+    width: 31%;
+
+    left: 42%;
+    bottom: 29%;
+
+    z-index: 6;
+
+    transform:
+        rotate(-18deg);
 }
 
 .capsule-9 {
-    left: 68%;
-    bottom: 30%;
-    transform: rotate(19deg);
+    width: 27%;
+
+    left: 70%;
+    bottom: 31%;
+
+    z-index: 4;
+
+    transform:
+        rotate(38deg)
+        scaleY(0.92);
 }
 
 
 /* =========================
-   FILA INFERIOR
+   CÁPSULAS DEL FRENTE
+   más grandes
    ========================= */
 
 .capsule-1 {
-    left: -2%;
-    bottom: -5%;
-    transform: rotate(16deg);
+    width: 31%;
+
+    left: -5%;
+    bottom: -8%;
+
+    z-index: 10;
+
+    transform:
+        rotate(24deg);
 }
 
 .capsule-2 {
-    left: 17%;
-    bottom: 2%;
-    transform: rotate(-19deg);
+    width: 28%;
+
+    left: 15%;
+    bottom: 1%;
+
+    z-index: 8;
+
+    transform:
+        rotate(-34deg)
+        scaleX(0.95);
 }
 
 .capsule-3 {
-    left: 37%;
-    bottom: -7%;
-    transform: rotate(11deg);
+    width: 34%;
+
+    left: 34%;
+    bottom: -11%;
+
+    z-index: 12;
+
+    transform:
+        rotate(14deg);
 }
 
 .capsule-4 {
+    width: 29%;
+
     left: 57%;
-    bottom: 1%;
-    transform: rotate(-15deg);
+    bottom: 3%;
+
+    z-index: 9;
+
+    transform:
+        rotate(-27deg)
+        scaleY(0.95);
 }
 
 .capsule-5 {
+    width: 32%;
+
     left: 76%;
-    bottom: -6%;
-    transform: rotate(18deg);
+    bottom: -10%;
+
+    z-index: 11;
+
+    transform:
+        rotate(31deg);
 }
 
 
