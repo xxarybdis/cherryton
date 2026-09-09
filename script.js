@@ -1,6 +1,6 @@
 /* =========================================
    CHERRYTON GACHA
-   Animación de cápsulas
+   Animación segura de cápsulas
    ========================================= */
 
 const machine = document.querySelector(".machine-wrap");
@@ -20,81 +20,107 @@ function random(min, max) {
 
 
 /* =========================================
+   CONFIGURACIÓN POR CÁPSULA
+   ========================================= */
+
+/*
+   Las cápsulas cercanas a los bordes
+   reciben menos movimiento horizontal.
+
+   capsule-1 es la conflictiva de abajo
+   a la izquierda, así que la limitamos más.
+*/
+
+function getCapsuleLimits(capsule) {
+
+    if (capsule.classList.contains("capsule-1")) {
+        return {
+            left: -2,
+            right: 14,
+            up: 20,
+            down: 2
+        };
+    }
+
+    if (capsule.classList.contains("capsule-6")) {
+        return {
+            left: -4,
+            right: 16,
+            up: 18,
+            down: 5
+        };
+    }
+
+    if (capsule.classList.contains("capsule-5")) {
+        return {
+            left: -14,
+            right: 3,
+            up: 18,
+            down: 2
+        };
+    }
+
+    if (capsule.classList.contains("capsule-9")) {
+        return {
+            left: -15,
+            right: 5,
+            up: 18,
+            down: 5
+        };
+    }
+
+    return {
+        left: -18,
+        right: 18,
+        up: 22,
+        down: 8
+    };
+}
+
+
+/* =========================================
    ANIMAR UNA CÁPSULA
    ========================================= */
 
 function animateCapsule(capsule, index) {
 
-    /*
-       El movimiento se calcula según
-       el tamaño actual del depósito.
-
-       Así también funciona bien
-       en celular.
-    */
-
-    const areaWidth = capsuleArea.clientWidth;
-    const areaHeight = capsuleArea.clientHeight;
+    const limits = getCapsuleLimits(capsule);
 
     /*
-       Cada cápsula recibe una fuerza
-       ligeramente diferente.
+       Cada cápsula tiene su propio
+       movimiento, pero respetando
+       los límites asignados.
     */
 
-    const strength = random(0.75, 1.15);
+    const x1 = random(limits.left, limits.right);
+    const y1 = random(-limits.up, limits.down);
 
-    const horizontal =
-        areaWidth * 0.08 * strength;
+    const x2 = random(limits.left, limits.right);
+    const y2 = random(-limits.up, limits.down);
 
-    const vertical =
-        areaHeight * 0.16 * strength;
+    const x3 = random(limits.left, limits.right);
+    const y3 = random(-limits.up, limits.down);
+
+    const x4 = random(limits.left, limits.right);
+    const y4 = random(-limits.up * 0.7, limits.down);
 
 
     /*
-       Creamos varios puntos de movimiento.
-
-       No todas siguen exactamente
-       la misma trayectoria.
+       Rotación independiente
     */
 
-    const x1 = random(-horizontal, horizontal);
-    const y1 = random(-vertical, -vertical * 0.35);
-
-    const x2 = random(-horizontal, horizontal);
-    const y2 = random(-vertical * 0.5, vertical * 0.35);
-
-    const x3 = random(-horizontal, horizontal);
-    const y3 = random(-vertical, vertical * 0.15);
-
-    const x4 = random(-horizontal * 0.7, horizontal * 0.7);
-    const y4 = random(-vertical * 0.5, vertical * 0.3);
+    const r1 = random(-22, 22);
+    const r2 = random(-32, 32);
+    const r3 = random(-26, 26);
+    const r4 = random(-16, 16);
 
 
     /*
-       Rotaciones independientes.
+       Movimiento ligeramente desfasado
     */
 
-    const r1 = random(-25, 25);
-    const r2 = random(-38, 38);
-    const r3 = random(-30, 30);
-    const r4 = random(-18, 18);
-
-
-    /*
-       Algunas cápsulas empiezan
-       unas milésimas después que otras.
-
-       Eso rompe el movimiento sincronizado.
-    */
-
-    const delay = random(0, 110) + index * 8;
-
-
-    /*
-       Duración diferente para cada cápsula.
-    */
-
-    const duration = random(650, 900);
+    const delay = random(0, 100) + index * 8;
+    const duration = random(650, 850);
 
 
     return capsule.animate(
@@ -137,14 +163,7 @@ function animateCapsule(capsule, index) {
             duration: duration,
             iterations: 3,
             delay: delay,
-
             easing: "ease-in-out",
-
-            /*
-               Importantísimo:
-               al terminar vuelven exactamente
-               a su posición original.
-            */
             fill: "none"
         }
     );
@@ -152,15 +171,10 @@ function animateCapsule(capsule, index) {
 
 
 /* =========================================
-   ACTIVAR EL GACHAPÓN
+   ACTIVAR LA MÁQUINA
    ========================================= */
 
 function runGacha() {
-
-    /*
-       Evita activar la máquina
-       diez veces a la vez.
-    */
 
     if (machineIsRunning) {
         return;
@@ -168,38 +182,18 @@ function runGacha() {
 
     machineIsRunning = true;
 
-
-    /*
-       Animamos cada cápsula
-       de manera independiente.
-    */
-
     capsules.forEach((capsule, index) => {
         animateCapsule(capsule, index);
     });
 
-
-    /*
-       Duración total aproximada
-       del movimiento.
-    */
-
     setTimeout(() => {
-
         machineIsRunning = false;
-
     }, 3000);
 }
 
 
 /* =========================================
    PRUEBA TEMPORAL
-
-   Por ahora hacemos clic en cualquier
-   parte de la máquina para activarla.
-
-   Después esto se conectará
-   exclusivamente con el token/perilla.
    ========================================= */
 
 machine.addEventListener("click", runGacha);
