@@ -19,23 +19,18 @@ const capsules =
 const token =
     document.querySelector(".token");
 
-const tokenSlot =
-    document.querySelector(".token-slot");
-
 
 /* =========================================
    ESTADOS
    ========================================= */
 
 let machineIsRunning = false;
-
 let tokenInserted = false;
-
 let tokenIsDragging = false;
 
 
 /* =========================================
-   ARRASTRE DEL TOKEN
+   DATOS DEL ARRASTRE
    ========================================= */
 
 let startPointerX = 0;
@@ -47,15 +42,9 @@ let tokenMoveY = 0;
 
 /* =========================================
    AJUSTAR TAMAÑO DE LA MÁQUINA
-
-   Esto soluciona el token gigante.
    ========================================= */
 
 function resizeMachine() {
-
-    /*
-       Tamaño original del PNG.
-    */
 
     const naturalWidth =
         machineImage.naturalWidth;
@@ -68,13 +57,6 @@ function resizeMachine() {
         return;
     }
 
-
-    /*
-       En computadora dejamos como máximo
-       90% del ancho y 90% del alto.
-
-       En celular usamos un poquito más.
-    */
 
     const isMobile =
         window.innerWidth <= 600;
@@ -89,12 +71,6 @@ function resizeMachine() {
         window.innerHeight *
         (isMobile ? 0.94 : 0.90);
 
-
-    /*
-       Calculamos cuánto necesitamos
-       reducir la imagen manteniendo
-       exactamente su proporción.
-    */
 
     const scaleX =
         maxWidth / naturalWidth;
@@ -111,27 +87,13 @@ function resizeMachine() {
         );
 
 
-    const finalWidth =
-        naturalWidth * scale;
-
-    const finalHeight =
-        naturalHeight * scale;
-
-
-    /*
-       El contenedor pasa a tener
-       EXACTAMENTE esas dimensiones.
-    */
-
     machine.style.width =
-        `${finalWidth}px`;
+        `${naturalWidth * scale}px`;
 
     machine.style.height =
-        `${finalHeight}px`;
+        `${naturalHeight * scale}px`;
 }
 
-
-/* Si la imagen ya estaba cargada */
 
 if (machineImage.complete) {
 
@@ -146,8 +108,6 @@ if (machineImage.complete) {
 
 }
 
-
-/* Recalculamos al cambiar ventana */
 
 window.addEventListener(
     "resize",
@@ -322,12 +282,8 @@ function animateCapsule(
     return capsule.animate(
         [
             {
-                translate:
-                    "0px 0px",
-
-                rotate:
-                    "0deg",
-
+                translate: "0px 0px",
+                rotate: "0deg",
                 offset: 0
             },
 
@@ -362,12 +318,8 @@ function animateCapsule(
             },
 
             {
-                translate:
-                    "0px 0px",
-
-                rotate:
-                    "0deg",
-
+                translate: "0px 0px",
+                rotate: "0deg",
                 offset: 1
             }
         ],
@@ -429,16 +381,69 @@ function runGacha() {
 
 
 /* =========================================
-   ¿TOKEN SOBRE LA RANURA?
+   POSICIÓN REAL DE LA RANURA
    ========================================= */
 
-function tokenIsOverSlot() {
+/*
+   IMPORTANTE:
+
+   El PNG tiene espacio transparente.
+
+   Según tu captura, la ranura real
+   se encuentra aproximadamente en:
+
+   X = 30% del lienzo
+   Y = 71% del lienzo
+*/
+
+function getTokenSlotPosition() {
+
+    const machineRect =
+        machine.getBoundingClientRect();
+
+
+    return {
+
+        /*
+           CENTRO DE LA RANURA
+        */
+
+        x:
+            machineRect.left +
+            machineRect.width * 0.30,
+
+        y:
+            machineRect.top +
+            machineRect.height * 0.71,
+
+
+        /*
+           ÁREA DE DETECCIÓN
+
+           Es un poco más grande que
+           la ranura dibujada para que
+           insertar el token sea cómodo.
+        */
+
+        radiusX:
+            machineRect.width * 0.055,
+
+        radiusY:
+            machineRect.height * 0.045
+
+    };
+
+}
+
+
+/* =========================================
+   ¿TOKEN CERCA DE LA RANURA?
+   ========================================= */
+
+function tokenIsNearSlot() {
 
     const tokenRect =
         token.getBoundingClientRect();
-
-    const slotRect =
-        tokenSlot.getBoundingClientRect();
 
 
     const tokenCenterX =
@@ -450,18 +455,26 @@ function tokenIsOverSlot() {
         tokenRect.height / 2;
 
 
+    const slot =
+        getTokenSlotPosition();
+
+
+    const distanceX =
+        Math.abs(
+            tokenCenterX -
+            slot.x
+        );
+
+    const distanceY =
+        Math.abs(
+            tokenCenterY -
+            slot.y
+        );
+
+
     return (
-        tokenCenterX >=
-            slotRect.left &&
-
-        tokenCenterX <=
-            slotRect.right &&
-
-        tokenCenterY >=
-            slotRect.top &&
-
-        tokenCenterY <=
-            slotRect.bottom
+        distanceX <= slot.radiusX &&
+        distanceY <= slot.radiusY
     );
 
 }
@@ -529,7 +542,12 @@ function moveToken(event) {
         )`;
 
 
-    if (tokenIsOverSlot()) {
+    /*
+       Brilla cuando entra en
+       la zona correcta.
+    */
+
+    if (tokenIsNearSlot()) {
 
         token.classList.add(
             "near-slot"
@@ -578,7 +596,7 @@ function endTokenDrag(event) {
     }
 
 
-    if (tokenIsOverSlot()) {
+    if (tokenIsNearSlot()) {
 
         insertToken();
 
@@ -667,9 +685,6 @@ function insertToken() {
     const tokenRect =
         token.getBoundingClientRect();
 
-    const slotRect =
-        tokenSlot.getBoundingClientRect();
-
 
     const tokenCenterX =
         tokenRect.left +
@@ -680,29 +695,30 @@ function insertToken() {
         tokenRect.height / 2;
 
 
-    const slotCenterX =
-        slotRect.left +
-        slotRect.width / 2;
-
-    const slotCenterY =
-        slotRect.top +
-        slotRect.height / 2;
+    const slot =
+        getTokenSlotPosition();
 
 
     const finalX =
         tokenMoveX +
         (
-            slotCenterX -
+            slot.x -
             tokenCenterX
         );
+
 
     const finalY =
         tokenMoveY +
         (
-            slotCenterY -
+            slot.y -
             tokenCenterY
         );
 
+
+    /*
+       El token primero es atraído
+       hacia la ranura.
+    */
 
     const animation =
         token.animate(
@@ -724,11 +740,11 @@ function insertToken() {
                             ${finalX}px,
                             ${finalY}px
                         )
-                        scale(0.7)`,
+                        scale(0.82)`,
 
                     opacity: 1,
 
-                    offset: 0.6
+                    offset: 0.55
                 },
 
                 {
@@ -744,7 +760,7 @@ function insertToken() {
             ],
 
             {
-                duration: 520,
+                duration: 600,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -765,7 +781,7 @@ function insertToken() {
         );
 
         console.log(
-            "Perilla lista."
+            "Máquina con 1 crédito."
         );
 
     };
@@ -774,7 +790,7 @@ function insertToken() {
 
 
 /* =========================================
-   EVENTOS
+   EVENTOS DEL TOKEN
    ========================================= */
 
 token.addEventListener(
