@@ -9,20 +9,30 @@
 html,
 body {
     margin: 0;
+
     width: 100%;
     height: 100%;
+
+    overflow: hidden;
+}
+
+html {
+    background: #202a68;
 }
 
 body {
-    min-height: 100vh;
+    width: 100vw;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
 
     background: #202a68;
 
     overflow: hidden;
+
+    overscroll-behavior: none;
+
+    touch-action: manipulation;
 }
 
 
@@ -31,14 +41,27 @@ body {
    ========================= */
 
 .page {
+    position: fixed;
+
+    inset: 0;
+
     width: 100%;
+
     height: 100vh;
+    height: 100dvh;
 
     display: flex;
+
     justify-content: center;
     align-items: center;
 
-    padding: 20px;
+    padding:
+        max(12px, env(safe-area-inset-top))
+        max(12px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
+
+    overflow: hidden;
 }
 
 
@@ -50,6 +73,39 @@ body {
     position: relative;
 
     flex: 0 0 auto;
+
+    /*
+       MUY IMPORTANTE:
+
+       Se mantiene oculta hasta que
+       JavaScript calcule sus dimensiones.
+
+       Esto elimina el glitch inicial
+       de las cápsulas gigantes.
+    */
+
+    visibility: hidden;
+
+    opacity: 0;
+
+    transform: translateZ(0);
+
+    transition:
+        opacity 0.18s ease;
+
+    contain: layout;
+}
+
+
+/*
+   La máquina aparece únicamente
+   cuando sus dimensiones ya están listas.
+*/
+
+.machine-wrap.ready {
+    visibility: visible;
+
+    opacity: 1;
 }
 
 
@@ -132,7 +188,10 @@ body {
 
     transform-origin: center center;
 
-    will-change: transform;
+    will-change:
+        transform,
+        translate,
+        rotate;
 }
 
 
@@ -333,12 +392,9 @@ body {
 }
 
 
-/*
-   Pequeño efecto de pila.
-
-   El token 1 está arriba
-   y es el primero que se usa.
-*/
+/* =========================
+   PILA DE TOKENS
+   ========================= */
 
 .token-5 {
     transform:
@@ -374,7 +430,7 @@ body {
 
 .token-1 {
     transform:
-        translate(0px, 0px)
+        translate(0, 0)
         rotate(0deg);
 
     opacity: 1;
@@ -412,7 +468,7 @@ body {
 
 
 /* =========================
-   TOKEN CERCA DE LA RANURA
+   TOKEN CERCA DE RANURA
    ========================= */
 
 .token.near-slot {
@@ -441,6 +497,11 @@ body {
     position: absolute;
 
     z-index: 60;
+
+    /*
+       POSICIÓN CALIBRADA.
+       NO CAMBIAR.
+    */
 
     left: 32.9%;
     top: 77.1%;
@@ -505,18 +566,72 @@ body {
 }
 
 
-/* =========================
-   CELULAR
-   ========================= */
+/* =========================================
+   TABLETS / CELULARES
+   ========================================= */
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
     .page {
-        padding: 10px;
+        padding:
+            max(8px, env(safe-area-inset-top))
+            max(8px, env(safe-area-inset-right))
+            max(8px, env(safe-area-inset-bottom))
+            max(8px, env(safe-area-inset-left));
     }
 
+
+    /*
+       La pila se mantiene dentro
+       de un margen seguro de pantalla.
+    */
+
     .token-stack {
-        width: 11%;
-        left: -5%;
+        width: 10.5%;
+
+        left: -4%;
     }
+
+}
+
+
+/* =========================================
+   CELULARES MUY ESTRECHOS
+   ========================================= */
+
+@media (max-width: 380px) {
+
+    .page {
+        padding:
+            max(5px, env(safe-area-inset-top))
+            max(5px, env(safe-area-inset-right))
+            max(5px, env(safe-area-inset-bottom))
+            max(5px, env(safe-area-inset-left));
+    }
+
+
+    .token-stack {
+        width: 10%;
+
+        left: -3%;
+    }
+
+}
+
+
+/* =========================================
+   PANTALLAS HORIZONTALES BAJITAS
+   ========================================= */
+
+@media (max-height: 500px) {
+
+    .page {
+        padding: 5px;
+    }
+
+
+    .token-stack {
+        left: -3%;
+    }
+
 }
