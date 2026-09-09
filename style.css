@@ -92,11 +92,6 @@ body {
     position: absolute;
     z-index: 1;
 
-    /*
-       Empieza debajo de la cabeza
-       y ahora llega hasta el fondo
-       real del cristal.
-    */
     top: 28.5%;
     left: 23%;
 
@@ -106,24 +101,28 @@ body {
     overflow: hidden;
 
     /*
-       Recorte adaptado a la forma
-       del depósito.
+       Ajustado para cerrar mejor
+       las esquinas inferiores,
+       especialmente la izquierda.
     */
     clip-path: polygon(
-        7% 0%,
+        8% 0%,
         91% 0%,
         97% 6%,
         100% 20%,
-        99% 72%,
-        97% 87%,
-        92% 96%,
-        86% 100%,
-        9% 100%,
-        4% 96%,
-        1% 86%,
-        0% 70%,
-        0% 22%,
-        2% 9%
+        99% 70%,
+        97% 86%,
+        92% 95%,
+        86% 99%,
+
+        14% 99%,
+        8% 96%,
+        4% 90%,
+        2% 80%,
+
+        1% 68%,
+        1% 24%,
+        3% 10%
     );
 }
 
@@ -195,7 +194,7 @@ body {
 .capsule-6 {
     width: 29%;
 
-    left: -2%;
+    left: -1%;
     bottom: 27%;
 
     z-index: 5;
@@ -246,15 +245,13 @@ body {
 
 /* =========================
    CÁPSULAS DEL FRENTE
-   Ahora llegan hasta abajo
-   del cristal sin cortarse.
    ========================= */
 
 .capsule-1 {
     width: 31%;
 
-    left: -3%;
-    bottom: 1%;
+    left: 0%;
+    bottom: 2%;
 
     z-index: 10;
 
@@ -303,8 +300,8 @@ body {
 .capsule-5 {
     width: 32%;
 
-    left: 75%;
-    bottom: 0%;
+    left: 74%;
+    bottom: 1%;
 
     z-index: 11;
 
