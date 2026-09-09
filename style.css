@@ -59,6 +59,7 @@ body {
 
 .machine-img {
     position: relative;
+
     z-index: 20;
 
     display: block;
@@ -69,6 +70,7 @@ body {
     object-fit: contain;
 
     pointer-events: none;
+
     user-select: none;
 
     -webkit-user-drag: none;
@@ -81,6 +83,7 @@ body {
 
 .capsule-area {
     position: absolute;
+
     z-index: 1;
 
     top: 28.5%;
@@ -276,18 +279,6 @@ body {
 
 
 /* =========================
-   RANURA INVISIBLE ANTIGUA
-
-   Ya no se utiliza para detectar
-   el token, pero la dejamos oculta.
-   ========================= */
-
-.token-slot {
-    display: none;
-}
-
-
-/* =========================
    TOKEN
    ========================= */
 
@@ -299,13 +290,7 @@ body {
     left: -8%;
     top: 67%;
 
-    /*
-       Antes era 12%.
-       Ahora es un poco más pequeño.
-    */
-
     width: 9.5%;
-
     height: auto;
 
     user-select: none;
@@ -330,8 +315,6 @@ body {
 }
 
 
-/* Token agarrado */
-
 .token.dragging {
     cursor: grabbing;
 
@@ -343,8 +326,6 @@ body {
 }
 
 
-/* Token cerca de la ranura */
-
 .token.near-slot {
     filter:
         drop-shadow(
@@ -354,10 +335,107 @@ body {
 }
 
 
-/* Token utilizado */
-
 .token.inserted {
     pointer-events: none;
+}
+
+
+/* =========================
+   PERILLA
+   ========================= */
+
+/*
+   La perilla está centrada encima
+   del círculo que dejaste en la máquina.
+
+   Si visualmente queda unos píxeles
+   corrida, después ajustamos SOLO
+   estos valores.
+*/
+
+.knob {
+    position: absolute;
+
+    z-index: 45;
+
+    /*
+       Centro aproximado:
+       X = 30%
+       Y = 71%
+    */
+
+    left: 30%;
+    top: 71%;
+
+    /*
+       El PNG tiene margen transparente,
+       por eso el ancho CSS es mayor que
+       el círculo que vemos.
+    */
+
+    width: 9.5%;
+    height: auto;
+
+    transform:
+        translate(-50%, -50%)
+        rotate(0deg);
+
+    transform-origin: center center;
+
+    user-select: none;
+
+    touch-action: none;
+
+    -webkit-user-drag: none;
+
+    cursor: grab;
+
+    will-change: transform;
+}
+
+
+/* =========================
+   PERILLA BLOQUEADA
+   ========================= */
+
+/*
+   Antes de insertar el token
+   todavía se ve, pero no responde.
+
+   La bajamos apenas de brillo para
+   comunicar que aún está bloqueada.
+*/
+
+.knob.locked {
+    cursor: not-allowed;
+
+    filter:
+        brightness(0.88)
+        saturate(0.85);
+}
+
+
+/* =========================
+   PERILLA HABILITADA
+   ========================= */
+
+.knob.ready {
+    cursor: grab;
+
+    filter:
+        brightness(1)
+        saturate(1)
+        drop-shadow(
+            0 0 5px
+            rgba(255, 203, 215, 0.45)
+        );
+}
+
+
+/* Mientras se está girando */
+
+.knob.turning {
+    cursor: grabbing;
 }
 
 
@@ -370,11 +448,6 @@ body {
     .page {
         padding: 10px;
     }
-
-    /*
-       Sigue siendo un poquito más grande
-       en celular para poder agarrarlo.
-    */
 
     .token {
         width: 11%;
