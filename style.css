@@ -1,12 +1,19 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* =========================
+   AJUSTES GENERALES
+   ========================= */
 
 * {
     box-sizing: border-box;
 }
 
+html,
 body {
     margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
     min-height: 100vh;
 
     display: flex;
@@ -15,85 +22,95 @@ body {
 
     background: #202a68;
 
-    font-family: 'Press Start 2P', monospace;
-
     overflow: hidden;
 }
 
-.gacha-container {
-    text-align: center;
-}
 
-h1 {
-    color: #fffe53;
-    font-size: 24px;
+/* =========================
+   PÁGINA
+   ========================= */
 
-    margin-bottom: 40px;
-
-    text-shadow:
-        4px 4px 0 #000;
-}
-
-.machine {
-    width: 350px;
-    padding: 35px;
-
-    background: #fffe53;
-
-    border: 8px solid #202a68;
-
-    box-shadow:
-        10px 10px 0 #000;
-}
-
-.machine-screen {
+.page {
     width: 100%;
-    height: 200px;
+    height: 100vh;
 
     display: flex;
     justify-content: center;
     align-items: center;
 
-    background: white;
-
-    border: 6px solid #202a68;
-
-    font-size: 60px;
-
-    margin-bottom: 30px;
+    padding: 20px;
 }
 
-button {
-    font-family: 'Press Start 2P', monospace;
 
-    font-size: 16px;
+/* =========================
+   CONTENEDOR DE LA MÁQUINA
+   ========================= */
 
-    padding: 18px 30px;
+.machine-wrap {
+    position: relative;
 
-    background: #202a68;
-    color: #fffe53;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    border: none;
+    width: fit-content;
+    height: fit-content;
 
-    cursor: pointer;
-
-    box-shadow:
-        6px 6px 0 #000;
+    max-width: 90vw;
+    max-height: 90vh;
 }
 
-button:active {
-    transform: translate(4px, 4px);
 
-    box-shadow:
-        2px 2px 0 #000;
+/* =========================
+   IMAGEN DE LA MÁQUINA
+   ========================= */
+
+.machine-img {
+    position: relative;
+    z-index: 2;
+
+    display: block;
+
+    width: auto;
+    height: auto;
+
+    max-width: 90vw;
+    max-height: 90vh;
+
+    object-fit: contain;
+
+    pointer-events: none;
+    user-select: none;
 }
 
-#message {
-    margin-top: 30px;
 
-    color: white;
+/* =========================
+   ZONA DE LAS CÁPSULAS
+   ========================= */
 
-    font-size: 12px;
+.capsule-area {
+    position: absolute;
+    z-index: 1;
 
-    line-height: 1.8;
+    /*
+       Estos valores son TEMPORALES.
+       Después los ajustaremos exactamente
+       al cristal de tu máquina.
+    */
+
+    top: 25%;
+    left: 20%;
+
+    width: 60%;
+    height: 35%;
+
+    overflow: hidden;
+
+    /*
+       ROJO TEMPORAL
+       para localizar la zona.
+    */
+
+    background: rgba(255, 0, 0, 0.20);
+    outline: 3px dashed red;
 }
