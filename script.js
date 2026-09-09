@@ -82,10 +82,8 @@ const GACHA_CAPSULES = [
    ========================================= */
 
 /*
-   Punto de nacimiento.
-
-   Este punto está calibrado hacia
-   la compuerta que marcaste en rojo.
+   Posición de salida que ya
+   tenemos calibrada.
 */
 
 const DISPENSER_X = 62.2;
@@ -93,14 +91,14 @@ const DISPENSER_Y = 72;
 
 
 /*
-   Tamaño de la cápsula.
+   Tamaño final de la cápsula.
 */
 
 const DISPENSED_CAPSULE_WIDTH = 10;
 
 
 /*
-   Desplazamiento después de salir.
+   Movimiento después de salir.
 
    X negativo = izquierda
    Y positivo = abajo
@@ -438,9 +436,8 @@ function runGacha() {
 
 
     /*
-       Primero se mueven las cápsulas.
-
-       Después aparece la ganadora.
+       Esperamos mientras se agitan
+       las cápsulas internas.
     */
 
     setTimeout(
@@ -461,7 +458,7 @@ function runGacha() {
 
         },
 
-        3200
+        3700
     );
 
 }
@@ -522,12 +519,6 @@ function createDispensedCapsule() {
         "absolute";
 
 
-    /*
-       La ponemos por encima de la máquina
-       para asegurarnos de verla durante
-       esta fase de calibración.
-    */
-
     capsule.style.zIndex =
         "80";
 
@@ -564,8 +555,16 @@ function createDispensedCapsule() {
         "center center";
 
 
+    /*
+       Empieza MUY chiquita.
+    */
+
     capsule.style.transform =
-        "translate(-50%, -50%) scale(0.45)";
+        `translate(
+            -50%,
+            -50%
+        )
+        scale(0.18)`;
 
 
     machine.appendChild(
@@ -597,8 +596,13 @@ function dispenseCapsule() {
         capsule.animate(
             [
                 /*
-                   Oculta dentro
-                   de la compuerta.
+                   0%
+
+                   Está prácticamente
+                   escondida.
+
+                   Muy pequeña +
+                   completamente transparente.
                 */
 
                 {
@@ -609,10 +613,10 @@ function dispenseCapsule() {
                         )
                         translate(
                             0px,
-                            -5px
+                            -4px
                         )
-                        scale(0.45)
-                        rotate(-10deg)`,
+                        scale(0.18)
+                        rotate(-8deg)`,
 
                     opacity: 0,
 
@@ -621,7 +625,13 @@ function dispenseCapsule() {
 
 
                 /*
-                   Se empieza a asomar.
+                   18%
+
+                   Empieza el fade in.
+
+                   Todavía se ve como si
+                   estuviera dentro de
+                   la máquina.
                 */
 
                 {
@@ -631,20 +641,25 @@ function dispenseCapsule() {
                             -50%
                         )
                         translate(
-                            -3px,
-                            5px
+                            -1px,
+                            0px
                         )
-                        scale(0.72)
-                        rotate(5deg)`,
+                        scale(0.35)
+                        rotate(-4deg)`,
 
-                    opacity: 1,
+                    opacity: 0.30,
 
-                    offset: 0.22
+                    offset: 0.18
                 },
 
 
                 /*
-                   Ya salió de la ranura.
+                   36%
+
+                   Ya se distingue.
+
+                   Sigue creciendo poco
+                   a poco.
                 */
 
                 {
@@ -654,21 +669,78 @@ function dispenseCapsule() {
                             -50%
                         )
                         translate(
-                            ${CAPSULE_MOVE_X * 0.55}px,
-                            ${CAPSULE_MOVE_Y * 0.55}px
+                            -4px,
+                            8px
+                        )
+                        scale(0.58)
+                        rotate(4deg)`,
+
+                    opacity: 0.68,
+
+                    offset: 0.36
+                },
+
+
+                /*
+                   55%
+
+                   Casi terminó de aparecer.
+
+                   La cápsula ya está
+                   saliendo de la compuerta.
+                */
+
+                {
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        translate(
+                            ${CAPSULE_MOVE_X * 0.25}px,
+                            ${CAPSULE_MOVE_Y * 0.25}px
+                        )
+                        scale(0.82)
+                        rotate(-5deg)`,
+
+                    opacity: 0.92,
+
+                    offset: 0.55
+                },
+
+
+                /*
+                   72%
+
+                   Ya está completamente
+                   visible y alcanza su
+                   tamaño normal.
+                */
+
+                {
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        translate(
+                            ${CAPSULE_MOVE_X * 0.58}px,
+                            ${CAPSULE_MOVE_Y * 0.58}px
                         )
                         scale(1)
-                        rotate(-8deg)`,
+                        rotate(6deg)`,
 
                     opacity: 1,
 
-                    offset: 0.60
+                    offset: 0.72
                 },
 
 
                 /*
-                   Cae hacia abajo
-                   y a la izquierda.
+                   90%
+
+                   Termina de bajar hacia
+                   la izquierda.
                 */
 
                 {
@@ -682,16 +754,18 @@ function dispenseCapsule() {
                             ${CAPSULE_MOVE_Y}px
                         )
                         scale(1)
-                        rotate(5deg)`,
+                        rotate(-3deg)`,
 
                     opacity: 1,
 
-                    offset: 0.86
+                    offset: 0.90
                 },
 
 
                 /*
-                   Pequeño rebote final.
+                   100%
+
+                   Rebote pequeño.
                 */
 
                 {
@@ -714,7 +788,14 @@ function dispenseCapsule() {
             ],
 
             {
-                duration: 1050,
+                /*
+                   Antes: 1050 ms
+
+                   Ahora es bastante
+                   más suave y lenta.
+                */
+
+                duration: 1550,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -806,7 +887,7 @@ function getTokenCenter() {
 
 
 /* =========================================
-   TOKEN - DISTANCIA
+   TOKEN - DISTANCIA A LA RANURA
    ========================================= */
 
 function getTokenDistanceFromSlot() {
@@ -1251,7 +1332,7 @@ function insertToken() {
 
 
 /* =========================================
-   PERILLA - ÁNGULO
+   PERILLA - OBTENER ÁNGULO
    ========================================= */
 
 function getPointerAngle(event) {
@@ -1283,7 +1364,7 @@ function getPointerAngle(event) {
 
 
 /* =========================================
-   PERILLA - EMPEZAR
+   PERILLA - EMPEZAR A GIRAR
    ========================================= */
 
 function startKnobTurn(event) {
@@ -1351,6 +1432,10 @@ function moveKnob(event) {
         difference += 360;
     }
 
+
+    /*
+       Dirección antihoraria.
+    */
 
     knobRotation +=
         -difference;
