@@ -65,24 +65,31 @@ const KNOB_REQUIRED_TURN = 280;
 
 
 /* =========================================
-   CÁPSULA QUE SALE
+   CÁPSULAS POSIBLES
+   ========================================= */
+
+const GACHA_CAPSULES = [
+    "assets/capsule-dog.png",
+    "assets/capsule-cat.png",
+    "assets/capsule-letter.png",
+    "assets/capsule-candy.png",
+    "assets/capsule-friends.png"
+];
+
+
+/* =========================================
+   SALIDA DE LA CÁPSULA
    ========================================= */
 
 /*
-   Centro de la compuerta marcada en rojo.
+   Punto de nacimiento.
+
+   Este punto está calibrado hacia
+   la compuerta que marcaste en rojo.
 */
 
 const DISPENSER_X = 62.2;
-const DISPENSER_Y = 72.0;
-
-
-/*
-   Después de salir, baja y se recorre
-   ligeramente hacia la izquierda.
-*/
-
-const CAPSULE_FINAL_X = 58.8;
-const CAPSULE_FINAL_Y = 80.5;
+const DISPENSER_Y = 72;
 
 
 /*
@@ -90,6 +97,17 @@ const CAPSULE_FINAL_Y = 80.5;
 */
 
 const DISPENSED_CAPSULE_WIDTH = 10;
+
+
+/*
+   Desplazamiento después de salir.
+
+   X negativo = izquierda
+   Y positivo = abajo
+*/
+
+const CAPSULE_MOVE_X = -26;
+const CAPSULE_MOVE_Y = 58;
 
 
 /* =========================================
@@ -394,7 +412,7 @@ function animateCapsule(
 
 
 /* =========================================
-   ACTIVAR CÁPSULAS
+   ACTIVAR GACHA
    ========================================= */
 
 function runGacha() {
@@ -420,9 +438,9 @@ function runGacha() {
 
 
     /*
-       Después de que las cápsulas
-       lleven un rato moviéndose,
-       sale una por la compuerta.
+       Primero se mueven las cápsulas.
+
+       Después aparece la ganadora.
     */
 
     setTimeout(
@@ -443,7 +461,7 @@ function runGacha() {
 
         },
 
-        3100
+        3200
     );
 
 }
@@ -475,11 +493,6 @@ function getRandomCapsule() {
 
 function createDispensedCapsule() {
 
-    /*
-       Por ahora solo puede haber
-       una cápsula afuera.
-    */
-
     if (dispensedCapsule) {
 
         dispensedCapsule.remove();
@@ -505,17 +518,19 @@ function createDispensedCapsule() {
         false;
 
 
-    /*
-       Estilos directamente desde JS
-       para que NO tengas que modificar
-       style.css todavía.
-    */
-
     capsule.style.position =
         "absolute";
 
+
+    /*
+       La ponemos por encima de la máquina
+       para asegurarnos de verla durante
+       esta fase de calibración.
+    */
+
     capsule.style.zIndex =
-        "45";
+        "80";
+
 
     capsule.style.left =
         `${DISPENSER_X}%`;
@@ -523,14 +538,17 @@ function createDispensedCapsule() {
     capsule.style.top =
         `${DISPENSER_Y}%`;
 
+
     capsule.style.width =
         `${DISPENSED_CAPSULE_WIDTH}%`;
 
     capsule.style.height =
         "auto";
 
+
     capsule.style.opacity =
         "0";
+
 
     capsule.style.pointerEvents =
         "none";
@@ -541,11 +559,13 @@ function createDispensedCapsule() {
     capsule.style.webkitUserDrag =
         "none";
 
+
     capsule.style.transformOrigin =
         "center center";
 
+
     capsule.style.transform =
-        "translate(-50%, -50%) scale(0.35) rotate(-10deg)";
+        "translate(-50%, -50%) scale(0.45)";
 
 
     machine.appendChild(
@@ -572,143 +592,129 @@ function dispenseCapsule() {
         createDispensedCapsule();
 
 
-    /*
-       Esperamos a que cargue la imagen
-       antes de hacer la animación.
-    */
-
     const startAnimation = () => {
 
         capsule.animate(
             [
                 /*
-                   Todavía "dentro"
-                   de la máquina.
+                   Oculta dentro
+                   de la compuerta.
                 */
 
                 {
-                    left:
-                        `${DISPENSER_X}%`,
-
-                    top:
-                        `${DISPENSER_Y}%`,
-
-                    opacity: 0,
-
                     transform:
                         `translate(
                             -50%,
                             -50%
                         )
-                        scale(0.35)
-                        rotate(-12deg)`,
+                        translate(
+                            0px,
+                            -5px
+                        )
+                        scale(0.45)
+                        rotate(-10deg)`,
+
+                    opacity: 0,
 
                     offset: 0
                 },
 
 
                 /*
-                   Empieza a asomarse.
+                   Se empieza a asomar.
                 */
 
                 {
-                    left:
-                        `${DISPENSER_X}%`,
-
-                    top:
-                        `${DISPENSER_Y + 1.5}%`,
-
-                    opacity: 1,
-
                     transform:
                         `translate(
                             -50%,
                             -50%
+                        )
+                        translate(
+                            -3px,
+                            5px
                         )
                         scale(0.72)
-                        rotate(7deg)`,
+                        rotate(5deg)`,
 
-                    offset: 0.25
+                    opacity: 1,
+
+                    offset: 0.22
                 },
 
 
                 /*
-                   Sale completamente.
+                   Ya salió de la ranura.
                 */
 
                 {
-                    left:
-                        `${CAPSULE_FINAL_X}%`,
-
-                    top:
-                        `${CAPSULE_FINAL_Y - 2}%`,
-
-                    opacity: 1,
-
                     transform:
                         `translate(
                             -50%,
                             -50%
+                        )
+                        translate(
+                            ${CAPSULE_MOVE_X * 0.55}px,
+                            ${CAPSULE_MOVE_Y * 0.55}px
                         )
                         scale(1)
-                        rotate(-5deg)`,
+                        rotate(-8deg)`,
 
-                    offset: 0.68
+                    opacity: 1,
+
+                    offset: 0.60
                 },
 
 
                 /*
-                   Pequeño rebote.
+                   Cae hacia abajo
+                   y a la izquierda.
                 */
 
                 {
-                    left:
-                        `${CAPSULE_FINAL_X}%`,
-
-                    top:
-                        `${CAPSULE_FINAL_Y + 0.8}%`,
-
-                    opacity: 1,
-
                     transform:
                         `translate(
                             -50%,
                             -50%
                         )
-                        scale(0.96)
-                        rotate(3deg)`,
+                        translate(
+                            ${CAPSULE_MOVE_X}px,
+                            ${CAPSULE_MOVE_Y}px
+                        )
+                        scale(1)
+                        rotate(5deg)`,
 
-                    offset: 0.84
+                    opacity: 1,
+
+                    offset: 0.86
                 },
 
 
                 /*
-                   Posición final.
+                   Pequeño rebote final.
                 */
 
                 {
-                    left:
-                        `${CAPSULE_FINAL_X}%`,
-
-                    top:
-                        `${CAPSULE_FINAL_Y}%`,
-
-                    opacity: 1,
-
                     transform:
                         `translate(
                             -50%,
                             -50%
+                        )
+                        translate(
+                            ${CAPSULE_MOVE_X}px,
+                            ${CAPSULE_MOVE_Y - 4}px
                         )
                         scale(1)
                         rotate(0deg)`,
+
+                    opacity: 1,
 
                     offset: 1
                 }
             ],
 
             {
-                duration: 950,
+                duration: 1050,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -721,7 +727,10 @@ function dispenseCapsule() {
     };
 
 
-    if (capsule.complete) {
+    if (
+        capsule.complete &&
+        capsule.naturalWidth > 0
+    ) {
 
         startAnimation();
 
@@ -755,11 +764,6 @@ function getTokenSlotPosition() {
         x:
             machineRect.left +
             machineRect.width * 0.32,
-
-        /*
-           Punto definitivo,
-           un poco más arriba.
-        */
 
         y:
             machineRect.top +
@@ -802,7 +806,7 @@ function getTokenCenter() {
 
 
 /* =========================================
-   TOKEN - DISTANCIA A LA RANURA
+   TOKEN - DISTANCIA
    ========================================= */
 
 function getTokenDistanceFromSlot() {
@@ -877,7 +881,7 @@ function calculateTokenScale() {
 
 
 /* =========================================
-   TOKEN - APLICAR TRANSFORMACIÓN
+   TOKEN - TRANSFORMACIÓN
    ========================================= */
 
 function updateTokenTransform() {
@@ -893,7 +897,7 @@ function updateTokenTransform() {
 
 
 /* =========================================
-   TOKEN - DETECCIÓN DE RANURA
+   TOKEN - DETECTAR RANURA
    ========================================= */
 
 function tokenIsNearSlot() {
@@ -1247,7 +1251,7 @@ function insertToken() {
 
 
 /* =========================================
-   PERILLA - OBTENER ÁNGULO
+   PERILLA - ÁNGULO
    ========================================= */
 
 function getPointerAngle(event) {
@@ -1279,7 +1283,7 @@ function getPointerAngle(event) {
 
 
 /* =========================================
-   PERILLA - EMPEZAR A GIRAR
+   PERILLA - EMPEZAR
    ========================================= */
 
 function startKnobTurn(event) {
@@ -1347,10 +1351,6 @@ function moveKnob(event) {
         difference += 360;
     }
 
-
-    /*
-       Dirección antihoraria.
-    */
 
     knobRotation +=
         -difference;
