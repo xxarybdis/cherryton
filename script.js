@@ -419,8 +419,8 @@ function getTokenSlotPosition() {
             machineRect.width * 0.32,
 
         /*
-           Antes: 0.71
-           Ahora: 0.695
+           Antes: 0.695
+           Ahora: 0.6
 
            Esto sube un poco el punto
            donde el token es absorbido.
@@ -428,7 +428,7 @@ function getTokenSlotPosition() {
 
         y:
             machineRect.top +
-            machineRect.height * 0.695,
+            machineRect.height * 0.6,
 
         radiusX:
             machineRect.width * 0.055,
