@@ -1,6 +1,6 @@
 /* =========================================
    CHERRYTON GACHA
-   RESPONSIVE ESTABLE
+   STYLE.CSS COMPLETO
    ========================================= */
 
 
@@ -22,13 +22,29 @@ body {
 
     overflow: hidden;
 
-    background: #202a68;
+    background-color: #202a68;
+
+    background-image:
+        url("assets/wallpaper-pc.png");
+
+    background-size:
+        cover;
+
+    background-position:
+        center center;
+
+    background-repeat:
+        no-repeat;
+
+    background-attachment:
+        fixed;
 }
 
 
-/* =========================================
-   BODY
-   ========================================= */
+html {
+    min-height: 100%;
+}
+
 
 body {
     min-height: 100vh;
@@ -60,7 +76,13 @@ body {
 
     overflow: hidden;
 
-    background: #202a68;
+    /*
+       IMPORTANTE:
+       transparente para poder ver
+       el wallpaper del body.
+    */
+
+    background: transparent;
 }
 
 
@@ -68,42 +90,17 @@ body {
    CONTENEDOR DE LA MÁQUINA
    ========================================= */
 
-/*
-   MUY IMPORTANTE:
-
-   machine.png es cuadrado.
-
-   Por eso reservamos su espacio DESDE
-   EL PRIMER FRAME con aspect-ratio.
-
-   Así las cápsulas, la perilla y los
-   tokens nunca aparecen gigantes mientras
-   carga machine.png.
-*/
-
 .machine-wrap {
     position: relative;
 
     flex: 0 0 auto;
 
-    /*
-       PC:
-       usa el 90% de la dimensión
-       más pequeña de la pantalla.
-    */
-
     width: min(90vw, 90vh);
-
     width: min(90vw, 90dvh);
 
     aspect-ratio: 1 / 1;
 
     line-height: 0;
-
-    /*
-       Evita cualquier cambio accidental
-       de dimensiones durante la carga.
-    */
 
     min-width: 0;
     min-height: 0;
@@ -113,14 +110,6 @@ body {
 /* =========================================
    IMAGEN DE LA MÁQUINA
    ========================================= */
-
-/*
-   La imagen ya NO decide el tamaño
-   del contenedor.
-
-   El contenedor ya existe antes de
-   que termine de cargar el PNG.
-*/
 
 .machine-img {
     position: absolute;
@@ -379,10 +368,6 @@ body {
 
     z-index: 50;
 
-    /*
-       Posición original para PC.
-    */
-
     left: -8%;
     top: 67%;
 
@@ -426,18 +411,7 @@ body {
 
 /* =========================================
    LOS 5 TOKENS
-
-   Usamos left/top para formar la pila
-   en lugar de transform.
-
-   Esto es importante porque JavaScript
-   usa transform al arrastrarlos.
    ========================================= */
-
-
-/*
-   Token del fondo.
-*/
 
 .token-5 {
     left: -52%;
@@ -451,10 +425,6 @@ body {
 }
 
 
-/*
-   Cuarto.
-*/
-
 .token-4 {
     left: -39%;
     top: -46%;
@@ -466,10 +436,6 @@ body {
     z-index: 2;
 }
 
-
-/*
-   Tercero.
-*/
 
 .token-3 {
     left: -26%;
@@ -483,10 +449,6 @@ body {
 }
 
 
-/*
-   Segundo.
-*/
-
 .token-2 {
     left: -13%;
     top: -15%;
@@ -498,10 +460,6 @@ body {
     z-index: 4;
 }
 
-
-/*
-   Primer token que se usa.
-*/
 
 .token-1 {
     left: 0;
@@ -577,8 +535,8 @@ body {
     z-index: 60;
 
     /*
-       POSICIÓN YA CALIBRADA.
-       NO SE CAMBIA.
+       POSICIÓN CALIBRADA
+       NO MODIFICAR
     */
 
     left: 32.9%;
@@ -648,29 +606,33 @@ body {
    CELULAR VERTICAL
    ========================================= */
 
-@media (
-    max-width: 700px
-)
-and
-(
-    orientation: portrait
-) {
+@media (max-width: 700px) and (orientation: portrait) {
 
     /*
-       Esta es la parte importante.
+       WALLPAPER PARA CELULAR
+    */
 
-       El PNG tiene mucho espacio
-       transparente a los lados.
+    html,
+    body {
+        background-image:
+            url("assets/wallpaper-mobile.png");
 
-       Por eso permitimos que su lienzo
-       cuadrado sea más ancho que la
-       pantalla.
+        background-size:
+            cover;
 
-       Solo la zona transparente queda
-       fuera del viewport.
+        background-position:
+            center center;
 
-       El dibujo real de la máquina
-       permanece centrado.
+        background-repeat:
+            no-repeat;
+
+        background-attachment:
+            scroll;
+    }
+
+
+    /*
+       MÁQUINA
     */
 
     .machine-wrap {
@@ -688,11 +650,7 @@ and
 
 
     /*
-       En móvil el token ya NO parte
-       desde -8%.
-
-       Lo colocamos justo a la izquierda
-       del dibujo REAL de la máquina.
+       TOKENS
     */
 
     .token-stack {
@@ -710,13 +668,7 @@ and
    CELULARES MUY ANGOSTOS
    ========================================= */
 
-@media (
-    max-width: 380px
-)
-and
-(
-    orientation: portrait
-) {
+@media (max-width: 380px) and (orientation: portrait) {
 
     .machine-wrap {
         width:
@@ -740,13 +692,31 @@ and
    CELULAR HORIZONTAL
    ========================================= */
 
-@media (
-    orientation: landscape
-)
-and
-(
-    max-height: 600px
-) {
+@media (orientation: landscape) and (max-height: 600px) {
+
+    /*
+       También usamos wallpaper móvil
+       si es un teléfono horizontal.
+    */
+
+    html,
+    body {
+        background-image:
+            url("assets/wallpaper-mobile.png");
+
+        background-size:
+            cover;
+
+        background-position:
+            center center;
+
+        background-repeat:
+            no-repeat;
+
+        background-attachment:
+            scroll;
+    }
+
 
     .machine-wrap {
         width:
@@ -758,11 +728,6 @@ and
         aspect-ratio: 1 / 1;
     }
 
-
-    /*
-       En horizontal vuelve a funcionar
-       bien cerca del borde del lienzo.
-    */
 
     .token-stack {
         left: -4%;
