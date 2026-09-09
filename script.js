@@ -7,7 +7,11 @@
    ELEMENTOS
    ========================================= */
 
-const machine = document.querySelector(".machine-wrap");
+const machine =
+    document.querySelector(".machine-wrap");
+
+const machineImage =
+    document.querySelector(".machine-img");
 
 const capsules =
     document.querySelectorAll(".capsule");
@@ -20,7 +24,7 @@ const tokenSlot =
 
 
 /* =========================================
-   ESTADO DE LA MÁQUINA
+   ESTADOS
    ========================================= */
 
 let machineIsRunning = false;
@@ -31,7 +35,7 @@ let tokenIsDragging = false;
 
 
 /* =========================================
-   DATOS DEL ARRASTRE
+   ARRASTRE DEL TOKEN
    ========================================= */
 
 let startPointerX = 0;
@@ -42,25 +46,139 @@ let tokenMoveY = 0;
 
 
 /* =========================================
+   AJUSTAR TAMAÑO DE LA MÁQUINA
+
+   Esto soluciona el token gigante.
+   ========================================= */
+
+function resizeMachine() {
+
+    /*
+       Tamaño original del PNG.
+    */
+
+    const naturalWidth =
+        machineImage.naturalWidth;
+
+    const naturalHeight =
+        machineImage.naturalHeight;
+
+
+    if (!naturalWidth || !naturalHeight) {
+        return;
+    }
+
+
+    /*
+       En computadora dejamos como máximo
+       90% del ancho y 90% del alto.
+
+       En celular usamos un poquito más.
+    */
+
+    const isMobile =
+        window.innerWidth <= 600;
+
+
+    const maxWidth =
+        window.innerWidth *
+        (isMobile ? 0.96 : 0.90);
+
+
+    const maxHeight =
+        window.innerHeight *
+        (isMobile ? 0.94 : 0.90);
+
+
+    /*
+       Calculamos cuánto necesitamos
+       reducir la imagen manteniendo
+       exactamente su proporción.
+    */
+
+    const scaleX =
+        maxWidth / naturalWidth;
+
+    const scaleY =
+        maxHeight / naturalHeight;
+
+
+    const scale =
+        Math.min(
+            scaleX,
+            scaleY,
+            1
+        );
+
+
+    const finalWidth =
+        naturalWidth * scale;
+
+    const finalHeight =
+        naturalHeight * scale;
+
+
+    /*
+       El contenedor pasa a tener
+       EXACTAMENTE esas dimensiones.
+    */
+
+    machine.style.width =
+        `${finalWidth}px`;
+
+    machine.style.height =
+        `${finalHeight}px`;
+}
+
+
+/* Si la imagen ya estaba cargada */
+
+if (machineImage.complete) {
+
+    resizeMachine();
+
+} else {
+
+    machineImage.addEventListener(
+        "load",
+        resizeMachine
+    );
+
+}
+
+
+/* Recalculamos al cambiar ventana */
+
+window.addEventListener(
+    "resize",
+    resizeMachine
+);
+
+
+/* =========================================
    NÚMERO ALEATORIO
    ========================================= */
 
 function random(min, max) {
 
-    return Math.random() * (max - min) + min;
+    return Math.random() *
+        (max - min) +
+        min;
 
 }
 
 
 /* =========================================
-   LÍMITES DE LAS CÁPSULAS
+   LÍMITES DE CÁPSULAS
    ========================================= */
 
 function getCapsuleLimits(capsule) {
 
-    /* Abajo izquierda */
-
-    if (capsule.classList.contains("capsule-1")) {
+    if (
+        capsule.classList.contains(
+            "capsule-1"
+        )
+    ) {
 
         return {
             left: -1,
@@ -72,9 +190,11 @@ function getCapsuleLimits(capsule) {
     }
 
 
-    /* Izquierda */
-
-    if (capsule.classList.contains("capsule-6")) {
+    if (
+        capsule.classList.contains(
+            "capsule-6"
+        )
+    ) {
 
         return {
             left: -2,
@@ -86,9 +206,11 @@ function getCapsuleLimits(capsule) {
     }
 
 
-    /* Abajo derecha */
-
-    if (capsule.classList.contains("capsule-5")) {
+    if (
+        capsule.classList.contains(
+            "capsule-5"
+        )
+    ) {
 
         return {
             left: -10,
@@ -100,9 +222,11 @@ function getCapsuleLimits(capsule) {
     }
 
 
-    /* Derecha */
-
-    if (capsule.classList.contains("capsule-9")) {
+    if (
+        capsule.classList.contains(
+            "capsule-9"
+        )
+    ) {
 
         return {
             left: -11,
@@ -113,8 +237,6 @@ function getCapsuleLimits(capsule) {
 
     }
 
-
-    /* Interior */
 
     return {
         left: -12,
@@ -127,39 +249,65 @@ function getCapsuleLimits(capsule) {
 
 
 /* =========================================
-   ANIMAR UNA CÁPSULA
+   ANIMAR CÁPSULA
    ========================================= */
 
-function animateCapsule(capsule, index) {
+function animateCapsule(
+    capsule,
+    index
+) {
 
     const limits =
         getCapsuleLimits(capsule);
 
 
     const x1 =
-        random(limits.left, limits.right);
+        random(
+            limits.left,
+            limits.right
+        );
 
     const y1 =
-        random(-limits.up, -2);
+        random(
+            -limits.up,
+            -2
+        );
 
 
     const x2 =
-        random(limits.left, limits.right);
+        random(
+            limits.left,
+            limits.right
+        );
 
     const y2 =
-        random(-limits.up * 0.55, limits.down);
+        random(
+            -limits.up * 0.55,
+            limits.down
+        );
 
 
     const x3 =
-        random(limits.left, limits.right);
+        random(
+            limits.left,
+            limits.right
+        );
 
     const y3 =
-        random(-limits.up * 0.75, limits.down);
+        random(
+            -limits.up * 0.75,
+            limits.down
+        );
 
 
-    const r1 = random(-9, 9);
-    const r2 = random(-12, 12);
-    const r3 = random(-7, 7);
+    const r1 =
+        random(-9, 9);
+
+    const r2 =
+        random(-12, 12);
+
+    const r3 =
+        random(-7, 7);
 
 
     const duration =
@@ -174,8 +322,12 @@ function animateCapsule(capsule, index) {
     return capsule.animate(
         [
             {
-                translate: "0px 0px",
-                rotate: "0deg",
+                translate:
+                    "0px 0px",
+
+                rotate:
+                    "0deg",
+
                 offset: 0
             },
 
@@ -210,11 +362,16 @@ function animateCapsule(capsule, index) {
             },
 
             {
-                translate: "0px 0px",
-                rotate: "0deg",
+                translate:
+                    "0px 0px",
+
+                rotate:
+                    "0deg",
+
                 offset: 1
             }
         ],
+
         {
             duration: duration,
 
@@ -235,16 +392,6 @@ function animateCapsule(capsule, index) {
 /* =========================================
    ACTIVAR CÁPSULAS
    ========================================= */
-
-/*
-   Esta función se queda preparada.
-
-   Ya NO se activa haciendo clic
-   sobre toda la máquina.
-
-   Más adelante la llamaremos
-   cuando giremos la perilla.
-*/
 
 function runGacha() {
 
@@ -268,18 +415,21 @@ function runGacha() {
     );
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        machineIsRunning = false;
+            machineIsRunning = false;
 
-    }, 2700);
+        },
+
+        2700
+    );
 
 }
 
 
 /* =========================================
-   COMPROBAR SI EL TOKEN
-   ESTÁ CERCA DE LA RANURA
+   ¿TOKEN SOBRE LA RANURA?
    ========================================= */
 
 function tokenIsOverSlot() {
@@ -291,14 +441,6 @@ function tokenIsOverSlot() {
         tokenSlot.getBoundingClientRect();
 
 
-    /*
-       Usamos el centro del token.
-
-       Así no hace falta colocar
-       absolutamente toda la moneda
-       dentro de la zona.
-    */
-
     const tokenCenterX =
         tokenRect.left +
         tokenRect.width / 2;
@@ -309,17 +451,24 @@ function tokenIsOverSlot() {
 
 
     return (
-        tokenCenterX >= slotRect.left &&
-        tokenCenterX <= slotRect.right &&
-        tokenCenterY >= slotRect.top &&
-        tokenCenterY <= slotRect.bottom
+        tokenCenterX >=
+            slotRect.left &&
+
+        tokenCenterX <=
+            slotRect.right &&
+
+        tokenCenterY >=
+            slotRect.top &&
+
+        tokenCenterY <=
+            slotRect.bottom
     );
 
 }
 
 
 /* =========================================
-   EMPEZAR A ARRASTRAR
+   AGARRAR TOKEN
    ========================================= */
 
 function startTokenDrag(event) {
@@ -333,20 +482,18 @@ function startTokenDrag(event) {
 
 
     startPointerX =
-        event.clientX - tokenMoveX;
+        event.clientX -
+        tokenMoveX;
 
     startPointerY =
-        event.clientY - tokenMoveY;
+        event.clientY -
+        tokenMoveY;
 
 
-    token.classList.add("dragging");
+    token.classList.add(
+        "dragging"
+    );
 
-
-    /*
-       Hace que sigamos recibiendo
-       movimiento aunque el cursor
-       salga momentáneamente del token.
-    */
 
     token.setPointerCapture(
         event.pointerId
@@ -367,10 +514,12 @@ function moveToken(event) {
 
 
     tokenMoveX =
-        event.clientX - startPointerX;
+        event.clientX -
+        startPointerX;
 
     tokenMoveY =
-        event.clientY - startPointerY;
+        event.clientY -
+        startPointerY;
 
 
     token.style.transform =
@@ -379,11 +528,6 @@ function moveToken(event) {
             ${tokenMoveY}px
         )`;
 
-
-    /*
-       Pequeña reacción cuando estamos
-       sobre la ranura correcta.
-    */
 
     if (tokenIsOverSlot()) {
 
@@ -421,15 +565,18 @@ function endTokenDrag(event) {
     );
 
 
-    token.releasePointerCapture(
-        event.pointerId
-    );
+    if (
+        token.hasPointerCapture(
+            event.pointerId
+        )
+    ) {
 
+        token.releasePointerCapture(
+            event.pointerId
+        );
 
-    /*
-       Si llegó a la ranura,
-       la máquina lo acepta.
-    */
+    }
+
 
     if (tokenIsOverSlot()) {
 
@@ -439,18 +586,13 @@ function endTokenDrag(event) {
     }
 
 
-    /*
-       Si lo soltamos en otro sitio,
-       vuelve a su posición original.
-    */
-
     returnTokenHome();
 
 }
 
 
 /* =========================================
-   DEVOLVER TOKEN A SU SITIO
+   REGRESAR TOKEN
    ========================================= */
 
 function returnTokenHome() {
@@ -476,6 +618,7 @@ function returnTokenHome() {
                         "translate(0px, 0px)"
                 }
             ],
+
             {
                 duration: 450,
 
@@ -516,15 +659,10 @@ function insertToken() {
         "near-slot"
     );
 
-
     token.classList.add(
         "inserted"
     );
 
-
-    /*
-       Posición actual.
-    */
 
     const tokenRect =
         token.getBoundingClientRect();
@@ -551,24 +689,20 @@ function insertToken() {
         slotRect.height / 2;
 
 
-    /*
-       Calculamos cuánto debe desplazarse
-       desde donde lo soltamos hasta
-       el centro de la ranura.
-    */
-
     const finalX =
         tokenMoveX +
-        (slotCenterX - tokenCenterX);
+        (
+            slotCenterX -
+            tokenCenterX
+        );
 
     const finalY =
         tokenMoveY +
-        (slotCenterY - tokenCenterY);
+        (
+            slotCenterY -
+            tokenCenterY
+        );
 
-
-    /*
-       Animación de absorción.
-    */
 
     const animation =
         token.animate(
@@ -590,11 +724,11 @@ function insertToken() {
                             ${finalX}px,
                             ${finalY}px
                         )
-                        scale(0.72)`,
+                        scale(0.7)`,
 
                     opacity: 1,
 
-                    offset: 0.65
+                    offset: 0.6
                 },
 
                 {
@@ -603,11 +737,12 @@ function insertToken() {
                             ${finalX}px,
                             ${finalY}px
                         )
-                        scale(0.12)`,
+                        scale(0.08)`,
 
                     opacity: 0
                 }
             ],
+
             {
                 duration: 520,
 
@@ -625,21 +760,12 @@ function insertToken() {
             "hidden";
 
 
-        /*
-           A partir de aquí la máquina
-           ya tiene un token.
-
-           En el siguiente paso utilizaremos
-           esta variable para permitir
-           girar la perilla.
-        */
-
         console.log(
             "Token insertado 🍒"
         );
 
         console.log(
-            "Perilla lista para activarse."
+            "Perilla lista."
         );
 
     };
@@ -648,7 +774,7 @@ function insertToken() {
 
 
 /* =========================================
-   EVENTOS DEL TOKEN
+   EVENTOS
    ========================================= */
 
 token.addEventListener(
