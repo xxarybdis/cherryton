@@ -1,6 +1,12 @@
-/* =========================
-   AJUSTES GENERALES
-   ========================= */
+/* =========================================
+   CHERRYTON GACHA
+   RESPONSIVE ESTABLE
+   ========================================= */
+
+
+/* =========================================
+   RESET
+   ========================================= */
 
 * {
     box-sizing: border-box;
@@ -14,26 +20,29 @@ body {
     width: 100%;
     height: 100%;
 
-    background: #202a68;
-
     overflow: hidden;
+
+    background: #202a68;
 }
 
-html {
-    min-height: 100%;
-}
+
+/* =========================================
+   BODY
+   ========================================= */
 
 body {
     min-height: 100vh;
     min-height: 100dvh;
 
     overscroll-behavior: none;
+
+    -webkit-text-size-adjust: 100%;
 }
 
 
-/* =========================
-   CONTENEDOR DE PÁGINA
-   ========================= */
+/* =========================================
+   PÁGINA
+   ========================================= */
 
 .page {
     position: fixed;
@@ -51,77 +60,93 @@ body {
 
     overflow: hidden;
 
-    padding:
-        max(12px, env(safe-area-inset-top))
-        max(12px, env(safe-area-inset-right))
-        max(12px, env(safe-area-inset-bottom))
-        max(12px, env(safe-area-inset-left));
+    background: #202a68;
 }
 
 
-/* =========================
-   CONTENEDOR MÁQUINA
-   ========================= */
+/* =========================================
+   CONTENEDOR DE LA MÁQUINA
+   ========================================= */
 
 /*
-   IMPORTANTE:
+   MUY IMPORTANTE:
 
-   Ya NO tiene width/height calculados
-   mediante JavaScript.
+   machine.png es cuadrado.
 
-   El tamaño del PNG machine.png
-   determina automáticamente el tamaño
-   de todo el sistema.
+   Por eso reservamos su espacio DESDE
+   EL PRIMER FRAME con aspect-ratio.
+
+   Así las cápsulas, la perilla y los
+   tokens nunca aparecen gigantes mientras
+   carga machine.png.
 */
 
 .machine-wrap {
     position: relative;
 
-    display: inline-block;
-
     flex: 0 0 auto;
+
+    /*
+       PC:
+       usa el 90% de la dimensión
+       más pequeña de la pantalla.
+    */
+
+    width: min(90vw, 90vh);
+
+    width: min(90vw, 90dvh);
+
+    aspect-ratio: 1 / 1;
 
     line-height: 0;
 
-    max-width: 88vw;
+    /*
+       Evita cualquier cambio accidental
+       de dimensiones durante la carga.
+    */
 
-    max-height: 90vh;
-    max-height: 90dvh;
+    min-width: 0;
+    min-height: 0;
 }
 
 
-/* =========================
-   IMAGEN MÁQUINA
-   ========================= */
+/* =========================================
+   IMAGEN DE LA MÁQUINA
+   ========================================= */
+
+/*
+   La imagen ya NO decide el tamaño
+   del contenedor.
+
+   El contenedor ya existe antes de
+   que termine de cargar el PNG.
+*/
 
 .machine-img {
-    position: relative;
+    position: absolute;
 
     z-index: 20;
 
+    inset: 0;
+
     display: block;
 
-    width: auto;
-    height: auto;
-
-    max-width: 88vw;
-
-    max-height: 90vh;
-    max-height: 90dvh;
+    width: 100%;
+    height: 100%;
 
     object-fit: contain;
 
-    user-select: none;
-
     pointer-events: none;
+
+    user-select: none;
 
     -webkit-user-drag: none;
 }
 
 
-/* =========================
+/* =========================================
    DEPÓSITO DE CÁPSULAS
-   ========================= */
+   ========================================= */
 
 .capsule-area {
     position: absolute;
@@ -159,9 +184,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    CÁPSULAS
-   ========================= */
+   ========================================= */
 
 .capsule {
     position: absolute;
@@ -181,14 +206,15 @@ body {
 }
 
 
-/* =========================
-   CÁPSULAS FONDO
-   ========================= */
+/* =========================================
+   CÁPSULAS DEL FONDO
+   ========================================= */
 
 .capsule-10 {
     width: 23%;
     left: 8%;
     bottom: 55%;
+
     z-index: 1;
 
     transform:
@@ -196,10 +222,12 @@ body {
         scaleX(0.94);
 }
 
+
 .capsule-11 {
     width: 25%;
     left: 34%;
     bottom: 57%;
+
     z-index: 2;
 
     transform:
@@ -207,10 +235,12 @@ body {
         scaleY(0.93);
 }
 
+
 .capsule-12 {
     width: 22%;
     left: 65%;
     bottom: 54%;
+
     z-index: 1;
 
     transform:
@@ -219,14 +249,15 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    CÁPSULAS INTERMEDIAS
-   ========================= */
+   ========================================= */
 
 .capsule-6 {
     width: 29%;
     left: 0%;
     bottom: 27%;
+
     z-index: 5;
 
     transform:
@@ -234,10 +265,12 @@ body {
         scaleY(0.96);
 }
 
+
 .capsule-7 {
     width: 26%;
     left: 20%;
     bottom: 34%;
+
     z-index: 3;
 
     transform:
@@ -245,20 +278,24 @@ body {
         scaleX(0.92);
 }
 
+
 .capsule-8 {
     width: 31%;
     left: 42%;
     bottom: 28%;
+
     z-index: 6;
 
     transform:
         rotate(-18deg);
 }
 
+
 .capsule-9 {
     width: 27%;
     left: 70%;
     bottom: 31%;
+
     z-index: 4;
 
     transform:
@@ -267,24 +304,27 @@ body {
 }
 
 
-/* =========================
-   CÁPSULAS FRENTE
-   ========================= */
+/* =========================================
+   CÁPSULAS DEL FRENTE
+   ========================================= */
 
 .capsule-1 {
     width: 31%;
     left: 2%;
     bottom: 3%;
+
     z-index: 10;
 
     transform:
         rotate(24deg);
 }
 
+
 .capsule-2 {
     width: 28%;
     left: 16%;
     bottom: 4%;
+
     z-index: 8;
 
     transform:
@@ -292,20 +332,24 @@ body {
         scaleX(0.95);
 }
 
+
 .capsule-3 {
     width: 34%;
     left: 34%;
     bottom: 0%;
+
     z-index: 12;
 
     transform:
         rotate(14deg);
 }
 
+
 .capsule-4 {
     width: 29%;
     left: 57%;
     bottom: 5%;
+
     z-index: 9;
 
     transform:
@@ -313,10 +357,12 @@ body {
         scaleY(0.95);
 }
 
+
 .capsule-5 {
     width: 32%;
     left: 74%;
     bottom: 1%;
+
     z-index: 11;
 
     transform:
@@ -324,14 +370,18 @@ body {
 }
 
 
-/* =========================
-   PILA DE TOKENS
-   ========================= */
+/* =========================================
+   CONTENEDOR DE TOKENS
+   ========================================= */
 
 .token-stack {
     position: absolute;
 
     z-index: 50;
+
+    /*
+       Posición original para PC.
+    */
 
     left: -8%;
     top: 67%;
@@ -342,15 +392,12 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    TOKENS
-   ========================= */
+   ========================================= */
 
 .token {
     position: absolute;
-
-    left: 0;
-    top: 0;
 
     width: 100%;
     height: auto;
@@ -361,9 +408,9 @@ body {
 
     -webkit-user-drag: none;
 
-    transform-origin: center center;
-
     pointer-events: none;
+
+    transform-origin: center center;
 
     filter:
         drop-shadow(
@@ -377,54 +424,100 @@ body {
 }
 
 
-/* =========================
-   TOKENS APILADOS
-   ========================= */
+/* =========================================
+   LOS 5 TOKENS
+
+   Usamos left/top para formar la pila
+   en lugar de transform.
+
+   Esto es importante porque JavaScript
+   usa transform al arrastrarlos.
+   ========================================= */
+
+
+/*
+   Token del fondo.
+*/
 
 .token-5 {
-    transform:
-        translate(-10px, -8px)
-        rotate(-12deg);
+    left: -52%;
+    top: -62%;
 
-    opacity: 0.78;
+    rotate: -14deg;
+
+    opacity: 0.72;
+
+    z-index: 1;
 }
+
+
+/*
+   Cuarto.
+*/
 
 .token-4 {
-    transform:
-        translate(-7px, -6px)
-        rotate(-7deg);
+    left: -39%;
+    top: -46%;
 
-    opacity: 0.84;
+    rotate: -9deg;
+
+    opacity: 0.80;
+
+    z-index: 2;
 }
+
+
+/*
+   Tercero.
+*/
 
 .token-3 {
-    transform:
-        translate(-4px, -4px)
-        rotate(-3deg);
+    left: -26%;
+    top: -30%;
 
-    opacity: 0.90;
+    rotate: -5deg;
+
+    opacity: 0.87;
+
+    z-index: 3;
 }
+
+
+/*
+   Segundo.
+*/
 
 .token-2 {
-    transform:
-        translate(-2px, -2px)
-        rotate(3deg);
+    left: -13%;
+    top: -15%;
 
-    opacity: 0.96;
+    rotate: 3deg;
+
+    opacity: 0.94;
+
+    z-index: 4;
 }
+
+
+/*
+   Primer token que se usa.
+*/
 
 .token-1 {
-    transform:
-        translate(0, 0)
-        rotate(0deg);
+    left: 0;
+    top: 0;
+
+    rotate: 0deg;
 
     opacity: 1;
+
+    z-index: 5;
 }
 
 
-/* =========================
+/* =========================================
    TOKEN ACTIVO
-   ========================= */
+   ========================================= */
 
 .token.active-token {
     pointer-events: auto;
@@ -437,9 +530,9 @@ body {
 }
 
 
-/* =========================
-   TOKEN ARRASTRADO
-   ========================= */
+/* =========================================
+   TOKEN ARRASTRANDO
+   ========================================= */
 
 .token.dragging {
     cursor: grabbing;
@@ -452,9 +545,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    TOKEN CERCA DE RANURA
-   ========================= */
+   ========================================= */
 
 .token.near-slot {
     filter:
@@ -465,23 +558,28 @@ body {
 }
 
 
-/* =========================
-   TOKEN GASTADO
-   ========================= */
+/* =========================================
+   TOKEN UTILIZADO
+   ========================================= */
 
 .token.used-token {
     pointer-events: none;
 }
 
 
-/* =========================
+/* =========================================
    PERILLA
-   ========================= */
+   ========================================= */
 
 .knob {
     position: absolute;
 
     z-index: 60;
+
+    /*
+       POSICIÓN YA CALIBRADA.
+       NO SE CAMBIA.
+    */
 
     left: 32.9%;
     top: 77.1%;
@@ -507,9 +605,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    PERILLA BLOQUEADA
-   ========================= */
+   ========================================= */
 
 .knob.locked {
     cursor: not-allowed;
@@ -520,9 +618,9 @@ body {
 }
 
 
-/* =========================
-   PERILLA LISTA
-   ========================= */
+/* =========================================
+   PERILLA HABILITADA
+   ========================================= */
 
 .knob.ready {
     cursor: grab;
@@ -537,9 +635,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    PERILLA GIRANDO
-   ========================= */
+   ========================================= */
 
 .knob.turning {
     cursor: grabbing;
@@ -558,59 +656,62 @@ and
     orientation: portrait
 ) {
 
-    .page {
-        padding:
-            max(10px, env(safe-area-inset-top))
-            max(10px, env(safe-area-inset-right))
-            max(10px, env(safe-area-inset-bottom))
-            max(10px, env(safe-area-inset-left));
-    }
-
-
     /*
-       IMPORTANTE:
+       Esta es la parte importante.
 
-       76vw deja espacio suficiente
-       para los tokens que sobresalen
-       del lado izquierdo.
+       El PNG tiene mucho espacio
+       transparente a los lados.
+
+       Por eso permitimos que su lienzo
+       cuadrado sea más ancho que la
+       pantalla.
+
+       Solo la zona transparente queda
+       fuera del viewport.
+
+       El dibujo real de la máquina
+       permanece centrado.
     */
 
     .machine-wrap {
-        max-width: 76vw;
+        width:
+            min(
+                88dvh,
+                172vw
+            );
 
-        max-height: 84vh;
-        max-height: 84dvh;
-    }
+        max-width: none;
+        max-height: none;
 
-
-    .machine-img {
-        max-width: 76vw;
-
-        max-height: 84vh;
-        max-height: 84dvh;
+        aspect-ratio: 1 / 1;
     }
 
 
     /*
-       Tokens más fáciles de ver
-       y completamente dentro de pantalla.
+       En móvil el token ya NO parte
+       desde -8%.
+
+       Lo colocamos justo a la izquierda
+       del dibujo REAL de la máquina.
     */
 
     .token-stack {
-        left: -10%;
+        left: 22%;
 
-        width: 12%;
+        top: 67%;
+
+        width: 8.5%;
     }
 
 }
 
 
 /* =========================================
-   CELULARES PEQUEÑOS
+   CELULARES MUY ANGOSTOS
    ========================================= */
 
 @media (
-    max-width: 390px
+    max-width: 380px
 )
 and
 (
@@ -618,25 +719,18 @@ and
 ) {
 
     .machine-wrap {
-        max-width: 72vw;
-
-        max-height: 82vh;
-        max-height: 82dvh;
-    }
-
-
-    .machine-img {
-        max-width: 72vw;
-
-        max-height: 82vh;
-        max-height: 82dvh;
+        width:
+            min(
+                86dvh,
+                170vw
+            );
     }
 
 
     .token-stack {
-        left: -10%;
+        left: 22%;
 
-        width: 12.5%;
+        width: 8.8%;
     }
 
 }
@@ -655,25 +749,27 @@ and
 ) {
 
     .machine-wrap {
-        max-width: 78vw;
+        width:
+            min(
+                90vw,
+                92dvh
+            );
 
-        max-height: 88vh;
-        max-height: 88dvh;
+        aspect-ratio: 1 / 1;
     }
 
 
-    .machine-img {
-        max-width: 78vw;
-
-        max-height: 88vh;
-        max-height: 88dvh;
-    }
-
+    /*
+       En horizontal vuelve a funcionar
+       bien cerca del borde del lienzo.
+    */
 
     .token-stack {
-        left: -8%;
+        left: -4%;
 
-        width: 10%;
+        top: 67%;
+
+        width: 9%;
     }
 
 }
