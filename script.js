@@ -381,20 +381,8 @@ function runGacha() {
 
 
 /* =========================================
-   POSICIÓN REAL DE LA RANURA
+   POSICIÓN DE LA RANURA
    ========================================= */
-
-/*
-   IMPORTANTE:
-
-   El PNG tiene espacio transparente.
-
-   Según tu captura, la ranura real
-   se encuentra aproximadamente en:
-
-   X = 30% del lienzo
-   Y = 71% del lienzo
-*/
 
 function getTokenSlotPosition() {
 
@@ -405,12 +393,21 @@ function getTokenSlotPosition() {
     return {
 
         /*
-           CENTRO DE LA RANURA
+           La movimos un poco
+           más hacia la derecha.
+
+           Antes: 0.30
+           Ahora: 0.32
         */
 
         x:
             machineRect.left +
-            machineRect.width * 0.30,
+            machineRect.width * 0.32,
+
+
+        /*
+           La altura queda igual.
+        */
 
         y:
             machineRect.top +
@@ -418,11 +415,7 @@ function getTokenSlotPosition() {
 
 
         /*
-           ÁREA DE DETECCIÓN
-
-           Es un poco más grande que
-           la ranura dibujada para que
-           insertar el token sea cómodo.
+           Área de tolerancia.
         */
 
         radiusX:
@@ -541,11 +534,6 @@ function moveToken(event) {
             ${tokenMoveY}px
         )`;
 
-
-    /*
-       Brilla cuando entra en
-       la zona correcta.
-    */
 
     if (tokenIsNearSlot()) {
 
@@ -714,11 +702,6 @@ function insertToken() {
             tokenCenterY
         );
 
-
-    /*
-       El token primero es atraído
-       hacia la ranura.
-    */
 
     const animation =
         token.animate(
