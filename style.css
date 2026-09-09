@@ -350,26 +350,24 @@ body {
     z-index: 60;
 
     /*
-       Horizontalmente ya estaba
-       prácticamente bien.
+       Un poquito más hacia la derecha.
+       Antes: 32%
     */
 
-    left: 32%;
+    left: 32.8%;
 
     /*
-       Antes estaba demasiado abajo.
-       La subimos para centrarla
-       sobre el círculo verde.
+       La altura queda igual.
     */
 
     top: 77.4%;
 
     /*
-       Antes: 8.5%
-       Ahora: 6.3%
+       Un poquito más pequeña.
+       Antes: 6.3%
     */
 
-    width: 6.3%;
+    width: 5.5%;
     height: auto;
 
     transform:
