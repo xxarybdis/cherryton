@@ -35,6 +35,8 @@ let tokenIsDragging = false;
 
 let knobIsTurning = false;
 
+let dispensedCapsule = null;
+
 
 /* =========================================
    TOKEN - DATOS DE ARRASTRE
@@ -60,6 +62,52 @@ let knobRotation = 0;
 let knobLastPointerAngle = 0;
 
 const KNOB_REQUIRED_TURN = 280;
+
+
+/* =========================================
+   CÁPSULA QUE SALE
+   ========================================= */
+
+/*
+   Estas son las cinco cápsulas posibles.
+*/
+
+const GACHA_CAPSULES = [
+    "assets/capsule-dog.png",
+    "assets/capsule-cat.png",
+    "assets/capsule-letter.png",
+    "assets/capsule-candy.png",
+    "assets/capsule-friends.png"
+];
+
+
+/*
+   POSICIÓN DE LA COMPUERTA
+
+   Estos valores son los que vamos
+   a calibrar visualmente.
+
+   X = izquierda / derecha
+   Y = arriba / abajo
+*/
+
+const DISPENSER_X = 51.5;
+const DISPENSER_Y = 78.5;
+
+
+/*
+   Posición final después de caer.
+*/
+
+const CAPSULE_FINAL_X = 51.5;
+const CAPSULE_FINAL_Y = 88;
+
+
+/*
+   Tamaño de la cápsula que sale.
+*/
+
+const DISPENSED_CAPSULE_WIDTH = 10;
 
 
 /* =========================================
@@ -389,6 +437,23 @@ function runGacha() {
     );
 
 
+    /*
+       Después de que las cápsulas
+       lleven un rato moviéndose,
+       sale una por la compuerta.
+    */
+
+    setTimeout(
+        () => {
+
+            dispenseCapsule();
+
+        },
+
+        1850
+    );
+
+
     setTimeout(
         () => {
 
@@ -396,8 +461,299 @@ function runGacha() {
 
         },
 
-        2700
+        3100
     );
+
+}
+
+
+/* =========================================
+   ELEGIR CÁPSULA ALEATORIA
+   ========================================= */
+
+function getRandomCapsule() {
+
+    const randomIndex =
+        Math.floor(
+            Math.random() *
+            GACHA_CAPSULES.length
+        );
+
+
+    return GACHA_CAPSULES[
+        randomIndex
+    ];
+
+}
+
+
+/* =========================================
+   CREAR CÁPSULA DE SALIDA
+   ========================================= */
+
+function createDispensedCapsule() {
+
+    /*
+       Por ahora solo puede haber
+       una cápsula afuera.
+    */
+
+    if (dispensedCapsule) {
+
+        dispensedCapsule.remove();
+
+        dispensedCapsule = null;
+
+    }
+
+
+    const capsule =
+        document.createElement("img");
+
+
+    capsule.src =
+        getRandomCapsule();
+
+
+    capsule.alt =
+        "Cápsula obtenida";
+
+
+    capsule.draggable =
+        false;
+
+
+    /*
+       Estilos directamente desde JS
+       para que NO tengas que modificar
+       style.css todavía.
+    */
+
+    capsule.style.position =
+        "absolute";
+
+    capsule.style.zIndex =
+        "45";
+
+    capsule.style.left =
+        `${DISPENSER_X}%`;
+
+    capsule.style.top =
+        `${DISPENSER_Y}%`;
+
+    capsule.style.width =
+        `${DISPENSED_CAPSULE_WIDTH}%`;
+
+    capsule.style.height =
+        "auto";
+
+    capsule.style.opacity =
+        "0";
+
+    capsule.style.pointerEvents =
+        "none";
+
+    capsule.style.userSelect =
+        "none";
+
+    capsule.style.webkitUserDrag =
+        "none";
+
+    capsule.style.transformOrigin =
+        "center center";
+
+    capsule.style.transform =
+        "translate(-50%, -50%) scale(0.35) rotate(-10deg)";
+
+
+    machine.appendChild(
+        capsule
+    );
+
+
+    dispensedCapsule =
+        capsule;
+
+
+    return capsule;
+
+}
+
+
+/* =========================================
+   HACER SALIR LA CÁPSULA
+   ========================================= */
+
+function dispenseCapsule() {
+
+    const capsule =
+        createDispensedCapsule();
+
+
+    /*
+       Esperamos a que cargue la imagen
+       antes de hacer la animación.
+    */
+
+    const startAnimation = () => {
+
+        capsule.animate(
+            [
+                /*
+                   Todavía "dentro"
+                   de la máquina.
+                */
+
+                {
+                    left:
+                        `${DISPENSER_X}%`,
+
+                    top:
+                        `${DISPENSER_Y}%`,
+
+                    opacity: 0,
+
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(0.35)
+                        rotate(-12deg)`,
+
+                    offset: 0
+                },
+
+
+                /*
+                   Empieza a asomarse.
+                */
+
+                {
+                    left:
+                        `${DISPENSER_X}%`,
+
+                    top:
+                        `${DISPENSER_Y + 1.5}%`,
+
+                    opacity: 1,
+
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(0.72)
+                        rotate(7deg)`,
+
+                    offset: 0.25
+                },
+
+
+                /*
+                   Sale completamente.
+                */
+
+                {
+                    left:
+                        `${CAPSULE_FINAL_X}%`,
+
+                    top:
+                        `${CAPSULE_FINAL_Y - 2}%`,
+
+                    opacity: 1,
+
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1)
+                        rotate(-5deg)`,
+
+                    offset: 0.68
+                },
+
+
+                /*
+                   Pequeño rebote.
+                */
+
+                {
+                    left:
+                        `${CAPSULE_FINAL_X}%`,
+
+                    top:
+                        `${CAPSULE_FINAL_Y + 0.8}%`,
+
+                    opacity: 1,
+
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(0.96)
+                        rotate(3deg)`,
+
+                    offset: 0.84
+                },
+
+
+                /*
+                   Posición final.
+                */
+
+                {
+                    left:
+                        `${CAPSULE_FINAL_X}%`,
+
+                    top:
+                        `${CAPSULE_FINAL_Y}%`,
+
+                    opacity: 1,
+
+                    transform:
+                        `translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1)
+                        rotate(0deg)`,
+
+                    offset: 1
+                }
+            ],
+
+            {
+                duration: 950,
+
+                easing:
+                    "cubic-bezier(0.22, 1, 0.36, 1)",
+
+                fill:
+                    "forwards"
+            }
+        );
+
+    };
+
+
+    if (capsule.complete) {
+
+        startAnimation();
+
+    } else {
+
+        capsule.addEventListener(
+            "load",
+            startAnimation,
+            {
+                once: true
+            }
+        );
+
+    }
 
 }
 
@@ -419,16 +775,13 @@ function getTokenSlotPosition() {
             machineRect.width * 0.32,
 
         /*
-           Antes: 0.695
-           Ahora: 0.6
-
-           Esto sube un poco el punto
-           donde el token es absorbido.
+           Punto definitivo,
+           un poco más arriba.
         */
 
         y:
             machineRect.top +
-            machineRect.height * 0.6,
+            machineRect.height * 0.695,
 
         radiusX:
             machineRect.width * 0.055,
@@ -886,7 +1239,8 @@ function insertToken() {
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)",
 
-                fill: "forwards"
+                fill:
+                    "forwards"
             }
         );
 
@@ -1006,10 +1360,15 @@ function moveKnob(event) {
         difference -= 360;
     }
 
+
     if (difference < -180) {
         difference += 360;
     }
 
+
+    /*
+       Dirección antihoraria.
+    */
 
     knobRotation +=
         -difference;
