@@ -354,20 +354,20 @@ body {
        Antes: 32%
     */
 
-    left: 32.8%;
+    left: 33%;
 
     /*
        La altura queda igual.
     */
 
-    top: 77.4%;
+    top: 77.6%;
 
     /*
        Un poquito más pequeña.
        Antes: 6.3%
     */
 
-    width: 5.5%;
+    width: 5.3%;
     height: auto;
 
     transform:
