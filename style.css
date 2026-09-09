@@ -344,41 +344,24 @@ body {
    PERILLA
    ========================= */
 
-/*
-   La perilla está bastante más abajo
-   que la ranura del token.
-
-   Estas coordenadas están calibradas
-   según tu captura actual.
-*/
-
 .knob {
     position: absolute;
 
     z-index: 60;
 
     /*
-       Centro horizontal de la perilla.
+       Conservamos la posición.
     */
 
     left: 32%;
-
-    /*
-       Antes estaba en 71%.
-       Eso era demasiado arriba.
-
-       Ahora la ponemos sobre el círculo
-       verde claro de la máquina.
-    */
-
     top: 80.5%;
 
     /*
-       Un poco más grande para que coincida
-       con el diámetro del soporte.
+       Antes: 11%
+       Ahora: 8.5%
     */
 
-    width: 11%;
+    width: 8.5%;
     height: auto;
 
     transform:
