@@ -58,8 +58,6 @@ body {
 
     max-width: 90vw;
     max-height: 90vh;
-
-    cursor: pointer;
 }
 
 
@@ -311,6 +309,115 @@ body {
 
 
 /* =========================
+   RANURA DEL TOKEN
+   ========================= */
+
+/*
+   Esta zona es completamente invisible.
+
+   Su función es detectar si soltamos
+   el token encima de la parte de
+   "1 TOKEN" de la máquina.
+*/
+
+.token-slot {
+    position: absolute;
+
+    z-index: 30;
+
+    left: 8%;
+    top: 57%;
+
+    width: 16%;
+    height: 14%;
+
+    pointer-events: none;
+
+    background: transparent;
+}
+
+
+/* =========================
+   TOKEN
+   ========================= */
+
+.token {
+    position: absolute;
+
+    z-index: 50;
+
+    /*
+       Posición inicial del token:
+       a la izquierda de la máquina.
+    */
+
+    left: -8%;
+    top: 67%;
+
+    width: 12%;
+
+    height: auto;
+
+    user-select: none;
+
+    /*
+       Evita gestos del navegador
+       al arrastrarlo en celular.
+    */
+
+    touch-action: none;
+
+    /*
+       Evita el arrastre predeterminado
+       de imágenes del navegador.
+    */
+
+    -webkit-user-drag: none;
+
+    cursor: grab;
+
+    /*
+       Transición utilizada cuando
+       regresa a su lugar.
+    */
+
+    transition:
+        filter 0.2s ease,
+        opacity 0.2s ease;
+
+    filter:
+        drop-shadow(0 5px 5px rgba(0, 0, 0, 0.22));
+
+    transform-origin: center center;
+}
+
+
+/* Cuando lo estamos agarrando */
+
+.token.dragging {
+    cursor: grabbing;
+
+    filter:
+        drop-shadow(0 9px 7px rgba(0, 0, 0, 0.30));
+}
+
+
+/* Cuando está cerca de la ranura */
+
+.token.near-slot {
+    filter:
+        drop-shadow(0 0 8px rgba(194, 255, 143, 0.8));
+}
+
+
+/* Después de haber sido usado */
+
+.token.inserted {
+    pointer-events: none;
+}
+
+
+/* =========================
    ADAPTACIÓN PARA CELULAR
    ========================= */
 
@@ -328,5 +435,16 @@ body {
     .machine-wrap {
         max-width: 96vw;
         max-height: 94vh;
+    }
+
+    /*
+       En pantallas pequeñas aumentamos
+       ligeramente el token para que sea
+       más fácil agarrarlo con el dedo.
+    */
+
+    .token {
+        width: 14%;
+        left: -5%;
     }
 }
