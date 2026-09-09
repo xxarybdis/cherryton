@@ -43,6 +43,8 @@ let capsuleCanOpen = false;
 
 let capsuleIsOpening = false;
 
+let currentGachaResult = null;
+
 
 /* =========================================
    TOKEN - DATOS DE ARRASTRE
@@ -71,59 +73,231 @@ const KNOB_REQUIRED_TURN = 280;
 
 
 /* =========================================
-   CÁPSULAS POSIBLES
+   RESULTADOS DEL GACHA
    ========================================= */
 
-const GACHA_CAPSULES = [
-    "assets/capsule-dog.png",
-    "assets/capsule-cat.png",
-    "assets/capsule-letter.png",
-    "assets/capsule-candy.png",
-    "assets/capsule-friends.png"
+/*
+   Las cuatro cápsulas normales.
+
+   closed:
+   imagen que sale de la máquina.
+
+   opened:
+   imagen que aparece al darle click.
+*/
+
+const NORMAL_GACHA_CAPSULES = [
+
+    {
+        name: "dog",
+
+        closed:
+            "assets/capsule-dog.png",
+
+        opened:
+            "assets/capsule-dog2.png"
+    },
+
+    {
+        name: "cat",
+
+        closed:
+            "assets/capsule-cat.png",
+
+        opened:
+            "assets/capsule-cat2.png"
+    },
+
+    {
+        name: "candy",
+
+        closed:
+            "assets/capsule-candy.png",
+
+        opened:
+            "assets/capsule-candy2.png"
+    },
+
+    {
+        name: "friends",
+
+        closed:
+            "assets/capsule-friends.png",
+
+        opened:
+            "assets/capsule-friends2.png"
+    }
+
 ];
+
+
+/*
+   La cápsula especial.
+
+   IMPORTANTE:
+
+   No utilizamos capsule-letter.png
+   como resultado de salida.
+
+   La cápsula que SALE es letter2.
+
+   Al abrirla pasa a letter3.
+*/
+
+const LETTER_CAPSULE = {
+
+    name: "letter",
+
+    closed:
+        "assets/capsule-letter2.png",
+
+    opened:
+        "assets/capsule-letter3.png"
+
+};
+
+
+/* =========================================
+   COLA DE LA RONDA
+   ========================================= */
+
+/*
+   Cada ronda contiene:
+
+   1 - normal
+   2 - normal
+   3 - normal
+   4 - normal
+   5 - LETTER
+
+   Las primeras cuatro se mezclan.
+*/
+
+let gachaQueue = [];
+
+
+/* =========================================
+   CREAR NUEVA RONDA
+   ========================================= */
+
+function createNewGachaRound() {
+
+    /*
+       Copiamos las cápsulas normales
+       para no modificar el array original.
+    */
+
+    const shuffled =
+        [...NORMAL_GACHA_CAPSULES];
+
+
+    /*
+       Fisher-Yates shuffle.
+    */
+
+    for (
+        let i =
+            shuffled.length - 1;
+
+        i > 0;
+
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() *
+                (i + 1)
+            );
+
+
+        [
+            shuffled[i],
+            shuffled[j]
+        ] =
+        [
+            shuffled[j],
+            shuffled[i]
+        ];
+
+    }
+
+
+    /*
+       Letter siempre queda al final.
+    */
+
+    gachaQueue = [
+
+        ...shuffled,
+
+        LETTER_CAPSULE
+
+    ];
+
+}
+
+
+/*
+   Creamos la primera ronda
+   al cargar la página.
+*/
+
+createNewGachaRound();
+
+
+/* =========================================
+   OBTENER SIGUIENTE RESULTADO
+   ========================================= */
+
+function getNextGachaResult() {
+
+    /*
+       Si terminamos la ronda anterior,
+       creamos una nueva.
+    */
+
+    if (
+        gachaQueue.length === 0
+    ) {
+
+        createNewGachaRound();
+
+    }
+
+
+    /*
+       Sacamos el primer elemento
+       de la cola.
+    */
+
+    const result =
+        gachaQueue.shift();
+
+
+    return result;
+
+}
 
 
 /* =========================================
    SALIDA DE LA CÁPSULA
    ========================================= */
 
-/*
-   Posición definitiva calibrada.
-*/
-
 const DISPENSER_X = 62;
+
 const DISPENSER_Y = 81;
-
-
-/*
-   Tamaño de la cápsula al salir.
-*/
 
 const DISPENSED_CAPSULE_WIDTH = 10;
 
-
-/*
-   Movimiento después de salir.
-
-   X negativo = izquierda
-   Y positivo = abajo
-*/
-
 const CAPSULE_MOVE_X = -26;
+
 const CAPSULE_MOVE_Y = 64;
 
 
 /* =========================================
-   CÁPSULA EN EL CENTRO
+   TAMAÑO CENTRAL
    ========================================= */
-
-/*
-   Tamaño de la cápsula cuando
-   llega al centro.
-
-   34 = 34% del lado más pequeño
-   de la pantalla.
-*/
 
 const CENTER_CAPSULE_SIZE = 34;
 
@@ -140,26 +314,48 @@ function resizeMachine() {
     const naturalHeight =
         machineImage.naturalHeight;
 
-    if (!naturalWidth || !naturalHeight) {
+
+    if (
+        !naturalWidth ||
+        !naturalHeight
+    ) {
+
         return;
+
     }
+
 
     const isMobile =
         window.innerWidth <= 600;
 
+
     const maxWidth =
         window.innerWidth *
-        (isMobile ? 0.96 : 0.90);
+        (
+            isMobile
+                ? 0.96
+                : 0.90
+        );
+
 
     const maxHeight =
         window.innerHeight *
-        (isMobile ? 0.94 : 0.90);
+        (
+            isMobile
+                ? 0.94
+                : 0.90
+        );
+
 
     const scaleX =
-        maxWidth / naturalWidth;
+        maxWidth /
+        naturalWidth;
+
 
     const scaleY =
-        maxHeight / naturalHeight;
+        maxHeight /
+        naturalHeight;
+
 
     const scale =
         Math.min(
@@ -168,15 +364,20 @@ function resizeMachine() {
             1
         );
 
+
     machine.style.width =
         `${naturalWidth * scale}px`;
 
+
     machine.style.height =
         `${naturalHeight * scale}px`;
+
 }
 
 
-if (machineImage.complete) {
+if (
+    machineImage.complete
+) {
 
     resizeMachine();
 
@@ -200,11 +401,19 @@ window.addEventListener(
    UTILIDAD ALEATORIA
    ========================================= */
 
-function random(min, max) {
+function random(
+    min,
+    max
+) {
 
-    return Math.random() *
-        (max - min) +
-        min;
+    return (
+        Math.random() *
+        (
+            max -
+            min
+        ) +
+        min
+    );
 
 }
 
@@ -213,7 +422,9 @@ function random(min, max) {
    CÁPSULAS - LÍMITES
    ========================================= */
 
-function getCapsuleLimits(capsule) {
+function getCapsuleLimits(
+    capsule
+) {
 
     if (
         capsule.classList.contains(
@@ -222,10 +433,12 @@ function getCapsuleLimits(capsule) {
     ) {
 
         return {
+
             left: -1,
             right: 10,
             up: 13,
             down: 1
+
         };
 
     }
@@ -238,10 +451,12 @@ function getCapsuleLimits(capsule) {
     ) {
 
         return {
+
             left: -2,
             right: 11,
             up: 12,
             down: 3
+
         };
 
     }
@@ -254,10 +469,12 @@ function getCapsuleLimits(capsule) {
     ) {
 
         return {
+
             left: -10,
             right: 2,
             up: 13,
             down: 1
+
         };
 
     }
@@ -270,20 +487,24 @@ function getCapsuleLimits(capsule) {
     ) {
 
         return {
+
             left: -11,
             right: 3,
             up: 12,
             down: 3
+
         };
 
     }
 
 
     return {
+
         left: -12,
         right: 12,
         up: 15,
         down: 5
+
     };
 
 }
@@ -299,7 +520,10 @@ function animateCapsule(
 ) {
 
     const limits =
-        getCapsuleLimits(capsule);
+        getCapsuleLimits(
+            capsule
+        );
+
 
     const x1 =
         random(
@@ -307,11 +531,13 @@ function animateCapsule(
             limits.right
         );
 
+
     const y1 =
         random(
             -limits.up,
             -2
         );
+
 
     const x2 =
         random(
@@ -319,11 +545,13 @@ function animateCapsule(
             limits.right
         );
 
+
     const y2 =
         random(
             -limits.up * 0.55,
             limits.down
         );
+
 
     const x3 =
         random(
@@ -331,74 +559,122 @@ function animateCapsule(
             limits.right
         );
 
+
     const y3 =
         random(
             -limits.up * 0.75,
             limits.down
         );
 
+
     const r1 =
-        random(-9, 9);
+        random(
+            -9,
+            9
+        );
+
 
     const r2 =
-        random(-12, 12);
+        random(
+            -12,
+            12
+        );
+
 
     const r3 =
-        random(-7, 7);
+        random(
+            -7,
+            7
+        );
+
 
     const duration =
-        random(1900, 2400);
+        random(
+            1900,
+            2400
+        );
+
 
     const delay =
-        random(0, 180) +
+        random(
+            0,
+            180
+        ) +
         index * 12;
+
 
     return capsule.animate(
         [
+
             {
-                translate: "0px 0px",
-                rotate: "0deg",
+                translate:
+                    "0px 0px",
+
+                rotate:
+                    "0deg",
+
                 offset: 0
             },
 
             {
                 translate:
                     `${x1}px ${y1}px`,
+
                 rotate:
                     `${r1}deg`,
+
                 offset: 0.28
             },
 
             {
                 translate:
                     `${x2}px ${y2}px`,
+
                 rotate:
                     `${r2}deg`,
+
                 offset: 0.55
             },
 
             {
                 translate:
                     `${x3}px ${y3}px`,
+
                 rotate:
                     `${r3}deg`,
+
                 offset: 0.78
             },
 
             {
-                translate: "0px 0px",
-                rotate: "0deg",
+                translate:
+                    "0px 0px",
+
+                rotate:
+                    "0deg",
+
                 offset: 1
             }
+
         ],
 
         {
-            duration: duration,
-            iterations: 1,
-            delay: delay,
+
+            duration:
+                duration,
+
+            iterations:
+                1,
+
+            delay:
+                delay,
+
             easing:
                 "cubic-bezier(0.45, 0, 0.25, 1)",
-            fill: "none"
+
+            fill:
+                "none"
+
         }
     );
 
@@ -411,14 +687,23 @@ function animateCapsule(
 
 function runGacha() {
 
-    if (machineIsRunning) {
+    if (
+        machineIsRunning
+    ) {
+
         return;
+
     }
+
 
     machineIsRunning = true;
 
+
     capsules.forEach(
-        (capsule, index) => {
+        (
+            capsule,
+            index
+        ) => {
 
             animateCapsule(
                 capsule,
@@ -428,11 +713,6 @@ function runGacha() {
         }
     );
 
-
-    /*
-       Después de mover las cápsulas
-       aparece una en la salida.
-    */
 
     setTimeout(
         () => {
@@ -445,15 +725,11 @@ function runGacha() {
     );
 
 
-    /*
-       Dejamos margen suficiente
-       para toda la secuencia.
-    */
-
     setTimeout(
         () => {
 
-            machineIsRunning = false;
+            machineIsRunning =
+                false;
 
         },
 
@@ -464,59 +740,75 @@ function runGacha() {
 
 
 /* =========================================
-   ELEGIR CÁPSULA ALEATORIA
-   ========================================= */
-
-function getRandomCapsule() {
-
-    const randomIndex =
-        Math.floor(
-            Math.random() *
-            GACHA_CAPSULES.length
-        );
-
-    return GACHA_CAPSULES[
-        randomIndex
-    ];
-
-}
-
-
-/* =========================================
    CREAR CÁPSULA DE SALIDA
    ========================================= */
 
 function createDispensedCapsule() {
 
-    if (capsuleShakeAnimation) {
+    /*
+       Detenemos cualquier agitación
+       anterior.
+    */
+
+    if (
+        capsuleShakeAnimation
+    ) {
 
         capsuleShakeAnimation.cancel();
 
-        capsuleShakeAnimation = null;
+        capsuleShakeAnimation =
+            null;
 
     }
 
 
-    if (dispensedCapsule) {
+    /*
+       Eliminamos la cápsula anterior.
+    */
+
+    if (
+        dispensedCapsule
+    ) {
 
         dispensedCapsule.remove();
 
-        dispensedCapsule = null;
+        dispensedCapsule =
+            null;
 
     }
 
 
-    capsuleCanOpen = false;
+    capsuleCanOpen =
+        false;
 
-    capsuleIsOpening = false;
+
+    capsuleIsOpening =
+        false;
+
+
+    /*
+       Elegimos el siguiente resultado
+       de la ronda.
+    */
+
+    currentGachaResult =
+        getNextGachaResult();
 
 
     const capsule =
-        document.createElement("img");
+        document.createElement(
+            "img"
+        );
 
+
+    /*
+       Aquí está el cambio importante:
+
+       usamos .closed del resultado.
+    */
 
     capsule.src =
-        getRandomCapsule();
+        currentGachaResult.closed;
 
 
     capsule.alt =
@@ -538,6 +830,7 @@ function createDispensedCapsule() {
     capsule.style.left =
         `${DISPENSER_X}%`;
 
+
     capsule.style.top =
         `${DISPENSER_Y}%`;
 
@@ -545,12 +838,6 @@ function createDispensedCapsule() {
     capsule.style.width =
         `${DISPENSED_CAPSULE_WIDTH}%`;
 
-
-    /*
-       MUY IMPORTANTE:
-       height siempre automático para
-       conservar la proporción del PNG.
-    */
 
     capsule.style.height =
         "auto";
@@ -610,187 +897,204 @@ function dispenseCapsule() {
         createDispensedCapsule();
 
 
-    const startAnimation = () => {
+    const startAnimation =
+        () => {
 
-        const exitAnimation =
-            capsule.animate(
-                [
+
+            const exitAnimation =
+                capsule.animate(
+                    [
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    0px,
+                                    -4px
+                                )
+                                scale(0.18)
+                                rotate(-8deg)
+                                `,
+
+                            opacity:
+                                0,
+
+                            offset:
+                                0
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    -1px,
+                                    0px
+                                )
+                                scale(0.35)
+                                rotate(-4deg)
+                                `,
+
+                            opacity:
+                                0.30,
+
+                            offset:
+                                0.18
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    -4px,
+                                    8px
+                                )
+                                scale(0.58)
+                                rotate(4deg)
+                                `,
+
+                            opacity:
+                                0.68,
+
+                            offset:
+                                0.36
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    ${CAPSULE_MOVE_X * 0.25}px,
+                                    ${CAPSULE_MOVE_Y * 0.25}px
+                                )
+                                scale(0.82)
+                                rotate(-5deg)
+                                `,
+
+                            opacity:
+                                0.92,
+
+                            offset:
+                                0.55
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    ${CAPSULE_MOVE_X * 0.58}px,
+                                    ${CAPSULE_MOVE_Y * 0.58}px
+                                )
+                                scale(1)
+                                rotate(6deg)
+                                `,
+
+                            opacity:
+                                1,
+
+                            offset:
+                                0.72
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    ${CAPSULE_MOVE_X}px,
+                                    ${CAPSULE_MOVE_Y}px
+                                )
+                                scale(1)
+                                rotate(-3deg)
+                                `,
+
+                            opacity:
+                                1,
+
+                            offset:
+                                0.90
+                        },
+
+                        {
+                            transform:
+                                `
+                                translate(
+                                    -50%,
+                                    -50%
+                                )
+                                translate(
+                                    ${CAPSULE_MOVE_X}px,
+                                    ${CAPSULE_MOVE_Y - 4}px
+                                )
+                                scale(1)
+                                rotate(0deg)
+                                `,
+
+                            opacity:
+                                1,
+
+                            offset:
+                                1
+                        }
+
+                    ],
+
                     {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                0px,
-                                -4px
-                            )
-                            scale(0.18)
-                            rotate(-8deg)
-                            `,
 
-                        opacity: 0,
+                        duration:
+                            1550,
 
-                        offset: 0
-                    },
+                        easing:
+                            "cubic-bezier(0.22, 1, 0.36, 1)",
 
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                -1px,
-                                0px
-                            )
-                            scale(0.35)
-                            rotate(-4deg)
-                            `,
+                        fill:
+                            "forwards"
 
-                        opacity: 0.30,
-
-                        offset: 0.18
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                -4px,
-                                8px
-                            )
-                            scale(0.58)
-                            rotate(4deg)
-                            `,
-
-                        opacity: 0.68,
-
-                        offset: 0.36
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                ${CAPSULE_MOVE_X * 0.25}px,
-                                ${CAPSULE_MOVE_Y * 0.25}px
-                            )
-                            scale(0.82)
-                            rotate(-5deg)
-                            `,
-
-                        opacity: 0.92,
-
-                        offset: 0.55
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                ${CAPSULE_MOVE_X * 0.58}px,
-                                ${CAPSULE_MOVE_Y * 0.58}px
-                            )
-                            scale(1)
-                            rotate(6deg)
-                            `,
-
-                        opacity: 1,
-
-                        offset: 0.72
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                ${CAPSULE_MOVE_X}px,
-                                ${CAPSULE_MOVE_Y}px
-                            )
-                            scale(1)
-                            rotate(-3deg)
-                            `,
-
-                        opacity: 1,
-
-                        offset: 0.90
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            translate(
-                                ${CAPSULE_MOVE_X}px,
-                                ${CAPSULE_MOVE_Y - 4}px
-                            )
-                            scale(1)
-                            rotate(0deg)
-                            `,
-
-                        opacity: 1,
-
-                        offset: 1
                     }
-                ],
-
-                {
-                    duration: 1550,
-
-                    easing:
-                        "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                    fill:
-                        "forwards"
-                }
-            );
+                );
 
 
-        /*
-           Cuando termina de salir,
-           espera apenas un momento
-           y se va al centro.
-        */
-
-        exitAnimation.onfinish = () => {
-
-            setTimeout(
+            exitAnimation.onfinish =
                 () => {
 
-                    moveCapsuleToCenter(
-                        capsule
+
+                    setTimeout(
+                        () => {
+
+                            moveCapsuleToCenter(
+                                capsule
+                            );
+
+                        },
+
+                        300
                     );
 
-                },
-
-                300
-            );
+                };
 
         };
-
-    };
 
 
     if (
@@ -819,43 +1123,29 @@ function dispenseCapsule() {
    MOVER CÁPSULA AL CENTRO
    ========================================= */
 
-function moveCapsuleToCenter(capsule) {
-
-    /*
-       Obtenemos la posición real
-       después de haber salido.
-    */
+function moveCapsuleToCenter(
+    capsule
+) {
 
     const rect =
         capsule.getBoundingClientRect();
 
 
-    /*
-       Quitamos la animación anterior.
-    */
-
     capsule.getAnimations().forEach(
-        animation => animation.cancel()
+        animation =>
+            animation.cancel()
     );
 
-
-    /*
-       El centro actual de la cápsula.
-    */
 
     const startX =
         rect.left +
         rect.width / 2;
 
+
     const startY =
         rect.top +
         rect.height / 2;
 
-
-    /*
-       La convertimos en fixed para
-       moverla respecto a la pantalla.
-    */
 
     capsule.style.position =
         "fixed";
@@ -864,6 +1154,7 @@ function moveCapsuleToCenter(capsule) {
     capsule.style.left =
         `${startX}px`;
 
+
     capsule.style.top =
         `${startY}px`;
 
@@ -871,12 +1162,6 @@ function moveCapsuleToCenter(capsule) {
     capsule.style.width =
         `${rect.width}px`;
 
-
-    /*
-       Nunca fijamos height en píxeles.
-       Así el PNG conserva siempre
-       su proporción original.
-    */
 
     capsule.style.height =
         "auto";
@@ -908,10 +1193,6 @@ function moveCapsuleToCenter(capsule) {
         `;
 
 
-    /*
-       Tamaño final de la cápsula.
-    */
-
     const finalSize =
         Math.min(
             window.innerWidth,
@@ -923,28 +1204,25 @@ function moveCapsuleToCenter(capsule) {
         );
 
 
-    /*
-       Calculamos el scale necesario.
-
-       No animamos width y height,
-       por eso ya no se aplasta.
-    */
-
     const finalScale =
         finalSize /
         rect.width;
 
 
     const finalX =
-        window.innerWidth / 2;
+        window.innerWidth /
+        2;
+
 
     const finalY =
-        window.innerHeight / 2;
+        window.innerHeight /
+        2;
 
 
     const centerAnimation =
         capsule.animate(
             [
+
                 {
                     left:
                         `${startX}px`,
@@ -980,76 +1258,77 @@ function moveCapsuleToCenter(capsule) {
                         rotate(-2deg)
                         `
                 }
+
             ],
 
             {
-                duration: 900,
+
+                duration:
+                    900,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)",
 
                 fill:
                     "forwards"
+
             }
         );
 
 
-    centerAnimation.onfinish = () => {
-
-        /*
-           Primero cancelamos la animación.
-        */
-
-        capsule.getAnimations().forEach(
-            animation => animation.cancel()
-        );
+    centerAnimation.onfinish =
+        () => {
 
 
-        /*
-           Y después escribimos directamente
-           el estado final.
-
-           Así evitamos cualquier salto.
-        */
-
-        capsule.style.left =
-            `${finalX}px`;
-
-        capsule.style.top =
-            `${finalY}px`;
-
-        capsule.style.width =
-            `${finalSize}px`;
-
-        capsule.style.height =
-            "auto";
-
-        capsule.style.transform =
-            `
-            translate(
-                -50%,
-                -50%
-            )
-            rotate(0deg)
-            `;
+            capsule.getAnimations().forEach(
+                animation =>
+                    animation.cancel()
+            );
 
 
-        capsuleCanOpen = true;
+            capsule.style.left =
+                `${finalX}px`;
 
 
-        capsule.style.pointerEvents =
-            "auto";
+            capsule.style.top =
+                `${finalY}px`;
 
 
-        capsule.style.cursor =
-            "pointer";
+            capsule.style.width =
+                `${finalSize}px`;
 
 
-        startCapsuleShake(
-            capsule
-        );
+            capsule.style.height =
+                "auto";
 
-    };
+
+            capsule.style.transform =
+                `
+                translate(
+                    -50%,
+                    -50%
+                )
+                rotate(0deg)
+                `;
+
+
+            capsuleCanOpen =
+                true;
+
+
+            capsule.style.pointerEvents =
+                "auto";
+
+
+            capsule.style.cursor =
+                "pointer";
+
+
+            startCapsuleShake(
+                capsule
+            );
+
+        };
 
 }
 
@@ -1058,25 +1337,26 @@ function moveCapsuleToCenter(capsule) {
    AGITAR CÁPSULA SUAVEMENTE
    ========================================= */
 
-function startCapsuleShake(capsule) {
+function startCapsuleShake(
+    capsule
+) {
 
-    if (capsuleShakeAnimation) {
+    if (
+        capsuleShakeAnimation
+    ) {
 
         capsuleShakeAnimation.cancel();
 
-        capsuleShakeAnimation = null;
+        capsuleShakeAnimation =
+            null;
 
     }
 
 
-    /*
-       Agitación suave y lenta.
-       No modifica el tamaño.
-    */
-
     capsuleShakeAnimation =
         capsule.animate(
             [
+
                 {
                     transform:
                         `
@@ -1136,15 +1416,20 @@ function startCapsuleShake(capsule) {
                         rotate(0deg)
                         `
                 }
+
             ],
 
             {
-                duration: 1300,
 
-                iterations: Infinity,
+                duration:
+                    1300,
+
+                iterations:
+                    Infinity,
 
                 easing:
                     "ease-in-out"
+
             }
         );
 
@@ -1157,35 +1442,58 @@ function startCapsuleShake(capsule) {
 
 function openCapsule() {
 
-    if (!capsuleCanOpen) {
+    if (
+        !capsuleCanOpen
+    ) {
+
         return;
+
     }
 
 
-    if (capsuleIsOpening) {
+    if (
+        capsuleIsOpening
+    ) {
+
         return;
+
     }
 
 
-    if (!dispensedCapsule) {
+    if (
+        !dispensedCapsule
+    ) {
+
         return;
+
     }
 
 
-    capsuleCanOpen = false;
+    if (
+        !currentGachaResult
+    ) {
 
-    capsuleIsOpening = true;
+        return;
+
+    }
 
 
-    /*
-       Detenemos la agitación.
-    */
+    capsuleCanOpen =
+        false;
 
-    if (capsuleShakeAnimation) {
+
+    capsuleIsOpening =
+        true;
+
+
+    if (
+        capsuleShakeAnimation
+    ) {
 
         capsuleShakeAnimation.cancel();
 
-        capsuleShakeAnimation = null;
+        capsuleShakeAnimation =
+            null;
 
     }
 
@@ -1203,73 +1511,14 @@ function openCapsule() {
 
 
     /*
-       Resplandor detrás de la cápsula.
-    */
-
-    const burst =
-        document.createElement("div");
-
-
-    burst.style.position =
-        "fixed";
-
-
-    burst.style.left =
-        "50%";
-
-
-    burst.style.top =
-        "50%";
-
-
-    burst.style.width =
-        "40px";
-
-
-    burst.style.height =
-        "40px";
-
-
-    burst.style.borderRadius =
-        "50%";
-
-
-    burst.style.background =
-        "rgba(255, 255, 255, 0.85)";
-
-
-    burst.style.transform =
-        `
-        translate(
-            -50%,
-            -50%
-        )
-        scale(0)
-        `;
-
-
-    burst.style.pointerEvents =
-        "none";
-
-
-    burst.style.zIndex =
-        "9998";
-
-
-    document.body.appendChild(
-        burst
-    );
-
-
-    /*
-       Pequeña anticipación.
-       Solo cambia uniformemente de scale,
-       por lo que tampoco se deforma.
+       Primero damos una pequeña reacción
+       antes del cambio de imagen.
     */
 
     const anticipation =
         capsule.animate(
             [
+
                 {
                     transform:
                         `
@@ -1279,7 +1528,10 @@ function openCapsule() {
                         )
                         scale(1)
                         rotate(0deg)
-                        `
+                        `,
+
+                    opacity:
+                        1
                 },
 
                 {
@@ -1291,7 +1543,13 @@ function openCapsule() {
                         )
                         scale(0.95)
                         rotate(-2deg)
-                        `
+                        `,
+
+                    opacity:
+                        1,
+
+                    offset:
+                        0.45
                 },
 
                 {
@@ -1301,167 +1559,190 @@ function openCapsule() {
                             -50%,
                             -50%
                         )
-                        scale(1.06)
+                        scale(1.08)
                         rotate(2deg)
-                        `
+                        `,
+
+                    opacity:
+                        0,
+
+                    offset:
+                        1
                 }
+
             ],
 
             {
-                duration: 260,
+
+                duration:
+                    280,
 
                 easing:
                     "ease-out",
 
                 fill:
                     "forwards"
+
             }
         );
 
 
-    anticipation.onfinish = () => {
-
-        /*
-           Flash suave.
-        */
-
-        burst.animate(
-            [
-                {
-                    transform:
-                        `
-                        translate(
-                            -50%,
-                            -50%
-                        )
-                        scale(0)
-                        `,
-
-                    opacity: 0.9
-                },
-
-                {
-                    transform:
-                        `
-                        translate(
-                            -50%,
-                            -50%
-                        )
-                        scale(5)
-                        `,
-
-                    opacity: 0
-                }
-            ],
-
-            {
-                duration: 600,
-
-                easing:
-                    "ease-out",
-
-                fill:
-                    "forwards"
-            }
-        );
-
-
-        /*
-           La cápsula completa hace
-           un pequeño POP.
-
-           No se parte.
-        */
-
-        const opening =
-            capsule.animate(
-                [
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -50%
-                            )
-                            scale(1.06)
-                            rotate(2deg)
-                            `,
-
-                        opacity: 1
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -54%
-                            )
-                            scale(1.14)
-                            rotate(-2deg)
-                            `,
-
-                        opacity: 1,
-
-                        offset: 0.45
-                    },
-
-                    {
-                        transform:
-                            `
-                            translate(
-                                -50%,
-                                -58%
-                            )
-                            scale(1.22)
-                            rotate(0deg)
-                            `,
-
-                        opacity: 0
-                    }
-                ],
-
-                {
-                    duration: 480,
-
-                    easing:
-                        "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                    fill:
-                        "forwards"
-                }
-            );
-
-
-        opening.onfinish = () => {
-
-            capsule.style.visibility =
-                "hidden";
-
-
-            setTimeout(
-                () => {
-
-                    burst.remove();
-
-                },
-
-                300
-            );
+    anticipation.onfinish =
+        () => {
 
 
             /*
-               AQUÍ pondremos después:
+               Cambiamos la imagen por
+               su versión abierta.
 
-               - la cápsula abierta
-               - el premio
-               - el sonido
-               - efectos visuales
+               Normales:
+               dog -> dog2
+               cat -> cat2
+               etc.
+
+               Letter:
+               letter2 -> letter3
             */
 
-        };
+            capsule.src =
+                currentGachaResult.opened;
 
-    };
+
+            /*
+               Esperamos a que la nueva
+               imagen esté cargada antes
+               de mostrarla.
+            */
+
+            const revealOpenedCapsule =
+                () => {
+
+
+                    capsule.getAnimations().forEach(
+                        animation =>
+                            animation.cancel()
+                    );
+
+
+                    /*
+                       Mantiene siempre
+                       la proporción natural.
+                    */
+
+                    capsule.style.height =
+                        "auto";
+
+
+                    capsule.style.opacity =
+                        "1";
+
+
+                    capsule.style.transform =
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1)
+                        rotate(0deg)
+                        `;
+
+
+                    /*
+                       Animación de aparición
+                       de la cápsula abierta.
+                    */
+
+                    capsule.animate(
+                        [
+
+                            {
+                                transform:
+                                    `
+                                    translate(
+                                        -50%,
+                                        -50%
+                                    )
+                                    scale(0.82)
+                                    rotate(-3deg)
+                                    `,
+
+                                opacity:
+                                    0
+                            },
+
+                            {
+                                transform:
+                                    `
+                                    translate(
+                                        -50%,
+                                        -50%
+                                    )
+                                    scale(1.07)
+                                    rotate(2deg)
+                                    `,
+
+                                opacity:
+                                    1,
+
+                                offset:
+                                    0.65
+                            },
+
+                            {
+                                transform:
+                                    `
+                                    translate(
+                                        -50%,
+                                        -50%
+                                    )
+                                    scale(1)
+                                    rotate(0deg)
+                                    `,
+
+                                opacity:
+                                    1
+                            }
+
+                        ],
+
+                        {
+
+                            duration:
+                                520,
+
+                            easing:
+                                "cubic-bezier(0.22, 1, 0.36, 1)",
+
+                            fill:
+                                "forwards"
+
+                        }
+                    );
+
+                };
+
+
+            if (
+                capsule.complete &&
+                capsule.naturalWidth > 0
+            ) {
+
+                revealOpenedCapsule();
+
+            } else {
+
+                capsule.addEventListener(
+                    "load",
+                    revealOpenedCapsule,
+                    {
+                        once: true
+                    }
+                );
+
+            }
+
+        };
 
 }
 
@@ -1480,17 +1761,21 @@ function getTokenSlotPosition() {
 
         x:
             machineRect.left +
-            machineRect.width * 0.32,
+            machineRect.width *
+            0.32,
 
         y:
             machineRect.top +
-            machineRect.height * 0.695,
+            machineRect.height *
+            0.695,
 
         radiusX:
-            machineRect.width * 0.055,
+            machineRect.width *
+            0.055,
 
         radiusY:
-            machineRect.height * 0.045
+            machineRect.height *
+            0.045
 
     };
 
@@ -1511,11 +1796,13 @@ function getTokenCenter() {
 
         x:
             tokenRect.left +
-            tokenRect.width / 2,
+            tokenRect.width /
+            2,
 
         y:
             tokenRect.top +
-            tokenRect.height / 2
+            tokenRect.height /
+            2
 
     };
 
@@ -1523,13 +1810,14 @@ function getTokenCenter() {
 
 
 /* =========================================
-   TOKEN - DISTANCIA A LA RANURA
+   TOKEN - DISTANCIA
    ========================================= */
 
 function getTokenDistanceFromSlot() {
 
     const tokenCenter =
         getTokenCenter();
+
 
     const slot =
         getTokenSlotPosition();
@@ -1539,14 +1827,17 @@ function getTokenDistanceFromSlot() {
         tokenCenter.x -
         slot.x;
 
+
     const distanceY =
         tokenCenter.y -
         slot.y;
 
 
     return Math.sqrt(
-        distanceX * distanceX +
-        distanceY * distanceY
+        distanceX *
+        distanceX +
+        distanceY *
+        distanceY
     );
 
 }
@@ -1567,7 +1858,8 @@ function calculateTokenScale() {
 
 
     const influenceDistance =
-        machineRect.width * 0.23;
+        machineRect.width *
+        0.23;
 
 
     if (
@@ -1609,7 +1901,9 @@ function updateTokenTransform() {
             ${tokenMoveX}px,
             ${tokenMoveY}px
         )
-        scale(${tokenScale})
+        scale(
+            ${tokenScale}
+        )
         `;
 
 }
@@ -1624,6 +1918,7 @@ function tokenIsNearSlot() {
     const tokenCenter =
         getTokenCenter();
 
+
     const slot =
         getTokenSlotPosition();
 
@@ -1634,6 +1929,7 @@ function tokenIsNearSlot() {
             slot.x
         );
 
+
     const distanceY =
         Math.abs(
             tokenCenter.y -
@@ -1642,8 +1938,10 @@ function tokenIsNearSlot() {
 
 
     return (
-        distanceX <= slot.radiusX &&
-        distanceY <= slot.radiusY
+        distanceX <=
+        slot.radiusX &&
+        distanceY <=
+        slot.radiusY
     );
 
 }
@@ -1653,19 +1951,27 @@ function tokenIsNearSlot() {
    TOKEN - AGARRAR
    ========================================= */
 
-function startTokenDrag(event) {
+function startTokenDrag(
+    event
+) {
 
-    if (tokenInserted) {
+    if (
+        tokenInserted
+    ) {
+
         return;
+
     }
 
 
-    tokenIsDragging = true;
+    tokenIsDragging =
+        true;
 
 
     startPointerX =
         event.clientX -
         tokenMoveX;
+
 
     startPointerY =
         event.clientY -
@@ -1688,16 +1994,23 @@ function startTokenDrag(event) {
    TOKEN - MOVER
    ========================================= */
 
-function moveToken(event) {
+function moveToken(
+    event
+) {
 
-    if (!tokenIsDragging) {
+    if (
+        !tokenIsDragging
+    ) {
+
         return;
+
     }
 
 
     tokenMoveX =
         event.clientX -
         startPointerX;
+
 
     tokenMoveY =
         event.clientY -
@@ -1711,7 +2024,9 @@ function moveToken(event) {
     updateTokenTransform();
 
 
-    if (tokenIsNearSlot()) {
+    if (
+        tokenIsNearSlot()
+    ) {
 
         token.classList.add(
             "near-slot"
@@ -1732,14 +2047,21 @@ function moveToken(event) {
    TOKEN - SOLTAR
    ========================================= */
 
-function endTokenDrag(event) {
+function endTokenDrag(
+    event
+) {
 
-    if (!tokenIsDragging) {
+    if (
+        !tokenIsDragging
+    ) {
+
         return;
+
     }
 
 
-    tokenIsDragging = false;
+    tokenIsDragging =
+        false;
 
 
     token.classList.remove(
@@ -1760,11 +2082,14 @@ function endTokenDrag(event) {
     }
 
 
-    if (tokenIsNearSlot()) {
+    if (
+        tokenIsNearSlot()
+    ) {
 
         insertToken();
 
         return;
+
     }
 
 
@@ -1787,8 +2112,10 @@ function returnTokenHome() {
     const currentX =
         tokenMoveX;
 
+
     const currentY =
         tokenMoveY;
+
 
     const currentScale =
         tokenScale;
@@ -1797,6 +2124,7 @@ function returnTokenHome() {
     const animation =
         token.animate(
             [
+
                 {
                     transform:
                         `
@@ -1804,7 +2132,9 @@ function returnTokenHome() {
                             ${currentX}px,
                             ${currentY}px
                         )
-                        scale(${currentScale})
+                        scale(
+                            ${currentScale}
+                        )
                         `
                 },
 
@@ -1818,29 +2148,40 @@ function returnTokenHome() {
                         scale(1)
                         `
                 }
+
             ],
 
             {
-                duration: 450,
+
+                duration:
+                    450,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)"
+
             }
         );
 
 
-    animation.onfinish = () => {
-
-        tokenMoveX = 0;
-
-        tokenMoveY = 0;
-
-        tokenScale = 1;
+    animation.onfinish =
+        () => {
 
 
-        updateTokenTransform();
+            tokenMoveX =
+                0;
 
-    };
+
+            tokenMoveY =
+                0;
+
+
+            tokenScale =
+                1;
+
+
+            updateTokenTransform();
+
+        };
 
 }
 
@@ -1851,12 +2192,17 @@ function returnTokenHome() {
 
 function insertToken() {
 
-    if (tokenInserted) {
+    if (
+        tokenInserted
+    ) {
+
         return;
+
     }
 
 
-    tokenInserted = true;
+    tokenInserted =
+        true;
 
 
     token.classList.remove(
@@ -1875,12 +2221,14 @@ function insertToken() {
 
     const tokenCenterX =
         tokenRect.left +
-        tokenRect.width / 2;
+        tokenRect.width /
+        2;
 
 
     const tokenCenterY =
         tokenRect.top +
-        tokenRect.height / 2;
+        tokenRect.height /
+        2;
 
 
     const slot =
@@ -1910,6 +2258,7 @@ function insertToken() {
     const animation =
         token.animate(
             [
+
                 {
                     transform:
                         `
@@ -1917,10 +2266,13 @@ function insertToken() {
                             ${tokenMoveX}px,
                             ${tokenMoveY}px
                         )
-                        scale(${startingScale})
+                        scale(
+                            ${startingScale}
+                        )
                         `,
 
-                    opacity: 1
+                    opacity:
+                        1
                 },
 
                 {
@@ -1933,9 +2285,11 @@ function insertToken() {
                         scale(0.35)
                         `,
 
-                    opacity: 1,
+                    opacity:
+                        1,
 
-                    offset: 0.55
+                    offset:
+                        0.55
                 },
 
                 {
@@ -1948,38 +2302,45 @@ function insertToken() {
                         scale(0.08)
                         `,
 
-                    opacity: 0
+                    opacity:
+                        0
                 }
+
             ],
 
             {
-                duration: 600,
+
+                duration:
+                    600,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)",
 
                 fill:
                     "forwards"
+
             }
         );
 
 
-    animation.onfinish = () => {
-
-        token.style.visibility =
-            "hidden";
+    animation.onfinish =
+        () => {
 
 
-        knob.classList.remove(
-            "locked"
-        );
+            token.style.visibility =
+                "hidden";
 
 
-        knob.classList.add(
-            "ready"
-        );
+            knob.classList.remove(
+                "locked"
+            );
 
-    };
+
+            knob.classList.add(
+                "ready"
+            );
+
+        };
 
 }
 
@@ -1988,7 +2349,9 @@ function insertToken() {
    PERILLA - OBTENER ÁNGULO
    ========================================= */
 
-function getPointerAngle(event) {
+function getPointerAngle(
+    event
+) {
 
     const knobRect =
         knob.getBoundingClientRect();
@@ -1996,23 +2359,31 @@ function getPointerAngle(event) {
 
     const centerX =
         knobRect.left +
-        knobRect.width / 2;
+        knobRect.width /
+        2;
 
 
     const centerY =
         knobRect.top +
-        knobRect.height / 2;
+        knobRect.height /
+        2;
 
 
     const radians =
         Math.atan2(
-            event.clientY - centerY,
-            event.clientX - centerX
+            event.clientY -
+            centerY,
+
+            event.clientX -
+            centerX
         );
 
 
-    return radians *
-        180 / Math.PI;
+    return (
+        radians *
+        180 /
+        Math.PI
+    );
 
 }
 
@@ -2021,26 +2392,40 @@ function getPointerAngle(event) {
    PERILLA - EMPEZAR A GIRAR
    ========================================= */
 
-function startKnobTurn(event) {
+function startKnobTurn(
+    event
+) {
 
-    if (!tokenInserted) {
+    if (
+        !tokenInserted
+    ) {
+
         return;
+
     }
 
 
-    if (machineIsRunning) {
+    if (
+        machineIsRunning
+    ) {
+
         return;
+
     }
 
 
-    knobIsTurning = true;
+    knobIsTurning =
+        true;
 
 
-    knobRotation = 0;
+    knobRotation =
+        0;
 
 
     knobLastPointerAngle =
-        getPointerAngle(event);
+        getPointerAngle(
+            event
+        );
 
 
     knob.classList.add(
@@ -2062,15 +2447,23 @@ function startKnobTurn(event) {
    PERILLA - GIRAR
    ========================================= */
 
-function moveKnob(event) {
+function moveKnob(
+    event
+) {
 
-    if (!knobIsTurning) {
+    if (
+        !knobIsTurning
+    ) {
+
         return;
+
     }
 
 
     const currentAngle =
-        getPointerAngle(event);
+        getPointerAngle(
+            event
+        );
 
 
     let difference =
@@ -2078,23 +2471,25 @@ function moveKnob(event) {
         knobLastPointerAngle;
 
 
-    if (difference > 180) {
+    if (
+        difference > 180
+    ) {
 
-        difference -= 360;
-
-    }
-
-
-    if (difference < -180) {
-
-        difference += 360;
+        difference -=
+            360;
 
     }
 
 
-    /*
-       Dirección antihoraria.
-    */
+    if (
+        difference < -180
+    ) {
+
+        difference +=
+            360;
+
+    }
+
 
     knobRotation +=
         -difference;
@@ -2151,14 +2546,21 @@ function moveKnob(event) {
    PERILLA - SOLTAR ANTES
    ========================================= */
 
-function endKnobTurn(event) {
+function endKnobTurn(
+    event
+) {
 
-    if (!knobIsTurning) {
+    if (
+        !knobIsTurning
+    ) {
+
         return;
+
     }
 
 
-    knobIsTurning = false;
+    knobIsTurning =
+        false;
 
 
     knob.classList.remove(
@@ -2197,6 +2599,7 @@ function resetKnob() {
     const animation =
         knob.animate(
             [
+
                 {
                     transform:
                         `
@@ -2220,32 +2623,39 @@ function resetKnob() {
                         rotate(0deg)
                         `
                 }
+
             ],
 
             {
-                duration: 450,
+
+                duration:
+                    450,
 
                 easing:
                     "cubic-bezier(0.22, 1, 0.36, 1)"
+
             }
         );
 
 
-    animation.onfinish = () => {
+    animation.onfinish =
+        () => {
 
-        knobRotation = 0;
+
+            knobRotation =
+                0;
 
 
-        knob.style.transform =
-            `
-            translate(
-                -50%,
-                -50%
-            )
-            rotate(0deg)
-            `;
+            knob.style.transform =
+                `
+                translate(
+                    -50%,
+                    -50%
+                )
+                rotate(0deg)
+                `;
 
-    };
+        };
 
 }
 
@@ -2258,7 +2668,8 @@ function completeKnobTurn(
     pointerId
 ) {
 
-    knobIsTurning = false;
+    knobIsTurning =
+        false;
 
 
     knob.classList.remove(
@@ -2279,7 +2690,8 @@ function completeKnobTurn(
     }
 
 
-    tokenInserted = false;
+    tokenInserted =
+        false;
 
 
     knob.classList.remove(
@@ -2295,6 +2707,7 @@ function completeKnobTurn(
     const animation =
         knob.animate(
             [
+
                 {
                     transform:
                         `
@@ -2318,32 +2731,39 @@ function completeKnobTurn(
                         rotate(-360deg)
                         `
                 }
+
             ],
 
             {
-                duration: 220,
+
+                duration:
+                    220,
 
                 easing:
                     "ease-out"
+
             }
         );
 
 
-    animation.onfinish = () => {
+    animation.onfinish =
+        () => {
 
-        knobRotation = 0;
+
+            knobRotation =
+                0;
 
 
-        knob.style.transform =
-            `
-            translate(
-                -50%,
-                -50%
-            )
-            rotate(0deg)
-            `;
+            knob.style.transform =
+                `
+                translate(
+                    -50%,
+                    -50%
+                )
+                rotate(0deg)
+                `;
 
-    };
+        };
 
 
     runGacha();
@@ -2411,15 +2831,10 @@ knob.addEventListener(
    CLICK / TAP EN LA CÁPSULA
    ========================================= */
 
-/*
-   La cápsula se crea dinámicamente,
-   por eso escuchamos el click
-   desde document.
-*/
-
 document.addEventListener(
     "click",
     event => {
+
 
         if (
             event.target ===
