@@ -290,7 +290,7 @@ const CENTER_CAPSULE_SIZE = 34;
    ULTRA-RARE permanece visible.
 */
 
-const RARITY_DISPLAY_TIME = 1900;
+const RARITY_DISPLAY_TIME = 1200;
 
 
 /* =========================================
