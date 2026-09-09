@@ -69,42 +69,24 @@ const KNOB_REQUIRED_TURN = 280;
    ========================================= */
 
 /*
-   Estas son las cinco cápsulas posibles.
+   Centro de la compuerta marcada en rojo.
 */
 
-const GACHA_CAPSULES = [
-    "assets/capsule-dog.png",
-    "assets/capsule-cat.png",
-    "assets/capsule-letter.png",
-    "assets/capsule-candy.png",
-    "assets/capsule-friends.png"
-];
+const DISPENSER_X = 62.2;
+const DISPENSER_Y = 72.0;
 
 
 /*
-   POSICIÓN DE LA COMPUERTA
-
-   Estos valores son los que vamos
-   a calibrar visualmente.
-
-   X = izquierda / derecha
-   Y = arriba / abajo
+   Después de salir, baja y se recorre
+   ligeramente hacia la izquierda.
 */
 
-const DISPENSER_X = 51.5;
-const DISPENSER_Y = 78.5;
+const CAPSULE_FINAL_X = 58.8;
+const CAPSULE_FINAL_Y = 80.5;
 
 
 /*
-   Posición final después de caer.
-*/
-
-const CAPSULE_FINAL_X = 51.5;
-const CAPSULE_FINAL_Y = 88;
-
-
-/*
-   Tamaño de la cápsula que sale.
+   Tamaño de la cápsula.
 */
 
 const DISPENSED_CAPSULE_WIDTH = 10;
