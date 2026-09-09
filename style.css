@@ -58,6 +58,8 @@ body {
 
     max-width: 90vw;
     max-height: 90vh;
+
+    cursor: pointer;
 }
 
 
@@ -136,6 +138,8 @@ body {
     pointer-events: none;
 
     transform-origin: center center;
+
+    will-change: transform;
 }
 
 
