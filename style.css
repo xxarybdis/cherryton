@@ -127,6 +127,7 @@ body {
     height: auto;
 
     user-select: none;
+
     pointer-events: none;
 
     transform-origin: center center;
@@ -279,10 +280,10 @@ body {
 
 
 /* =========================
-   TOKEN
+   CONTENEDOR DE TOKENS
    ========================= */
 
-.token {
+.token-stack {
     position: absolute;
 
     z-index: 50;
@@ -293,13 +294,30 @@ body {
     width: 9.5%;
     height: auto;
 
+    pointer-events: none;
+}
+
+
+/* =========================
+   TOKENS
+   ========================= */
+
+.token {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: auto;
+
     user-select: none;
 
     touch-action: none;
 
     -webkit-user-drag: none;
 
-    cursor: grab;
+    transform-origin: center center;
 
     filter:
         drop-shadow(
@@ -307,13 +325,80 @@ body {
             rgba(0, 0, 0, 0.22)
         );
 
-    transform-origin: center center;
-
     transition:
         filter 0.2s ease,
         opacity 0.2s ease;
+
+    pointer-events: none;
 }
 
+
+/*
+   Pequeño efecto de pila.
+
+   El token 1 está arriba
+   y es el primero que se usa.
+*/
+
+.token-5 {
+    transform:
+        translate(-10px, -8px)
+        rotate(-12deg);
+
+    opacity: 0.78;
+}
+
+.token-4 {
+    transform:
+        translate(-7px, -6px)
+        rotate(-7deg);
+
+    opacity: 0.84;
+}
+
+.token-3 {
+    transform:
+        translate(-4px, -4px)
+        rotate(-3deg);
+
+    opacity: 0.90;
+}
+
+.token-2 {
+    transform:
+        translate(-2px, -2px)
+        rotate(3deg);
+
+    opacity: 0.96;
+}
+
+.token-1 {
+    transform:
+        translate(0px, 0px)
+        rotate(0deg);
+
+    opacity: 1;
+}
+
+
+/* =========================
+   TOKEN ACTIVO
+   ========================= */
+
+.token.active-token {
+    pointer-events: auto;
+
+    cursor: grab;
+
+    opacity: 1;
+
+    z-index: 100;
+}
+
+
+/* =========================
+   TOKEN ARRASTRÁNDOSE
+   ========================= */
 
 .token.dragging {
     cursor: grabbing;
@@ -326,6 +411,10 @@ body {
 }
 
 
+/* =========================
+   TOKEN CERCA DE LA RANURA
+   ========================= */
+
 .token.near-slot {
     filter:
         drop-shadow(
@@ -335,7 +424,11 @@ body {
 }
 
 
-.token.inserted {
+/* =========================
+   TOKEN USADO
+   ========================= */
+
+.token.used-token {
     pointer-events: none;
 }
 
@@ -349,23 +442,8 @@ body {
 
     z-index: 60;
 
-    /*
-       Un poquito más hacia la derecha.
-       Antes: 32%
-    */
-
     left: 32.9%;
-
-    /*
-       La altura queda igual.
-    */
-
     top: 77.1%;
-
-    /*
-       Un poquito más pequeña.
-       Antes: 6.3%
-    */
 
     width: 5.3%;
     height: auto;
@@ -437,7 +515,7 @@ body {
         padding: 10px;
     }
 
-    .token {
+    .token-stack {
         width: 11%;
         left: -5%;
     }
