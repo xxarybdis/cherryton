@@ -345,35 +345,40 @@ body {
    ========================= */
 
 /*
-   La perilla está centrada encima
-   del círculo que dejaste en la máquina.
+   La perilla está bastante más abajo
+   que la ranura del token.
 
-   Si visualmente queda unos píxeles
-   corrida, después ajustamos SOLO
-   estos valores.
+   Estas coordenadas están calibradas
+   según tu captura actual.
 */
 
 .knob {
     position: absolute;
 
-    z-index: 45;
+    z-index: 60;
 
     /*
-       Centro aproximado:
-       X = 30%
-       Y = 71%
+       Centro horizontal de la perilla.
     */
 
-    left: 30%;
-    top: 71%;
+    left: 32%;
 
     /*
-       El PNG tiene margen transparente,
-       por eso el ancho CSS es mayor que
-       el círculo que vemos.
+       Antes estaba en 71%.
+       Eso era demasiado arriba.
+
+       Ahora la ponemos sobre el círculo
+       verde claro de la máquina.
     */
 
-    width: 9.5%;
+    top: 80.5%;
+
+    /*
+       Un poco más grande para que coincida
+       con el diámetro del soporte.
+    */
+
+    width: 11%;
     height: auto;
 
     transform:
@@ -397,14 +402,6 @@ body {
 /* =========================
    PERILLA BLOQUEADA
    ========================= */
-
-/*
-   Antes de insertar el token
-   todavía se ve, pero no responde.
-
-   La bajamos apenas de brillo para
-   comunicar que aún está bloqueada.
-*/
 
 .knob.locked {
     cursor: not-allowed;
@@ -432,7 +429,9 @@ body {
 }
 
 
-/* Mientras se está girando */
+/* =========================
+   PERILLA GIRANDO
+   ========================= */
 
 .knob.turning {
     cursor: grabbing;
