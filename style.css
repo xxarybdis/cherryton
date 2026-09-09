@@ -9,6 +9,7 @@
 html,
 body {
     margin: 0;
+    padding: 0;
 
     width: 100%;
     height: 100%;
@@ -31,7 +32,7 @@ body {
 
 
 /* =========================
-   CONTENEDOR GENERAL
+   CONTENEDOR DE PÁGINA
    ========================= */
 
 .page {
@@ -39,8 +40,7 @@ body {
 
     inset: 0;
 
-    width: 100vw;
-
+    width: 100%;
     height: 100vh;
     height: 100dvh;
 
@@ -60,19 +60,18 @@ body {
 
 
 /* =========================
-   CONTENEDOR DE LA MÁQUINA
+   CONTENEDOR MÁQUINA
    ========================= */
 
 /*
    IMPORTANTE:
 
-   Ya NO está oculto.
-   Ya NO depende de JavaScript
-   para obtener su tamaño inicial.
+   Ya NO tiene width/height calculados
+   mediante JavaScript.
 
-   Su tamaño lo determina directamente
-   machine.png, conservando siempre
-   su proporción original.
+   El tamaño del PNG machine.png
+   determina automáticamente el tamaño
+   de todo el sistema.
 */
 
 .machine-wrap {
@@ -82,17 +81,17 @@ body {
 
     flex: 0 0 auto;
 
-    width: auto;
-    height: auto;
+    line-height: 0;
 
-    max-width: 90vw;
+    max-width: 88vw;
+
     max-height: 90vh;
     max-height: 90dvh;
 }
 
 
 /* =========================
-   IMAGEN DE LA MÁQUINA
+   IMAGEN MÁQUINA
    ========================= */
 
 .machine-img {
@@ -102,29 +101,19 @@ body {
 
     display: block;
 
-    /*
-       El navegador conserva automáticamente
-       la proporción original del PNG.
-    */
-
     width: auto;
     height: auto;
 
-    /*
-       Nunca podrá sobrepasar
-       la pantalla.
-    */
-
-    max-width: 90vw;
+    max-width: 88vw;
 
     max-height: 90vh;
     max-height: 90dvh;
 
     object-fit: contain;
 
-    pointer-events: none;
-
     user-select: none;
+
+    pointer-events: none;
 
     -webkit-user-drag: none;
 }
@@ -193,7 +182,7 @@ body {
 
 
 /* =========================
-   CÁPSULAS DEL FONDO
+   CÁPSULAS FONDO
    ========================= */
 
 .capsule-10 {
@@ -279,7 +268,7 @@ body {
 
 
 /* =========================
-   CÁPSULAS DEL FRENTE
+   CÁPSULAS FRENTE
    ========================= */
 
 .capsule-1 {
@@ -336,7 +325,7 @@ body {
 
 
 /* =========================
-   CONTENEDOR DE TOKENS
+   PILA DE TOKENS
    ========================= */
 
 .token-stack {
@@ -374,6 +363,8 @@ body {
 
     transform-origin: center center;
 
+    pointer-events: none;
+
     filter:
         drop-shadow(
             0 5px 5px
@@ -383,13 +374,11 @@ body {
     transition:
         filter 0.2s ease,
         opacity 0.2s ease;
-
-    pointer-events: none;
 }
 
 
 /* =========================
-   PILA DE TOKENS
+   TOKENS APILADOS
    ========================= */
 
 .token-5 {
@@ -449,7 +438,7 @@ body {
 
 
 /* =========================
-   TOKEN ARRASTRÁNDOSE
+   TOKEN ARRASTRADO
    ========================= */
 
 .token.dragging {
@@ -477,7 +466,7 @@ body {
 
 
 /* =========================
-   TOKEN USADO
+   TOKEN GASTADO
    ========================= */
 
 .token.used-token {
@@ -493,10 +482,6 @@ body {
     position: absolute;
 
     z-index: 60;
-
-    /*
-       POSICIÓN QUE YA CALIBRAMOS.
-    */
 
     left: 32.9%;
     top: 77.1%;
@@ -536,7 +521,7 @@ body {
 
 
 /* =========================
-   PERILLA HABILITADA
+   PERILLA LISTA
    ========================= */
 
 .knob.ready {
@@ -562,10 +547,16 @@ body {
 
 
 /* =========================================
-   CELULARES
+   CELULAR VERTICAL
    ========================================= */
 
-@media (max-width: 700px) {
+@media (
+    max-width: 700px
+)
+and
+(
+    orientation: portrait
+) {
 
     .page {
         padding:
@@ -577,62 +568,75 @@ body {
 
 
     /*
-       En teléfono dejamos espacio para
-       los tokens que sobresalen por
-       el lado izquierdo.
+       IMPORTANTE:
+
+       76vw deja espacio suficiente
+       para los tokens que sobresalen
+       del lado izquierdo.
     */
 
     .machine-wrap {
-        max-width: 82vw;
+        max-width: 76vw;
 
-        max-height: 88vh;
-        max-height: 88dvh;
+        max-height: 84vh;
+        max-height: 84dvh;
     }
 
 
     .machine-img {
-        max-width: 82vw;
+        max-width: 76vw;
 
-        max-height: 88vh;
-        max-height: 88dvh;
+        max-height: 84vh;
+        max-height: 84dvh;
     }
 
 
-    .token-stack {
-        left: -6%;
+    /*
+       Tokens más fáciles de ver
+       y completamente dentro de pantalla.
+    */
 
-        width: 10%;
+    .token-stack {
+        left: -10%;
+
+        width: 12%;
     }
 
 }
 
 
 /* =========================================
-   CELULARES MUY ESTRECHOS
+   CELULARES PEQUEÑOS
    ========================================= */
 
-@media (max-width: 380px) {
+@media (
+    max-width: 390px
+)
+and
+(
+    orientation: portrait
+) {
 
     .machine-wrap {
-        max-width: 80vw;
+        max-width: 72vw;
 
-        max-height: 86vh;
-        max-height: 86dvh;
+        max-height: 82vh;
+        max-height: 82dvh;
     }
 
 
     .machine-img {
-        max-width: 80vw;
+        max-width: 72vw;
 
-        max-height: 86vh;
-        max-height: 86dvh;
+        max-height: 82vh;
+        max-height: 82dvh;
     }
 
 
     .token-stack {
-        left: -5%;
+        left: -10%;
 
-        width: 10%;
+        width: 12.5%;
     }
 
 }
@@ -651,7 +655,7 @@ and
 ) {
 
     .machine-wrap {
-        max-width: 88vw;
+        max-width: 78vw;
 
         max-height: 88vh;
         max-height: 88dvh;
@@ -659,10 +663,17 @@ and
 
 
     .machine-img {
-        max-width: 88vw;
+        max-width: 78vw;
 
         max-height: 88vh;
         max-height: 88dvh;
+    }
+
+
+    .token-stack {
+        left: -8%;
+
+        width: 10%;
     }
 
 }
