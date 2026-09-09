@@ -88,13 +88,26 @@ const GACHA_CAPSULES = [
    ========================================= */
 
 /*
-   Tus valores definitivos.
+   Posición definitiva calibrada.
 */
 
 const DISPENSER_X = 62;
 const DISPENSER_Y = 81;
 
+
+/*
+   Tamaño de la cápsula al salir.
+*/
+
 const DISPENSED_CAPSULE_WIDTH = 10;
+
+
+/*
+   Movimiento después de salir.
+
+   X negativo = izquierda
+   Y positivo = abajo
+*/
 
 const CAPSULE_MOVE_X = -26;
 const CAPSULE_MOVE_Y = 64;
@@ -105,11 +118,11 @@ const CAPSULE_MOVE_Y = 64;
    ========================================= */
 
 /*
-   Tamaño de la cápsula una vez que
-   llega al centro de la pantalla.
+   Tamaño de la cápsula cuando
+   llega al centro.
 
-   34vmin hace que responda bien
-   tanto en computadora como celular.
+   34 = 34% del lado más pequeño
+   de la pantalla.
 */
 
 const CENTER_CAPSULE_SIZE = 34;
@@ -127,25 +140,20 @@ function resizeMachine() {
     const naturalHeight =
         machineImage.naturalHeight;
 
-
     if (!naturalWidth || !naturalHeight) {
         return;
     }
 
-
     const isMobile =
         window.innerWidth <= 600;
-
 
     const maxWidth =
         window.innerWidth *
         (isMobile ? 0.96 : 0.90);
 
-
     const maxHeight =
         window.innerHeight *
         (isMobile ? 0.94 : 0.90);
-
 
     const scaleX =
         maxWidth / naturalWidth;
@@ -153,14 +161,12 @@ function resizeMachine() {
     const scaleY =
         maxHeight / naturalHeight;
 
-
     const scale =
         Math.min(
             scaleX,
             scaleY,
             1
         );
-
 
     machine.style.width =
         `${naturalWidth * scale}px`;
@@ -295,7 +301,6 @@ function animateCapsule(
     const limits =
         getCapsuleLimits(capsule);
 
-
     const x1 =
         random(
             limits.left,
@@ -307,7 +312,6 @@ function animateCapsule(
             -limits.up,
             -2
         );
-
 
     const x2 =
         random(
@@ -321,7 +325,6 @@ function animateCapsule(
             limits.down
         );
 
-
     const x3 =
         random(
             limits.left,
@@ -334,7 +337,6 @@ function animateCapsule(
             limits.down
         );
 
-
     const r1 =
         random(-9, 9);
 
@@ -344,15 +346,12 @@ function animateCapsule(
     const r3 =
         random(-7, 7);
 
-
     const duration =
         random(1900, 2400);
-
 
     const delay =
         random(0, 180) +
         index * 12;
-
 
     return capsule.animate(
         [
@@ -365,30 +364,24 @@ function animateCapsule(
             {
                 translate:
                     `${x1}px ${y1}px`,
-
                 rotate:
                     `${r1}deg`,
-
                 offset: 0.28
             },
 
             {
                 translate:
                     `${x2}px ${y2}px`,
-
                 rotate:
                     `${r2}deg`,
-
                 offset: 0.55
             },
 
             {
                 translate:
                     `${x3}px ${y3}px`,
-
                 rotate:
                     `${r3}deg`,
-
                 offset: 0.78
             },
 
@@ -401,14 +394,10 @@ function animateCapsule(
 
         {
             duration: duration,
-
             iterations: 1,
-
             delay: delay,
-
             easing:
                 "cubic-bezier(0.45, 0, 0.25, 1)",
-
             fill: "none"
         }
     );
@@ -426,9 +415,7 @@ function runGacha() {
         return;
     }
 
-
     machineIsRunning = true;
-
 
     capsules.forEach(
         (capsule, index) => {
@@ -443,8 +430,8 @@ function runGacha() {
 
 
     /*
-       Después de agitarse,
-       sale una cápsula.
+       Después de mover las cápsulas
+       aparece una en la salida.
     */
 
     setTimeout(
@@ -457,6 +444,11 @@ function runGacha() {
         1850
     );
 
+
+    /*
+       Dejamos margen suficiente
+       para toda la secuencia.
+    */
 
     setTimeout(
         () => {
@@ -483,7 +475,6 @@ function getRandomCapsule() {
             GACHA_CAPSULES.length
         );
 
-
     return GACHA_CAPSULES[
         randomIndex
     ];
@@ -497,6 +488,15 @@ function getRandomCapsule() {
 
 function createDispensedCapsule() {
 
+    if (capsuleShakeAnimation) {
+
+        capsuleShakeAnimation.cancel();
+
+        capsuleShakeAnimation = null;
+
+    }
+
+
     if (dispensedCapsule) {
 
         dispensedCapsule.remove();
@@ -507,6 +507,7 @@ function createDispensedCapsule() {
 
 
     capsuleCanOpen = false;
+
     capsuleIsOpening = false;
 
 
@@ -543,6 +544,13 @@ function createDispensedCapsule() {
 
     capsule.style.width =
         `${DISPENSED_CAPSULE_WIDTH}%`;
+
+
+    /*
+       MUY IMPORTANTE:
+       height siempre automático para
+       conservar la proporción del PNG.
+    */
 
     capsule.style.height =
         "auto";
@@ -762,8 +770,8 @@ function dispenseCapsule() {
 
         /*
            Cuando termina de salir,
-           espera un poquito y después
-           viaja al centro.
+           espera apenas un momento
+           y se va al centro.
         */
 
         exitAnimation.onfinish = () => {
@@ -814,8 +822,8 @@ function dispenseCapsule() {
 function moveCapsuleToCenter(capsule) {
 
     /*
-       Averiguamos dónde está exactamente
-       la cápsula después de salir.
+       Obtenemos la posición real
+       después de haber salido.
     */
 
     const rect =
@@ -823,9 +831,7 @@ function moveCapsuleToCenter(capsule) {
 
 
     /*
-       La sacamos del sistema de posiciones
-       de la máquina y la convertimos en
-       posición fija respecto a la pantalla.
+       Quitamos la animación anterior.
     */
 
     capsule.getAnimations().forEach(
@@ -833,26 +839,47 @@ function moveCapsuleToCenter(capsule) {
     );
 
 
+    /*
+       El centro actual de la cápsula.
+    */
+
+    const startX =
+        rect.left +
+        rect.width / 2;
+
+    const startY =
+        rect.top +
+        rect.height / 2;
+
+
+    /*
+       La convertimos en fixed para
+       moverla respecto a la pantalla.
+    */
+
     capsule.style.position =
         "fixed";
 
 
     capsule.style.left =
-        `${rect.left}px`;
+        `${startX}px`;
 
     capsule.style.top =
-        `${rect.top}px`;
+        `${startY}px`;
 
 
     capsule.style.width =
         `${rect.width}px`;
 
+
+    /*
+       Nunca fijamos height en píxeles.
+       Así el PNG conserva siempre
+       su proporción original.
+    */
+
     capsule.style.height =
-        `${rect.height}px`;
-
-
-    capsule.style.transform =
-        "none";
+        "auto";
 
 
     capsule.style.opacity =
@@ -867,9 +894,22 @@ function moveCapsuleToCenter(capsule) {
         "none";
 
 
+    capsule.style.transformOrigin =
+        "center center";
+
+
+    capsule.style.transform =
+        `
+        translate(
+            -50%,
+            -50%
+        )
+        scale(1)
+        `;
+
+
     /*
-       Calculamos el centro exacto
-       de la pantalla.
+       Tamaño final de la cápsula.
     */
 
     const finalSize =
@@ -883,14 +923,23 @@ function moveCapsuleToCenter(capsule) {
         );
 
 
-    const finalLeft =
-        window.innerWidth / 2 -
-        finalSize / 2;
+    /*
+       Calculamos el scale necesario.
+
+       No animamos width y height,
+       por eso ya no se aplasta.
+    */
+
+    const finalScale =
+        finalSize /
+        rect.width;
 
 
-    const finalTop =
-        window.innerHeight / 2 -
-        finalSize / 2;
+    const finalX =
+        window.innerWidth / 2;
+
+    const finalY =
+        window.innerHeight / 2;
 
 
     const centerAnimation =
@@ -898,30 +947,38 @@ function moveCapsuleToCenter(capsule) {
             [
                 {
                     left:
-                        `${rect.left}px`,
+                        `${startX}px`,
 
                     top:
-                        `${rect.top}px`,
-
-                    width:
-                        `${rect.width}px`,
+                        `${startY}px`,
 
                     transform:
-                        "rotate(0deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1)
+                        rotate(0deg)
+                        `
                 },
 
                 {
                     left:
-                        `${finalLeft}px`,
+                        `${finalX}px`,
 
                     top:
-                        `${finalTop}px`,
-
-                    width:
-                        `${finalSize}px`,
+                        `${finalY}px`,
 
                     transform:
-                        "rotate(-3deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(${finalScale})
+                        rotate(-2deg)
+                        `
                 }
             ],
 
@@ -940,16 +997,26 @@ function moveCapsuleToCenter(capsule) {
     centerAnimation.onfinish = () => {
 
         /*
-           Dejamos los valores finales
-           escritos directamente para
-           que no dependan de la animación.
+           Primero cancelamos la animación.
+        */
+
+        capsule.getAnimations().forEach(
+            animation => animation.cancel()
+        );
+
+
+        /*
+           Y después escribimos directamente
+           el estado final.
+
+           Así evitamos cualquier salto.
         */
 
         capsule.style.left =
-            `${finalLeft}px`;
+            `${finalX}px`;
 
         capsule.style.top =
-            `${finalTop}px`;
+            `${finalY}px`;
 
         capsule.style.width =
             `${finalSize}px`;
@@ -958,17 +1025,14 @@ function moveCapsuleToCenter(capsule) {
             "auto";
 
         capsule.style.transform =
-            "rotate(0deg)";
+            `
+            translate(
+                -50%,
+                -50%
+            )
+            rotate(0deg)
+            `;
 
-
-        capsule.getAnimations().forEach(
-            animation => animation.cancel()
-        );
-
-
-        /*
-           Ahora ya se puede tocar/clicar.
-        */
 
         capsuleCanOpen = true;
 
@@ -980,10 +1044,6 @@ function moveCapsuleToCenter(capsule) {
         capsule.style.cursor =
             "pointer";
 
-
-        /*
-           Comienza el movimiento suave.
-        */
 
         startCapsuleShake(
             capsule
@@ -1009,37 +1069,77 @@ function startCapsuleShake(capsule) {
     }
 
 
+    /*
+       Agitación suave y lenta.
+       No modifica el tamaño.
+    */
+
     capsuleShakeAnimation =
         capsule.animate(
             [
                 {
                     transform:
-                        "translateX(0px) rotate(0deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        translateX(0px)
+                        rotate(0deg)
+                        `
                 },
 
                 {
                     transform:
-                        "translateX(-7px) rotate(-3deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        translateX(-6px)
+                        rotate(-2.5deg)
+                        `
                 },
 
                 {
                     transform:
-                        "translateX(0px) rotate(0deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        translateX(0px)
+                        rotate(0deg)
+                        `
                 },
 
                 {
                     transform:
-                        "translateX(7px) rotate(3deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        translateX(6px)
+                        rotate(2.5deg)
+                        `
                 },
 
                 {
                     transform:
-                        "translateX(0px) rotate(0deg)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        translateX(0px)
+                        rotate(0deg)
+                        `
                 }
             ],
 
             {
-                duration: 1250,
+                duration: 1300,
 
                 iterations: Infinity,
 
@@ -1078,7 +1178,7 @@ function openCapsule() {
 
 
     /*
-       Detenemos el movimiento.
+       Detenemos la agitación.
     */
 
     if (capsuleShakeAnimation) {
@@ -1094,147 +1194,121 @@ function openCapsule() {
         dispensedCapsule;
 
 
-    /*
-       Guardamos su posición exacta.
-    */
-
-    const rect =
-        capsule.getBoundingClientRect();
-
-
-    /*
-       Ocultamos la cápsula original.
-    */
-
-    capsule.style.visibility =
-        "hidden";
-
-
-    /*
-       Creamos dos copias:
-       una será la mitad superior
-       y otra la inferior.
-    */
-
-    const topHalf =
-        capsule.cloneNode(true);
-
-
-    const bottomHalf =
-        capsule.cloneNode(true);
-
-
-    /*
-       Quitamos interacciones.
-    */
-
-    topHalf.style.pointerEvents =
-        "none";
-
-    bottomHalf.style.pointerEvents =
+    capsule.style.pointerEvents =
         "none";
 
 
-    topHalf.style.cursor =
-        "default";
-
-    bottomHalf.style.cursor =
+    capsule.style.cursor =
         "default";
 
 
     /*
-       Las ponemos exactamente encima
-       de la cápsula original.
+       Resplandor detrás de la cápsula.
     */
 
-    [topHalf, bottomHalf].forEach(
-        half => {
-
-            half.style.position =
-                "fixed";
-
-            half.style.left =
-                `${rect.left}px`;
-
-            half.style.top =
-                `${rect.top}px`;
-
-            half.style.width =
-                `${rect.width}px`;
-
-            half.style.height =
-                `${rect.height}px`;
-
-            half.style.visibility =
-                "visible";
-
-            half.style.opacity =
-                "1";
-
-            half.style.zIndex =
-                "10000";
-
-            half.style.transform =
-                "none";
-
-        }
-    );
+    const burst =
+        document.createElement("div");
 
 
-    /*
-       Mostramos solamente la mitad
-       superior de una copia.
-    */
-
-    topHalf.style.clipPath =
-        "inset(0 0 50% 0)";
+    burst.style.position =
+        "fixed";
 
 
-    /*
-       Y solamente la mitad inferior
-       de la otra.
-    */
+    burst.style.left =
+        "50%";
 
-    bottomHalf.style.clipPath =
-        "inset(50% 0 0 0)";
+
+    burst.style.top =
+        "50%";
+
+
+    burst.style.width =
+        "40px";
+
+
+    burst.style.height =
+        "40px";
+
+
+    burst.style.borderRadius =
+        "50%";
+
+
+    burst.style.background =
+        "rgba(255, 255, 255, 0.85)";
+
+
+    burst.style.transform =
+        `
+        translate(
+            -50%,
+            -50%
+        )
+        scale(0)
+        `;
+
+
+    burst.style.pointerEvents =
+        "none";
+
+
+    burst.style.zIndex =
+        "9998";
 
 
     document.body.appendChild(
-        topHalf
-    );
-
-
-    document.body.appendChild(
-        bottomHalf
+        burst
     );
 
 
     /*
-       Mini reacción antes de abrir:
-       se comprime apenas.
+       Pequeña anticipación.
+       Solo cambia uniformemente de scale,
+       por lo que tampoco se deforma.
     */
 
-    const anticipationTop =
-        topHalf.animate(
+    const anticipation =
+        capsule.animate(
             [
                 {
                     transform:
-                        "scale(1)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1)
+                        rotate(0deg)
+                        `
                 },
 
                 {
                     transform:
-                        "scale(0.96)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(0.95)
+                        rotate(-2deg)
+                        `
                 },
 
                 {
                     transform:
-                        "scale(1.03)"
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(1.06)
+                        rotate(2deg)
+                        `
                 }
             ],
 
             {
-                duration: 220,
+                duration: 260,
 
                 easing:
                     "ease-out",
@@ -1245,74 +1319,46 @@ function openCapsule() {
         );
 
 
-    bottomHalf.animate(
-        [
-            {
-                transform:
-                    "scale(1)"
-            },
-
-            {
-                transform:
-                    "scale(0.96)"
-            },
-
-            {
-                transform:
-                    "scale(1.03)"
-            }
-        ],
-
-        {
-            duration: 220,
-
-            easing:
-                "ease-out",
-
-            fill:
-                "forwards"
-        }
-    );
-
-
-    anticipationTop.onfinish = () => {
+    anticipation.onfinish = () => {
 
         /*
-           Parte superior:
-           sube y gira suavemente.
+           Flash suave.
         */
 
-        topHalf.animate(
+        burst.animate(
             [
                 {
                     transform:
-                        "translateY(0px) rotate(0deg)",
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(0)
+                        `,
 
-                    opacity: 1
+                    opacity: 0.9
                 },
 
                 {
                     transform:
-                        "translateY(-18px) rotate(-3deg)",
-
-                    opacity: 1,
-
-                    offset: 0.65
-                },
-
-                {
-                    transform:
-                        "translateY(-32px) rotate(-6deg)",
+                        `
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(5)
+                        `,
 
                     opacity: 0
                 }
             ],
 
             {
-                duration: 650,
+                duration: 600,
 
                 easing:
-                    "cubic-bezier(0.22, 1, 0.36, 1)",
+                    "ease-out",
 
                 fill:
                     "forwards"
@@ -1321,39 +1367,62 @@ function openCapsule() {
 
 
         /*
-           Parte inferior:
-           baja un poquito.
+           La cápsula completa hace
+           un pequeño POP.
+
+           No se parte.
         */
 
-        const bottomAnimation =
-            bottomHalf.animate(
+        const opening =
+            capsule.animate(
                 [
                     {
                         transform:
-                            "translateY(0px) rotate(0deg)",
+                            `
+                            translate(
+                                -50%,
+                                -50%
+                            )
+                            scale(1.06)
+                            rotate(2deg)
+                            `,
 
                         opacity: 1
                     },
 
                     {
                         transform:
-                            "translateY(18px) rotate(3deg)",
+                            `
+                            translate(
+                                -50%,
+                                -54%
+                            )
+                            scale(1.14)
+                            rotate(-2deg)
+                            `,
 
                         opacity: 1,
 
-                        offset: 0.65
+                        offset: 0.45
                     },
 
                     {
                         transform:
-                            "translateY(30px) rotate(5deg)",
+                            `
+                            translate(
+                                -50%,
+                                -58%
+                            )
+                            scale(1.22)
+                            rotate(0deg)
+                            `,
 
                         opacity: 0
                     }
                 ],
 
                 {
-                    duration: 650,
+                    duration: 480,
 
                     easing:
                         "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -1364,19 +1433,30 @@ function openCapsule() {
             );
 
 
-        bottomAnimation.onfinish = () => {
+        opening.onfinish = () => {
 
-            topHalf.remove();
+            capsule.style.visibility =
+                "hidden";
 
-            bottomHalf.remove();
+
+            setTimeout(
+                () => {
+
+                    burst.remove();
+
+                },
+
+                300
+            );
 
 
             /*
-               Por ahora dejamos vacío
-               el centro.
+               AQUÍ pondremos después:
 
-               AQUÍ será donde después
-               aparecerá el premio.
+               - la cápsula abierta
+               - el premio
+               - el sonido
+               - efectos visuales
             */
 
         };
@@ -1443,7 +1523,7 @@ function getTokenCenter() {
 
 
 /* =========================================
-   TOKEN - DISTANCIA
+   TOKEN - DISTANCIA A LA RANURA
    ========================================= */
 
 function getTokenDistanceFromSlot() {
@@ -1752,9 +1832,11 @@ function returnTokenHome() {
     animation.onfinish = () => {
 
         tokenMoveX = 0;
+
         tokenMoveY = 0;
 
         tokenScale = 1;
+
 
         updateTokenTransform();
 
@@ -1781,6 +1863,7 @@ function insertToken() {
         "near-slot"
     );
 
+
     token.classList.add(
         "inserted"
     );
@@ -1793,6 +1876,7 @@ function insertToken() {
     const tokenCenterX =
         tokenRect.left +
         tokenRect.width / 2;
+
 
     const tokenCenterY =
         tokenRect.top +
@@ -1890,6 +1974,7 @@ function insertToken() {
             "locked"
         );
 
+
         knob.classList.add(
             "ready"
         );
@@ -1900,7 +1985,7 @@ function insertToken() {
 
 
 /* =========================================
-   PERILLA - ÁNGULO
+   PERILLA - OBTENER ÁNGULO
    ========================================= */
 
 function getPointerAngle(event) {
@@ -1912,6 +1997,7 @@ function getPointerAngle(event) {
     const centerX =
         knobRect.left +
         knobRect.width / 2;
+
 
     const centerY =
         knobRect.top +
@@ -1932,7 +2018,7 @@ function getPointerAngle(event) {
 
 
 /* =========================================
-   PERILLA - EMPEZAR
+   PERILLA - EMPEZAR A GIRAR
    ========================================= */
 
 function startKnobTurn(event) {
@@ -1948,6 +2034,7 @@ function startKnobTurn(event) {
 
 
     knobIsTurning = true;
+
 
     knobRotation = 0;
 
@@ -1992,12 +2079,16 @@ function moveKnob(event) {
 
 
     if (difference > 180) {
+
         difference -= 360;
+
     }
 
 
     if (difference < -180) {
+
         difference += 360;
+
     }
 
 
@@ -2144,6 +2235,7 @@ function resetKnob() {
 
         knobRotation = 0;
 
+
         knob.style.transform =
             `
             translate(
@@ -2194,6 +2286,7 @@ function completeKnobTurn(
         "ready"
     );
 
+
     knob.classList.add(
         "locked"
     );
@@ -2240,6 +2333,7 @@ function completeKnobTurn(
 
         knobRotation = 0;
 
+
         knob.style.transform =
             `
             translate(
@@ -2266,15 +2360,18 @@ token.addEventListener(
     startTokenDrag
 );
 
+
 token.addEventListener(
     "pointermove",
     moveToken
 );
 
+
 token.addEventListener(
     "pointerup",
     endTokenDrag
 );
+
 
 token.addEventListener(
     "pointercancel",
@@ -2291,15 +2388,18 @@ knob.addEventListener(
     startKnobTurn
 );
 
+
 knob.addEventListener(
     "pointermove",
     moveKnob
 );
 
+
 knob.addEventListener(
     "pointerup",
     endKnobTurn
 );
+
 
 knob.addEventListener(
     "pointercancel",
@@ -2308,12 +2408,13 @@ knob.addEventListener(
 
 
 /* =========================================
-   EVENTO DE LA CÁPSULA
+   CLICK / TAP EN LA CÁPSULA
    ========================================= */
 
 /*
-   Usamos delegación porque la cápsula
-   se crea dinámicamente.
+   La cápsula se crea dinámicamente,
+   por eso escuchamos el click
+   desde document.
 */
 
 document.addEventListener(
