@@ -51,17 +51,25 @@ let tokenMoveY = 0;
    PERILLA - DATOS DE GIRO
    ========================================= */
 
+/*
+   knobRotation representa cuánto
+   hemos avanzado en el giro.
+
+   Siempre será un número positivo.
+
+   Visualmente lo convertiremos a
+   grados negativos para hacer que
+   la perilla gire en sentido contrario.
+*/
+
 let knobRotation = 0;
 
 let knobLastPointerAngle = 0;
 
 
 /*
-   Cuánto giro consideramos suficiente
-   para completar una jugada.
-
-   No exigimos 360° completos porque
-   con mouse/dedo se sentiría incómodo.
+   Aproximadamente 3/4 de vuelta
+   para completar la jugada.
 */
 
 const KNOB_REQUIRED_TURN = 280;
@@ -768,11 +776,6 @@ function insertToken() {
             "hidden";
 
 
-        /*
-           Ahora sí desbloqueamos
-           la perilla.
-        */
-
         knob.classList.remove(
             "locked"
         );
@@ -781,22 +784,13 @@ function insertToken() {
             "ready"
         );
 
-
-        console.log(
-            "Token insertado 🍒"
-        );
-
-        console.log(
-            "Perilla desbloqueada 🩷"
-        );
-
     };
 
 }
 
 
 /* =========================================
-   PERILLA - ÁNGULO DEL PUNTERO
+   PERILLA - OBTENER ÁNGULO
    ========================================= */
 
 function getPointerAngle(event) {
@@ -828,24 +822,19 @@ function getPointerAngle(event) {
 
 
 /* =========================================
-   PERILLA - EMPEZAR GIRO
+   PERILLA - EMPEZAR A GIRAR
    ========================================= */
 
 function startKnobTurn(event) {
 
     /*
-       Sin token no funciona.
+       Necesita token.
     */
 
     if (!tokenInserted) {
         return;
     }
 
-
-    /*
-       Tampoco permitimos usarla
-       mientras el gachapón funciona.
-    */
 
     if (machineIsRunning) {
         return;
@@ -897,8 +886,8 @@ function moveKnob(event) {
 
 
     /*
-       Corregimos el salto que ocurre
-       al pasar de 180° a -180°.
+       Evita el salto entre
+       +180 y -180 grados.
     */
 
     if (difference > 180) {
@@ -911,19 +900,23 @@ function moveKnob(event) {
 
 
     /*
-       Solo acumulamos giro horario.
+       IMPORTANTE:
 
-       Si el usuario retrocede un poco,
-       permitimos que la perilla también
-       retroceda.
+       Antes sumábamos "difference".
+
+       Ahora usamos "-difference".
+
+       Eso hace que la dirección válida
+       sea exactamente la contraria.
     */
 
-    knobRotation += difference;
+    knobRotation +=
+        -difference;
 
 
     /*
-       No dejamos girar hacia atrás
-       más allá de la posición inicial.
+       No permitimos retroceder
+       detrás del punto inicial.
     */
 
     knobRotation =
@@ -933,11 +926,6 @@ function moveKnob(event) {
         );
 
 
-    /*
-       Tampoco necesitamos más
-       de un giro completo.
-    */
-
     knobRotation =
         Math.min(
             360,
@@ -945,9 +933,15 @@ function moveKnob(event) {
         );
 
 
+    /*
+       Visualmente usamos grados negativos.
+
+       Por eso gira en sentido antihorario.
+    */
+
     knob.style.transform =
         `translate(-50%, -50%)
-         rotate(${knobRotation}deg)`;
+         rotate(${-knobRotation}deg)`;
 
 
     knobLastPointerAngle =
@@ -955,8 +949,8 @@ function moveKnob(event) {
 
 
     /*
-       En cuanto alcanza el giro necesario,
-       completamos la jugada.
+       Al llegar aproximadamente
+       a 3/4 de vuelta:
     */
 
     if (
@@ -977,7 +971,7 @@ function moveKnob(event) {
 
 
 /* =========================================
-   PERILLA - SOLTAR ANTES DE TERMINAR
+   PERILLA - SOLTAR ANTES
    ========================================= */
 
 function endKnobTurn(event) {
@@ -1008,18 +1002,13 @@ function endKnobTurn(event) {
     }
 
 
-    /*
-       Si soltó antes de completar
-       el giro, vuelve suavemente.
-    */
-
     resetKnob();
 
 }
 
 
 /* =========================================
-   PERILLA - VOLVER A POSICIÓN INICIAL
+   PERILLA - REGRESAR
    ========================================= */
 
 function resetKnob() {
@@ -1034,7 +1023,7 @@ function resetKnob() {
                 {
                     transform:
                         `translate(-50%, -50%)
-                         rotate(${startingRotation}deg)`
+                         rotate(${-startingRotation}deg)`
                 },
 
                 {
@@ -1067,7 +1056,7 @@ function resetKnob() {
 
 
 /* =========================================
-   PERILLA - GIRO COMPLETO
+   PERILLA - GIRO COMPLETADO
    ========================================= */
 
 function completeKnobTurn(
@@ -1096,11 +1085,7 @@ function completeKnobTurn(
 
 
     /*
-       Consumimos el token.
-
-       Ya no se podrá volver a girar
-       hasta que más adelante iniciemos
-       una nueva jugada.
+       Consumimos el crédito.
     */
 
     tokenInserted = false;
@@ -1116,8 +1101,10 @@ function completeKnobTurn(
 
 
     /*
-       Terminamos automáticamente
-       el giro hasta 360 grados.
+       Completa automáticamente
+       el poquito de giro restante.
+
+       También en sentido antihorario.
     */
 
     const animation =
@@ -1126,13 +1113,13 @@ function completeKnobTurn(
                 {
                     transform:
                         `translate(-50%, -50%)
-                         rotate(${knobRotation}deg)`
+                         rotate(${-knobRotation}deg)`
                 },
 
                 {
                     transform:
                         `translate(-50%, -50%)
-                         rotate(360deg)`
+                         rotate(-360deg)`
                 }
             ],
 
@@ -1157,17 +1144,10 @@ function completeKnobTurn(
 
 
     /*
-       Aquí ocurre la magia:
-       activamos el movimiento
-       suave de las cápsulas.
+       Activamos las cápsulas.
     */
 
     runGacha();
-
-
-    console.log(
-        "¡Giro completado! 🎰"
-    );
 
 }
 
