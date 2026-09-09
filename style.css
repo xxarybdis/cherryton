@@ -46,17 +46,6 @@ body {
    CONTENEDOR DE LA MÁQUINA
    ========================= */
 
-/*
-   IMPORTANTE:
-
-   Ahora JS le dará a este contenedor
-   exactamente el mismo ancho y alto
-   que tiene la máquina en pantalla.
-
-   Así todos los elementos en %
-   quedan correctamente posicionados.
-*/
-
 .machine-wrap {
     position: relative;
 
@@ -311,24 +300,25 @@ body {
 
 
 /* =========================
-   ZONA INVISIBLE DE LA RANURA
+   RANURA DEL TOKEN
    ========================= */
+
+/*
+   Esta zona invisible coincide ahora
+   con el pequeño óvalo vertical que
+   marcaste en rojo.
+*/
 
 .token-slot {
     position: absolute;
 
-    /*
-       Encima de la imagen de máquina
-       pero es completamente invisible.
-    */
-
     z-index: 30;
 
-    left: 8%;
-    top: 57%;
+    left: 8.5%;
+    top: 66%;
 
-    width: 16%;
-    height: 14%;
+    width: 12%;
+    height: 8%;
 
     background: transparent;
 
@@ -344,11 +334,6 @@ body {
     position: absolute;
 
     z-index: 50;
-
-    /*
-       El token aparece al lado
-       izquierdo de la máquina.
-    */
 
     left: -8%;
     top: 67%;
@@ -418,12 +403,6 @@ body {
     .page {
         padding: 10px;
     }
-
-    /*
-       Un poquito más grande para
-       que sea cómodo arrastrarlo
-       con el dedo.
-    */
 
     .token {
         width: 14%;
