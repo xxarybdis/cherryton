@@ -46,18 +46,21 @@ body {
    CONTENEDOR DE LA MÁQUINA
    ========================= */
 
+/*
+   IMPORTANTE:
+
+   Ahora JS le dará a este contenedor
+   exactamente el mismo ancho y alto
+   que tiene la máquina en pantalla.
+
+   Así todos los elementos en %
+   quedan correctamente posicionados.
+*/
+
 .machine-wrap {
     position: relative;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    width: fit-content;
-    height: fit-content;
-
-    max-width: 90vw;
-    max-height: 90vh;
+    flex: 0 0 auto;
 }
 
 
@@ -71,16 +74,15 @@ body {
 
     display: block;
 
-    width: auto;
-    height: auto;
-
-    max-width: 90vw;
-    max-height: 90vh;
+    width: 100%;
+    height: 100%;
 
     object-fit: contain;
 
     pointer-events: none;
     user-select: none;
+
+    -webkit-user-drag: none;
 }
 
 
@@ -309,19 +311,16 @@ body {
 
 
 /* =========================
-   RANURA DEL TOKEN
+   ZONA INVISIBLE DE LA RANURA
    ========================= */
-
-/*
-   Esta zona es completamente invisible.
-
-   Su función es detectar si soltamos
-   el token encima de la parte de
-   "1 TOKEN" de la máquina.
-*/
 
 .token-slot {
     position: absolute;
+
+    /*
+       Encima de la imagen de máquina
+       pero es completamente invisible.
+    */
 
     z-index: 30;
 
@@ -331,9 +330,9 @@ body {
     width: 16%;
     height: 14%;
 
-    pointer-events: none;
-
     background: transparent;
+
+    pointer-events: none;
 }
 
 
@@ -347,70 +346,63 @@ body {
     z-index: 50;
 
     /*
-       Posición inicial del token:
-       a la izquierda de la máquina.
+       El token aparece al lado
+       izquierdo de la máquina.
     */
 
     left: -8%;
     top: 67%;
 
     width: 12%;
-
     height: auto;
 
     user-select: none;
 
-    /*
-       Evita gestos del navegador
-       al arrastrarlo en celular.
-    */
-
     touch-action: none;
-
-    /*
-       Evita el arrastre predeterminado
-       de imágenes del navegador.
-    */
 
     -webkit-user-drag: none;
 
     cursor: grab;
 
-    /*
-       Transición utilizada cuando
-       regresa a su lugar.
-    */
+    filter:
+        drop-shadow(
+            0 5px 5px
+            rgba(0, 0, 0, 0.22)
+        );
+
+    transform-origin: center center;
 
     transition:
         filter 0.2s ease,
         opacity 0.2s ease;
-
-    filter:
-        drop-shadow(0 5px 5px rgba(0, 0, 0, 0.22));
-
-    transform-origin: center center;
 }
 
 
-/* Cuando lo estamos agarrando */
+/* Token agarrado */
 
 .token.dragging {
     cursor: grabbing;
 
     filter:
-        drop-shadow(0 9px 7px rgba(0, 0, 0, 0.30));
+        drop-shadow(
+            0 8px 7px
+            rgba(0, 0, 0, 0.30)
+        );
 }
 
 
-/* Cuando está cerca de la ranura */
+/* Token encima de la ranura */
 
 .token.near-slot {
     filter:
-        drop-shadow(0 0 8px rgba(194, 255, 143, 0.8));
+        drop-shadow(
+            0 0 9px
+            rgba(194, 255, 143, 0.9)
+        );
 }
 
 
-/* Después de haber sido usado */
+/* Token utilizado */
 
 .token.inserted {
     pointer-events: none;
@@ -418,7 +410,7 @@ body {
 
 
 /* =========================
-   ADAPTACIÓN PARA CELULAR
+   CELULAR
    ========================= */
 
 @media (max-width: 600px) {
@@ -427,20 +419,10 @@ body {
         padding: 10px;
     }
 
-    .machine-img {
-        max-width: 96vw;
-        max-height: 94vh;
-    }
-
-    .machine-wrap {
-        max-width: 96vw;
-        max-height: 94vh;
-    }
-
     /*
-       En pantallas pequeñas aumentamos
-       ligeramente el token para que sea
-       más fácil agarrarlo con el dedo.
+       Un poquito más grande para
+       que sea cómodo arrastrarlo
+       con el dedo.
     */
 
     .token {
