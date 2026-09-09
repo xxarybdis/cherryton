@@ -46,21 +46,26 @@ let startPointerY = 0;
 let tokenMoveX = 0;
 let tokenMoveY = 0;
 
+/*
+   Escala actual del token.
+
+   1 = tamaño normal.
+*/
+
+let tokenScale = 1;
+
+
+/*
+   Tamaño mínimo cuando está justo
+   sobre la ranura.
+*/
+
+const TOKEN_MIN_SCALE = 0.55;
+
 
 /* =========================================
    PERILLA - DATOS DE GIRO
    ========================================= */
-
-/*
-   knobRotation representa cuánto
-   hemos avanzado en el giro.
-
-   Siempre será un número positivo.
-
-   Visualmente lo convertiremos a
-   grados negativos para hacer que
-   la perilla gire en sentido contrario.
-*/
 
 let knobRotation = 0;
 
@@ -68,8 +73,7 @@ let knobLastPointerAngle = 0;
 
 
 /*
-   Aproximadamente 3/4 de vuelta
-   para completar la jugada.
+   Aproximadamente 3/4 de vuelta.
 */
 
 const KNOB_REQUIRED_TURN = 280;
@@ -447,23 +451,164 @@ function getTokenSlotPosition() {
 
 
 /* =========================================
-   TOKEN - DETECCIÓN
+   TOKEN - CENTRO ACTUAL
    ========================================= */
 
-function tokenIsNearSlot() {
+function getTokenCenter() {
 
     const tokenRect =
         token.getBoundingClientRect();
 
 
-    const tokenCenterX =
-        tokenRect.left +
-        tokenRect.width / 2;
+    return {
 
-    const tokenCenterY =
-        tokenRect.top +
-        tokenRect.height / 2;
+        x:
+            tokenRect.left +
+            tokenRect.width / 2,
 
+        y:
+            tokenRect.top +
+            tokenRect.height / 2
+
+    };
+
+}
+
+
+/* =========================================
+   TOKEN - DISTANCIA A LA RANURA
+   ========================================= */
+
+function getTokenDistanceFromSlot() {
+
+    const tokenCenter =
+        getTokenCenter();
+
+    const slot =
+        getTokenSlotPosition();
+
+
+    const distanceX =
+        tokenCenter.x -
+        slot.x;
+
+    const distanceY =
+        tokenCenter.y -
+        slot.y;
+
+
+    return Math.sqrt(
+        distanceX * distanceX +
+        distanceY * distanceY
+    );
+
+}
+
+
+/* =========================================
+   TOKEN - CALCULAR TAMAÑO
+   ========================================= */
+
+/*
+   Conforme el token se acerca,
+   pasa gradualmente de:
+
+   scale(1)
+       ↓
+   scale(0.55)
+
+   Si se vuelve a alejar,
+   recupera el tamaño.
+*/
+
+function calculateTokenScale() {
+
+    const machineRect =
+        machine.getBoundingClientRect();
+
+
+    const distance =
+        getTokenDistanceFromSlot();
+
+
+    /*
+       Radio alrededor de la ranura
+       en el que comienza el efecto.
+
+       Cuanto mayor sea este número,
+       antes empezará a encogerse.
+    */
+
+    const influenceDistance =
+        machineRect.width * 0.23;
+
+
+    /*
+       Fuera de esa distancia:
+       tamaño completamente normal.
+    */
+
+    if (
+        distance >=
+        influenceDistance
+    ) {
+
+        return 1;
+
+    }
+
+
+    /*
+       0 = justo en la ranura
+       1 = borde exterior de influencia
+    */
+
+    const progress =
+        distance /
+        influenceDistance;
+
+
+    /*
+       Interpolamos entre
+       TOKEN_MIN_SCALE y 1.
+    */
+
+    return (
+        TOKEN_MIN_SCALE +
+        (
+            1 -
+            TOKEN_MIN_SCALE
+        ) *
+        progress
+    );
+
+}
+
+
+/* =========================================
+   TOKEN - APLICAR TRANSFORMACIÓN
+   ========================================= */
+
+function updateTokenTransform() {
+
+    token.style.transform =
+        `translate(
+            ${tokenMoveX}px,
+            ${tokenMoveY}px
+        )
+        scale(${tokenScale})`;
+
+}
+
+
+/* =========================================
+   TOKEN - DETECCIÓN DE RANURA
+   ========================================= */
+
+function tokenIsNearSlot() {
+
+    const tokenCenter =
+        getTokenCenter();
 
     const slot =
         getTokenSlotPosition();
@@ -471,13 +616,13 @@ function tokenIsNearSlot() {
 
     const distanceX =
         Math.abs(
-            tokenCenterX -
+            tokenCenter.x -
             slot.x
         );
 
     const distanceY =
         Math.abs(
-            tokenCenterY -
+            tokenCenter.y -
             slot.y
         );
 
@@ -545,12 +690,28 @@ function moveToken(event) {
         startPointerY;
 
 
-    token.style.transform =
-        `translate(
-            ${tokenMoveX}px,
-            ${tokenMoveY}px
-        )`;
+    /*
+       Primero calculamos dónde está
+       con respecto a la ranura.
+    */
 
+    tokenScale =
+        calculateTokenScale();
+
+
+    /*
+       Después aplicamos movimiento
+       + tamaño al mismo tiempo.
+    */
+
+    updateTokenTransform();
+
+
+    /*
+       Conservamos el brillo que ya
+       teníamos al llegar a la zona
+       válida de inserción.
+    */
 
     if (tokenIsNearSlot()) {
 
@@ -601,6 +762,12 @@ function endTokenDrag(event) {
     }
 
 
+    /*
+       Si está en la ranura,
+       mantenemos la animación
+       de introducción y desaparición.
+    */
+
     if (tokenIsNearSlot()) {
 
         insertToken();
@@ -608,6 +775,11 @@ function endTokenDrag(event) {
         return;
     }
 
+
+    /*
+       Si no, vuelve a casa y
+       recupera su tamaño normal.
+    */
 
     returnTokenHome();
 
@@ -625,20 +797,35 @@ function returnTokenHome() {
     );
 
 
+    const currentX =
+        tokenMoveX;
+
+    const currentY =
+        tokenMoveY;
+
+    const currentScale =
+        tokenScale;
+
+
     const animation =
         token.animate(
             [
                 {
                     transform:
                         `translate(
-                            ${tokenMoveX}px,
-                            ${tokenMoveY}px
-                        )`
+                            ${currentX}px,
+                            ${currentY}px
+                        )
+                        scale(${currentScale})`
                 },
 
                 {
                     transform:
-                        "translate(0px, 0px)"
+                        `translate(
+                            0px,
+                            0px
+                        )
+                        scale(1)`
                 }
             ],
 
@@ -656,8 +843,9 @@ function returnTokenHome() {
         tokenMoveX = 0;
         tokenMoveY = 0;
 
-        token.style.transform =
-            "translate(0px, 0px)";
+        tokenScale = 1;
+
+        updateTokenTransform();
 
     };
 
@@ -720,6 +908,21 @@ function insertToken() {
         );
 
 
+    /*
+       IMPORTANTE:
+
+       La animación comienza desde el
+       tamaño que tenga el token en ese
+       preciso momento.
+
+       Así no da un salto de vuelta al
+       100% antes de desaparecer.
+    */
+
+    const startingScale =
+        tokenScale;
+
+
     const animation =
         token.animate(
             [
@@ -729,7 +932,7 @@ function insertToken() {
                             ${tokenMoveX}px,
                             ${tokenMoveY}px
                         )
-                        scale(1)`,
+                        scale(${startingScale})`,
 
                     opacity: 1
                 },
@@ -740,7 +943,7 @@ function insertToken() {
                             ${finalX}px,
                             ${finalY}px
                         )
-                        scale(0.82)`,
+                        scale(0.35)`,
 
                     opacity: 1,
 
@@ -775,6 +978,11 @@ function insertToken() {
         token.style.visibility =
             "hidden";
 
+
+        /*
+           Token aceptado:
+           desbloqueamos la perilla.
+        */
 
         knob.classList.remove(
             "locked"
@@ -826,10 +1034,6 @@ function getPointerAngle(event) {
    ========================================= */
 
 function startKnobTurn(event) {
-
-    /*
-       Necesita token.
-    */
 
     if (!tokenInserted) {
         return;
@@ -885,11 +1089,6 @@ function moveKnob(event) {
         knobLastPointerAngle;
 
 
-    /*
-       Evita el salto entre
-       +180 y -180 grados.
-    */
-
     if (difference > 180) {
         difference -= 360;
     }
@@ -900,24 +1099,12 @@ function moveKnob(event) {
 
 
     /*
-       IMPORTANTE:
-
-       Antes sumábamos "difference".
-
-       Ahora usamos "-difference".
-
-       Eso hace que la dirección válida
-       sea exactamente la contraria.
+       Sentido antihorario.
     */
 
     knobRotation +=
         -difference;
 
-
-    /*
-       No permitimos retroceder
-       detrás del punto inicial.
-    */
 
     knobRotation =
         Math.max(
@@ -933,12 +1120,6 @@ function moveKnob(event) {
         );
 
 
-    /*
-       Visualmente usamos grados negativos.
-
-       Por eso gira en sentido antihorario.
-    */
-
     knob.style.transform =
         `translate(-50%, -50%)
          rotate(${-knobRotation}deg)`;
@@ -947,11 +1128,6 @@ function moveKnob(event) {
     knobLastPointerAngle =
         currentAngle;
 
-
-    /*
-       Al llegar aproximadamente
-       a 3/4 de vuelta:
-    */
 
     if (
         knobRotation >=
@@ -1084,10 +1260,6 @@ function completeKnobTurn(
     }
 
 
-    /*
-       Consumimos el crédito.
-    */
-
     tokenInserted = false;
 
 
@@ -1099,13 +1271,6 @@ function completeKnobTurn(
         "locked"
     );
 
-
-    /*
-       Completa automáticamente
-       el poquito de giro restante.
-
-       También en sentido antihorario.
-    */
 
     const animation =
         knob.animate(
@@ -1142,10 +1307,6 @@ function completeKnobTurn(
 
     };
 
-
-    /*
-       Activamos las cápsulas.
-    */
 
     runGacha();
 
