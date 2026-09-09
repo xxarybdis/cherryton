@@ -13,26 +13,20 @@ body {
     width: 100%;
     height: 100%;
 
+    background: #202a68;
+
     overflow: hidden;
 }
 
 html {
-    background: #202a68;
+    min-height: 100%;
 }
 
 body {
-    width: 100vw;
-
     min-height: 100vh;
     min-height: 100dvh;
 
-    background: #202a68;
-
-    overflow: hidden;
-
     overscroll-behavior: none;
-
-    touch-action: manipulation;
 }
 
 
@@ -45,7 +39,7 @@ body {
 
     inset: 0;
 
-    width: 100%;
+    width: 100vw;
 
     height: 100vh;
     height: 100dvh;
@@ -55,13 +49,13 @@ body {
     justify-content: center;
     align-items: center;
 
+    overflow: hidden;
+
     padding:
         max(12px, env(safe-area-inset-top))
         max(12px, env(safe-area-inset-right))
         max(12px, env(safe-area-inset-bottom))
         max(12px, env(safe-area-inset-left));
-
-    overflow: hidden;
 }
 
 
@@ -69,43 +63,31 @@ body {
    CONTENEDOR DE LA MÁQUINA
    ========================= */
 
+/*
+   IMPORTANTE:
+
+   Ya NO está oculto.
+   Ya NO depende de JavaScript
+   para obtener su tamaño inicial.
+
+   Su tamaño lo determina directamente
+   machine.png, conservando siempre
+   su proporción original.
+*/
+
 .machine-wrap {
     position: relative;
 
+    display: inline-block;
+
     flex: 0 0 auto;
 
-    /*
-       MUY IMPORTANTE:
+    width: auto;
+    height: auto;
 
-       Se mantiene oculta hasta que
-       JavaScript calcule sus dimensiones.
-
-       Esto elimina el glitch inicial
-       de las cápsulas gigantes.
-    */
-
-    visibility: hidden;
-
-    opacity: 0;
-
-    transform: translateZ(0);
-
-    transition:
-        opacity 0.18s ease;
-
-    contain: layout;
-}
-
-
-/*
-   La máquina aparece únicamente
-   cuando sus dimensiones ya están listas.
-*/
-
-.machine-wrap.ready {
-    visibility: visible;
-
-    opacity: 1;
+    max-width: 90vw;
+    max-height: 90vh;
+    max-height: 90dvh;
 }
 
 
@@ -120,8 +102,23 @@ body {
 
     display: block;
 
-    width: 100%;
-    height: 100%;
+    /*
+       El navegador conserva automáticamente
+       la proporción original del PNG.
+    */
+
+    width: auto;
+    height: auto;
+
+    /*
+       Nunca podrá sobrepasar
+       la pantalla.
+    */
+
+    max-width: 90vw;
+
+    max-height: 90vh;
+    max-height: 90dvh;
 
     object-fit: contain;
 
@@ -351,7 +348,6 @@ body {
     top: 67%;
 
     width: 9.5%;
-    height: auto;
 
     pointer-events: none;
 }
@@ -499,8 +495,7 @@ body {
     z-index: 60;
 
     /*
-       POSICIÓN CALIBRADA.
-       NO CAMBIAR.
+       POSICIÓN QUE YA CALIBRAMOS.
     */
 
     left: 32.9%;
@@ -567,29 +562,46 @@ body {
 
 
 /* =========================================
-   TABLETS / CELULARES
+   CELULARES
    ========================================= */
 
 @media (max-width: 700px) {
 
     .page {
         padding:
-            max(8px, env(safe-area-inset-top))
-            max(8px, env(safe-area-inset-right))
-            max(8px, env(safe-area-inset-bottom))
-            max(8px, env(safe-area-inset-left));
+            max(10px, env(safe-area-inset-top))
+            max(10px, env(safe-area-inset-right))
+            max(10px, env(safe-area-inset-bottom))
+            max(10px, env(safe-area-inset-left));
     }
 
 
     /*
-       La pila se mantiene dentro
-       de un margen seguro de pantalla.
+       En teléfono dejamos espacio para
+       los tokens que sobresalen por
+       el lado izquierdo.
     */
 
-    .token-stack {
-        width: 10.5%;
+    .machine-wrap {
+        max-width: 82vw;
 
-        left: -4%;
+        max-height: 88vh;
+        max-height: 88dvh;
+    }
+
+
+    .machine-img {
+        max-width: 82vw;
+
+        max-height: 88vh;
+        max-height: 88dvh;
+    }
+
+
+    .token-stack {
+        left: -6%;
+
+        width: 10%;
     }
 
 }
@@ -601,37 +613,56 @@ body {
 
 @media (max-width: 380px) {
 
-    .page {
-        padding:
-            max(5px, env(safe-area-inset-top))
-            max(5px, env(safe-area-inset-right))
-            max(5px, env(safe-area-inset-bottom))
-            max(5px, env(safe-area-inset-left));
+    .machine-wrap {
+        max-width: 80vw;
+
+        max-height: 86vh;
+        max-height: 86dvh;
+    }
+
+
+    .machine-img {
+        max-width: 80vw;
+
+        max-height: 86vh;
+        max-height: 86dvh;
     }
 
 
     .token-stack {
-        width: 10%;
+        left: -5%;
 
-        left: -3%;
+        width: 10%;
     }
 
 }
 
 
 /* =========================================
-   PANTALLAS HORIZONTALES BAJITAS
+   CELULAR HORIZONTAL
    ========================================= */
 
-@media (max-height: 500px) {
+@media (
+    orientation: landscape
+)
+and
+(
+    max-height: 600px
+) {
 
-    .page {
-        padding: 5px;
+    .machine-wrap {
+        max-width: 88vw;
+
+        max-height: 88vh;
+        max-height: 88dvh;
     }
 
 
-    .token-stack {
-        left: -3%;
+    .machine-img {
+        max-width: 88vw;
+
+        max-height: 88vh;
+        max-height: 88dvh;
     }
 
 }
