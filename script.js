@@ -1589,7 +1589,7 @@ function openCapsule() {
                     */
 
                     capsule.style.filter =
-                        "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.22))";
+                        "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.30))";
 
 
                     capsule.style.transform =
