@@ -22,27 +22,7 @@ body {
 
     overflow: hidden;
 
-    background-color: #202a68;
-
-    background-image:
-        url("assets/wallpaper-pc.png");
-
-    background-size:
-        cover;
-
-    background-position:
-        center center;
-
-    background-repeat:
-        no-repeat;
-
-    background-attachment:
-        fixed;
-}
-
-
-html {
-    min-height: 100%;
+    background: #202a68;
 }
 
 
@@ -76,13 +56,49 @@ body {
 
     overflow: hidden;
 
-    /*
-       IMPORTANTE:
-       transparente para poder ver
-       el wallpaper del body.
-    */
-
     background: transparent;
+
+    isolation: isolate;
+}
+
+
+/* =========================================
+   WALLPAPER
+   ========================================= */
+
+/*
+   Lo ponemos en una capa independiente
+   para evitar que body/html o Chrome móvil
+   lo oculten.
+*/
+
+.page::before {
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -10;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: #202a68;
+
+    background-image:
+        url("./assets/wallpaper-pc.png");
+
+    background-size:
+        cover;
+
+    background-position:
+        center center;
+
+    background-repeat:
+        no-repeat;
+
+    pointer-events: none;
 }
 
 
@@ -92,6 +108,8 @@ body {
 
 .machine-wrap {
     position: relative;
+
+    z-index: 1;
 
     flex: 0 0 auto;
 
@@ -517,7 +535,7 @@ body {
 
 
 /* =========================================
-   TOKEN UTILIZADO
+   TOKEN USADO
    ========================================= */
 
 .token.used-token {
@@ -533,11 +551,6 @@ body {
     position: absolute;
 
     z-index: 60;
-
-    /*
-       POSICIÓN CALIBRADA
-       NO MODIFICAR
-    */
 
     left: 32.9%;
     top: 77.1%;
@@ -603,19 +616,22 @@ body {
 
 
 /* =========================================
-   CELULAR VERTICAL
+   CELULAR
    ========================================= */
 
-@media (max-width: 700px) and (orientation: portrait) {
+@media (max-width: 700px) {
 
     /*
-       WALLPAPER PARA CELULAR
+       AQUÍ CAMIAMOS EL WALLPAPER.
+
+       No depende de portrait/landscape.
+       Cualquier pantalla de 700px
+       o menos utilizará wallpaper-mobile.
     */
 
-    html,
-    body {
+    .page::before {
         background-image:
-            url("assets/wallpaper-mobile.png");
+            url("./assets/wallpaper-mobile.png");
 
         background-size:
             cover;
@@ -625,15 +641,8 @@ body {
 
         background-repeat:
             no-repeat;
-
-        background-attachment:
-            scroll;
     }
 
-
-    /*
-       MÁQUINA
-    */
 
     .machine-wrap {
         width:
@@ -648,10 +657,6 @@ body {
         aspect-ratio: 1 / 1;
     }
 
-
-    /*
-       TOKENS
-    */
 
     .token-stack {
         left: 22%;
@@ -668,7 +673,7 @@ body {
    CELULARES MUY ANGOSTOS
    ========================================= */
 
-@media (max-width: 380px) and (orientation: portrait) {
+@media (max-width: 380px) {
 
     .machine-wrap {
         width:
@@ -689,32 +694,18 @@ body {
 
 
 /* =========================================
-   CELULAR HORIZONTAL
+   TELÉFONO HORIZONTAL
    ========================================= */
 
-@media (orientation: landscape) and (max-height: 600px) {
+@media (max-height: 600px) and (orientation: landscape) {
 
     /*
-       También usamos wallpaper móvil
-       si es un teléfono horizontal.
+       También wallpaper móvil.
     */
 
-    html,
-    body {
+    .page::before {
         background-image:
-            url("assets/wallpaper-mobile.png");
-
-        background-size:
-            cover;
-
-        background-position:
-            center center;
-
-        background-repeat:
-            no-repeat;
-
-        background-attachment:
-            scroll;
+            url("./assets/wallpaper-mobile.png");
     }
 
 
