@@ -87,7 +87,7 @@ const GACHA_CAPSULES = [
 */
 
 const DISPENSER_X = 62;
-const DISPENSER_Y = 78;
+const DISPENSER_Y = 81;
 
 
 /*
