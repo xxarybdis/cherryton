@@ -1,6 +1,6 @@
 /* =========================================
    CHERRYTON GACHA
-   5 TOKENS / 5 CÁPSULAS
+   SCRIPT.JS COMPLETO
    ========================================= */
 
 
@@ -8,26 +8,108 @@
    ELEMENTOS
    ========================================= */
 
-const machine =
-    document.querySelector(".machine-wrap");
+const machine = document.querySelector(".machine-wrap");
+const capsules = document.querySelectorAll(".capsule");
+const knob = document.querySelector(".knob");
 
-const machineImage =
-    document.querySelector(".machine-img");
+const tokenOrder = [
+    document.querySelector(".token-1"),
+    document.querySelector(".token-2"),
+    document.querySelector(".token-3"),
+    document.querySelector(".token-4"),
+    document.querySelector(".token-5")
+];
 
-const capsules =
-    document.querySelectorAll(".capsule");
-
-const tokens =
-    Array.from(
-        document.querySelectorAll(".token")
-    );
-
-const knob =
-    document.querySelector(".knob");
 
 
 /* =========================================
-   ESTADO GENERAL
+   CONFIGURACIÓN
+   ========================================= */
+
+
+/*
+   RANURA DEL TOKEN
+
+   NO CAMBIAR:
+   ya está calibrada.
+*/
+
+const TOKEN_SLOT_X = 0.32;
+const TOKEN_SLOT_Y = 0.695;
+
+const TOKEN_SLOT_RADIUS_X = 0.055;
+const TOKEN_SLOT_RADIUS_Y = 0.045;
+
+
+/*
+   SALIDA DE LA CÁPSULA
+
+   NO CAMBIAR:
+   ya está calibrada.
+*/
+
+const DISPENSER_X = 62;
+const DISPENSER_Y = 81;
+
+const DISPENSED_CAPSULE_WIDTH = 10;
+
+const CAPSULE_MOVE_X = -26;
+const CAPSULE_MOVE_Y = 64;
+
+
+/*
+   TAMAÑO DE LA CÁPSULA CERRADA
+   EN EL CENTRO
+*/
+
+const CENTER_CAPSULE_SIZE = 34;
+
+
+/*
+   NUEVO:
+   TAMAÑO DEL RESULTADO ABIERTO
+
+   Antes se veía pequeño.
+   Ahora ocupará 58% del ancho
+   de la máquina.
+*/
+
+const OPENED_RESULT_SIZE = 58;
+
+
+/*
+   Carta final ULTRA RARE.
+
+   La hacemos todavía un poquito
+   más grande.
+*/
+
+const FINAL_LETTER_SIZE = 62;
+
+
+/*
+   TIEMPOS
+*/
+
+const CAPSULE_EMERGE_TIME = 1550;
+
+const RARITY_TIME = 1900;
+
+
+/*
+   DROP SHADOW
+
+   Dejamos el valor que tú cambiaste:
+   0.75
+*/
+
+const RESULT_DROP_SHADOW =
+    "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.75))";
+
+
+
+/* =========================================
+   ESTADO
    ========================================= */
 
 let machineIsRunning = false;
@@ -54,287 +136,133 @@ let currentGachaResult = null;
 
 let rarityImage = null;
 
-
-/*
-   Para LETTER:
-
-   closed
-   ↓
-   rarity
-   ↓
-   opened
-   ↓ click
-   final
-   ↓ click
-   cerrar
-*/
-
 let letterCanRevealFinal = false;
-
-
-/* =========================================
-   TOKENS
-   ========================================= */
-
-const tokenOrder = [
-
-    document.querySelector(".token-1"),
-    document.querySelector(".token-2"),
-    document.querySelector(".token-3"),
-    document.querySelector(".token-4"),
-    document.querySelector(".token-5")
-
-];
-
 
 let currentTokenIndex = 0;
 
-let currentToken =
-    tokenOrder[currentTokenIndex];
+let currentToken = tokenOrder[currentTokenIndex];
 
-
-/* =========================================
-   TOKEN - ARRASTRE
-   ========================================= */
-
-let startPointerX = 0;
-let startPointerY = 0;
-
-let tokenMoveX = 0;
-let tokenMoveY = 0;
-
-let tokenScale = 1;
-
-const TOKEN_MIN_SCALE = 0.55;
 
 
 /* =========================================
-   PERILLA
-   ========================================= */
-
-let knobRotation = 0;
-
-let knobLastPointerAngle = 0;
-
-const KNOB_REQUIRED_TURN = 280;
-
-
-/* =========================================
-   RESULTADOS NORMALES
+   RESULTADOS
    ========================================= */
 
 const NORMAL_GACHA_CAPSULES = [
 
     {
         name: "dog",
-
-        closed:
-            "assets/capsule-dog.png",
-
-        rarity:
-            "assets/normal.png",
-
-        opened:
-            "assets/capsule-dog2.png"
+        closed: "assets/capsule-dog.png",
+        rarity: "assets/normal.png",
+        opened: "assets/capsule-dog2.png"
     },
 
     {
         name: "cat",
-
-        closed:
-            "assets/capsule-cat.png",
-
-        rarity:
-            "assets/normal.png",
-
-        opened:
-            "assets/capsule-cat2.png"
+        closed: "assets/capsule-cat.png",
+        rarity: "assets/normal.png",
+        opened: "assets/capsule-cat2.png"
     },
 
     {
         name: "candy",
-
-        closed:
-            "assets/capsule-candy.png",
-
-        rarity:
-            "assets/normal.png",
-
-        opened:
-            "assets/capsule-candy2.png"
+        closed: "assets/capsule-candy.png",
+        rarity: "assets/normal.png",
+        opened: "assets/capsule-candy2.png"
     },
 
     {
         name: "friends",
-
-        closed:
-            "assets/capsule-friends.png",
-
-        rarity:
-            "assets/rare.png",
-
-        opened:
-            "assets/capsule-friends2.png"
+        closed: "assets/capsule-friends.png",
+        rarity: "assets/rare.png",
+        opened: "assets/capsule-friends2.png"
     }
 
 ];
 
 
-/* =========================================
-   LETTER ESPECIAL
-   ========================================= */
-
 const LETTER_CAPSULE = {
 
-    name:
-        "letter",
+    name: "letter",
 
-    /*
-       PRIMERO sale la cápsula normal.
-    */
+    closed: "assets/capsule-letter.png",
 
-    closed:
-        "assets/capsule-letter.png",
+    rarity: "assets/ultra-rare.png",
 
-    /*
-       Primer click.
-    */
+    opened: "assets/capsule-letter2.png",
 
-    rarity:
-        "assets/ultra-rare.png",
-
-    /*
-       Después del letrero.
-    */
-
-    opened:
-        "assets/capsule-letter2.png",
-
-    /*
-       Segundo click.
-    */
-
-    final:
-        "assets/capsule-letter3.png"
+    final: "assets/capsule-letter3.png"
 
 };
 
 
-/* =========================================
-   COLA DE LA RONDA
-   ========================================= */
-
-let gachaQueue = [];
-
 
 /* =========================================
-   CREAR RONDA
+   MEZCLAR RESULTADOS
    ========================================= */
 
-function createNewGachaRound() {
+function shuffleArray(array) {
 
-    const shuffled =
-        [...NORMAL_GACHA_CAPSULES];
-
+    const copy = [...array];
 
     for (
-        let i =
-            shuffled.length - 1;
-
+        let i = copy.length - 1;
         i > 0;
-
         i--
     ) {
 
         const j =
             Math.floor(
-                Math.random() *
-                (i + 1)
+                Math.random() * (i + 1)
             );
 
-
         [
-            shuffled[i],
-            shuffled[j]
-        ] =
-        [
-            shuffled[j],
-            shuffled[i]
+            copy[i],
+            copy[j]
+        ] = [
+            copy[j],
+            copy[i]
         ];
 
     }
 
-
-    /*
-       LETTER siempre es la quinta.
-    */
-
-    gachaQueue = [
-
-        ...shuffled,
-
-        LETTER_CAPSULE
-
-    ];
+    return copy;
 
 }
 
-
-createNewGachaRound();
-
-
-/* =========================================
-   SIGUIENTE RESULTADO
-   ========================================= */
-
-function getNextGachaResult() {
-
-    return gachaQueue.shift();
-
-}
-
-
-/* =========================================
-   SALIDA DE CÁPSULA
-   ========================================= */
 
 /*
-   VALORES CALIBRADOS.
+   Los primeros cuatro resultados
+   salen una sola vez cada uno,
+   en orden aleatorio.
+
+   La carta SIEMPRE es la quinta.
 */
 
-const DISPENSER_X = 62;
+const gachaQueue = [
 
-const DISPENSER_Y = 81;
+    ...shuffleArray(
+        NORMAL_GACHA_CAPSULES
+    ),
 
-const DISPENSED_CAPSULE_WIDTH = 10;
+    LETTER_CAPSULE
 
-const CAPSULE_MOVE_X = -26;
+];
 
-const CAPSULE_MOVE_Y = 64;
-
-
-/* =========================================
-   CENTRO
-   ========================================= */
-
-const CENTER_CAPSULE_SIZE = 34;
 
 
 /* =========================================
-   RAREZA
-   ========================================= */
-
-const RARITY_DISPLAY_TIME = 1900;
-
-
-/* =========================================
-   ACTIVAR TOKEN
+   TOKEN ACTIVO
    ========================================= */
 
 function activateCurrentToken() {
 
-    tokens.forEach(
+    tokenOrder.forEach(
         token => {
+
+            if (!token) {
+                return;
+            }
 
             token.classList.remove(
                 "active-token"
@@ -344,9 +272,19 @@ function activateCurrentToken() {
     );
 
 
-    if (
-        !currentToken
-    ) {
+    currentToken =
+        tokenOrder[currentTokenIndex];
+
+
+    if (!currentToken) {
+
+        knob.classList.remove(
+            "ready"
+        );
+
+        knob.classList.add(
+            "locked"
+        );
 
         return;
 
@@ -360,435 +298,1784 @@ function activateCurrentToken() {
 }
 
 
-activateCurrentToken();
-
 
 /* =========================================
-   AJUSTAR MÁQUINA
+   POSICIÓN DE LA RANURA
    ========================================= */
 
-function resizeMachine() {
+function getSlotPosition() {
 
-    const naturalWidth =
-        machineImage.naturalWidth;
-
-    const naturalHeight =
-        machineImage.naturalHeight;
-
-
-    if (
-        !naturalWidth ||
-        !naturalHeight
-    ) {
-
-        return;
-
-    }
-
-
-    const isMobile =
-        window.innerWidth <= 600;
-
-
-    const maxWidth =
-        window.innerWidth *
-        (
-            isMobile
-                ? 0.96
-                : 0.90
-        );
-
-
-    const maxHeight =
-        window.innerHeight *
-        (
-            isMobile
-                ? 0.94
-                : 0.90
-        );
-
-
-    const scaleX =
-        maxWidth /
-        naturalWidth;
-
-
-    const scaleY =
-        maxHeight /
-        naturalHeight;
-
-
-    const scale =
-        Math.min(
-            scaleX,
-            scaleY,
-            1
-        );
-
-
-    machine.style.width =
-        `${naturalWidth * scale}px`;
-
-
-    machine.style.height =
-        `${naturalHeight * scale}px`;
-
-}
-
-
-if (
-    machineImage.complete
-) {
-
-    resizeMachine();
-
-} else {
-
-    machineImage.addEventListener(
-        "load",
-        resizeMachine
-    );
-
-}
-
-
-window.addEventListener(
-    "resize",
-    resizeMachine
-);
-
-
-/* =========================================
-   RANDOM
-   ========================================= */
-
-function random(
-    min,
-    max
-) {
-
-    return (
-        Math.random() *
-        (max - min) +
-        min
-    );
-
-}
-
-
-/* =========================================
-   LÍMITES DE CÁPSULAS
-   ========================================= */
-
-function getCapsuleLimits(
-    capsule
-) {
-
-    if (
-        capsule.classList.contains(
-            "capsule-1"
-        )
-    ) {
-
-        return {
-            left: -1,
-            right: 10,
-            up: 13,
-            down: 1
-        };
-
-    }
-
-
-    if (
-        capsule.classList.contains(
-            "capsule-6"
-        )
-    ) {
-
-        return {
-            left: -2,
-            right: 11,
-            up: 12,
-            down: 3
-        };
-
-    }
-
-
-    if (
-        capsule.classList.contains(
-            "capsule-5"
-        )
-    ) {
-
-        return {
-            left: -10,
-            right: 2,
-            up: 13,
-            down: 1
-        };
-
-    }
-
-
-    if (
-        capsule.classList.contains(
-            "capsule-9"
-        )
-    ) {
-
-        return {
-            left: -11,
-            right: 3,
-            up: 12,
-            down: 3
-        };
-
-    }
+    const machineRect =
+        machine.getBoundingClientRect();
 
 
     return {
-        left: -12,
-        right: 12,
-        up: 15,
-        down: 5
+
+        x:
+            machineRect.left +
+            machineRect.width *
+            TOKEN_SLOT_X,
+
+        y:
+            machineRect.top +
+            machineRect.height *
+            TOKEN_SLOT_Y,
+
+        radiusX:
+            machineRect.width *
+            TOKEN_SLOT_RADIUS_X,
+
+        radiusY:
+            machineRect.height *
+            TOKEN_SLOT_RADIUS_Y
+
     };
 
 }
 
 
+
 /* =========================================
-   ANIMAR CÁPSULAS INTERNAS
+   DISTANCIA DEL TOKEN A LA RANURA
    ========================================= */
 
-function animateCapsule(
-    capsule,
-    index
-) {
+function getTokenSlotDistance(token) {
 
-    const limits =
-        getCapsuleLimits(
-            capsule
+    const tokenRect =
+        token.getBoundingClientRect();
+
+    const slot =
+        getSlotPosition();
+
+
+    const tokenCenterX =
+        tokenRect.left +
+        tokenRect.width / 2;
+
+    const tokenCenterY =
+        tokenRect.top +
+        tokenRect.height / 2;
+
+
+    const dx =
+        tokenCenterX -
+        slot.x;
+
+    const dy =
+        tokenCenterY -
+        slot.y;
+
+
+    const normalizedDistance =
+        Math.sqrt(
+
+            Math.pow(
+                dx / slot.radiusX,
+                2
+            )
+
+            +
+
+            Math.pow(
+                dy / slot.radiusY,
+                2
+            )
+
         );
 
 
-    const x1 =
-        random(
-            limits.left,
-            limits.right
+    return {
+
+        distance:
+            normalizedDistance,
+
+        dx,
+
+        dy,
+
+        slot
+
+    };
+
+}
+
+
+
+/* =========================================
+   DRAG DEL TOKEN
+   ========================================= */
+
+let tokenPointerId = null;
+
+let tokenStartPointerX = 0;
+let tokenStartPointerY = 0;
+
+let tokenMoveX = 0;
+let tokenMoveY = 0;
+
+
+
+function tokenPointerDown(event) {
+
+    if (
+        !currentToken ||
+        event.currentTarget !== currentToken ||
+        machineIsRunning ||
+        tokenInserted
+    ) {
+        return;
+    }
+
+
+    tokenIsDragging = true;
+
+    tokenPointerId =
+        event.pointerId;
+
+
+    tokenStartPointerX =
+        event.clientX;
+
+    tokenStartPointerY =
+        event.clientY;
+
+
+    tokenMoveX = 0;
+    tokenMoveY = 0;
+
+
+    currentToken.classList.add(
+        "dragging"
+    );
+
+
+    currentToken.setPointerCapture(
+        event.pointerId
+    );
+
+
+    event.preventDefault();
+
+}
+
+
+
+function tokenPointerMove(event) {
+
+    if (
+        !tokenIsDragging ||
+        !currentToken ||
+        event.pointerId !== tokenPointerId
+    ) {
+        return;
+    }
+
+
+    tokenMoveX =
+        event.clientX -
+        tokenStartPointerX;
+
+    tokenMoveY =
+        event.clientY -
+        tokenStartPointerY;
+
+
+    currentToken.style.translate =
+        `${tokenMoveX}px ${tokenMoveY}px`;
+
+
+    const info =
+        getTokenSlotDistance(
+            currentToken
         );
 
 
-    const y1 =
-        random(
-            -limits.up,
-            -2
+    /*
+       El token se encoge suavemente
+       mientras se acerca.
+    */
+
+    const shrinkDistance =
+        Math.min(
+            info.distance,
+            2.2
         );
 
 
-    const x2 =
-        random(
-            limits.left,
-            limits.right
+    const closeness =
+        1 -
+        Math.min(
+            shrinkDistance / 2.2,
+            1
         );
 
 
-    const y2 =
-        random(
-            -limits.up * 0.55,
-            limits.down
+    const tokenScale =
+        1 -
+        closeness * 0.45;
+
+
+    currentToken.style.scale =
+        tokenScale;
+
+
+    if (
+        info.distance <= 1.4
+    ) {
+
+        currentToken.classList.add(
+            "near-slot"
+        );
+
+    }
+    else {
+
+        currentToken.classList.remove(
+            "near-slot"
+        );
+
+    }
+
+
+    event.preventDefault();
+
+}
+
+
+
+/* =========================================
+   SOLTAR TOKEN
+   ========================================= */
+
+function tokenPointerUp(event) {
+
+    if (
+        !tokenIsDragging ||
+        !currentToken
+    ) {
+        return;
+    }
+
+
+    tokenIsDragging = false;
+
+
+    currentToken.classList.remove(
+        "dragging"
+    );
+
+
+    const info =
+        getTokenSlotDistance(
+            currentToken
         );
 
 
-    const x3 =
-        random(
-            limits.left,
-            limits.right
+    if (
+        info.distance <= 1
+    ) {
+
+        insertToken(
+            currentToken
         );
 
+    }
+    else {
 
-    const y3 =
-        random(
-            -limits.up * 0.75,
-            limits.down
+        returnToken(
+            currentToken
         );
 
-
-    const r1 =
-        random(-9, 9);
+    }
 
 
-    const r2 =
-        random(-12, 12);
+    tokenPointerId = null;
+
+}
 
 
-    const r3 =
-        random(-7, 7);
+
+/* =========================================
+   REGRESAR TOKEN
+   ========================================= */
+
+function returnToken(token) {
+
+    token.classList.remove(
+        "near-slot"
+    );
 
 
-    const duration =
-        random(
-            1900,
-            2400
-        );
+    const animation =
+        token.animate(
 
+            [
 
-    const delay =
-        random(
-            0,
-            180
-        ) +
-        index * 12;
+                {
+                    translate:
+                        `${tokenMoveX}px ${tokenMoveY}px`,
 
+                    scale:
+                        token.style.scale || 1
+                },
 
-    return capsule.animate(
-        [
+                {
+                    translate:
+                        "0px 0px",
+
+                    scale:
+                        1
+                }
+
+            ],
 
             {
-                translate:
-                    "0px 0px",
+                duration: 450,
 
-                rotate:
-                    "0deg",
+                easing:
+                    "cubic-bezier(.2,.8,.2,1)",
 
-                offset:
-                    0
-            },
-
-            {
-                translate:
-                    `${x1}px ${y1}px`,
-
-                rotate:
-                    `${r1}deg`,
-
-                offset:
-                    0.28
-            },
-
-            {
-                translate:
-                    `${x2}px ${y2}px`,
-
-                rotate:
-                    `${r2}deg`,
-
-                offset:
-                    0.55
-            },
-
-            {
-                translate:
-                    `${x3}px ${y3}px`,
-
-                rotate:
-                    `${r3}deg`,
-
-                offset:
-                    0.78
-            },
-
-            {
-                translate:
-                    "0px 0px",
-
-                rotate:
-                    "0deg",
-
-                offset:
-                    1
+                fill:
+                    "forwards"
             }
 
-        ],
+        );
 
-        {
 
-            duration:
-                duration,
+    animation.onfinish =
+        () => {
 
-            iterations:
-                1,
+            token.style.translate =
+                "0px 0px";
 
-            delay:
-                delay,
+            token.style.scale =
+                "1";
 
-            easing:
-                "cubic-bezier(0.45, 0, 0.25, 1)",
+            animation.cancel();
 
-            fill:
-                "none"
+        };
+
+}
+
+
+
+/* =========================================
+   INSERTAR TOKEN
+   ========================================= */
+
+function insertToken(token) {
+
+    tokenInserted = true;
+
+    token.classList.remove(
+        "near-slot"
+    );
+
+    token.classList.remove(
+        "active-token"
+    );
+
+
+    const tokenRect =
+        token.getBoundingClientRect();
+
+    const slot =
+        getSlotPosition();
+
+
+    const tokenCenterX =
+        tokenRect.left +
+        tokenRect.width / 2;
+
+    const tokenCenterY =
+        tokenRect.top +
+        tokenRect.height / 2;
+
+
+    const moveX =
+        slot.x -
+        tokenCenterX;
+
+    const moveY =
+        slot.y -
+        tokenCenterY;
+
+
+    const animation =
+        token.animate(
+
+            [
+
+                {
+                    translate:
+                        `${tokenMoveX}px ${tokenMoveY}px`,
+
+                    scale:
+                        token.style.scale || 1,
+
+                    opacity:
+                        1
+                },
+
+                {
+                    translate:
+                        `${
+                            tokenMoveX +
+                            moveX
+                        }px ${
+                            tokenMoveY +
+                            moveY
+                        }px`,
+
+                    scale:
+                        0.12,
+
+                    opacity:
+                        0
+                }
+
+            ],
+
+            {
+                duration:
+                    620,
+
+                easing:
+                    "cubic-bezier(.3,.8,.25,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    animation.onfinish =
+        () => {
+
+            token.classList.add(
+                "used-token"
+            );
+
+            token.style.opacity =
+                "0";
+
+            knob.classList.remove(
+                "locked"
+            );
+
+            knob.classList.add(
+                "ready"
+            );
+
+        };
+
+}
+
+
+
+/* =========================================
+   EVENTOS DE LOS TOKENS
+   ========================================= */
+
+tokenOrder.forEach(
+
+    token => {
+
+        if (!token) {
+            return;
+        }
+
+
+        token.addEventListener(
+            "pointerdown",
+            tokenPointerDown
+        );
+
+
+        token.addEventListener(
+            "pointermove",
+            tokenPointerMove
+        );
+
+
+        token.addEventListener(
+            "pointerup",
+            tokenPointerUp
+        );
+
+
+        token.addEventListener(
+            "pointercancel",
+            tokenPointerUp
+        );
+
+    }
+
+);
+
+
+
+/* =========================================
+   PERILLA
+   ========================================= */
+
+knob.addEventListener(
+
+    "pointerdown",
+
+    () => {
+
+        if (
+            !tokenInserted ||
+            knobIsTurning ||
+            machineIsRunning
+        ) {
+            return;
+        }
+
+
+        turnKnob();
+
+    }
+
+);
+
+
+
+/* =========================================
+   GIRAR PERILLA
+   ========================================= */
+
+function turnKnob() {
+
+    knobIsTurning = true;
+
+    machineIsRunning = true;
+
+
+    knob.classList.remove(
+        "ready"
+    );
+
+    knob.classList.add(
+        "turning"
+    );
+
+
+    /*
+       Giro hacia la izquierda
+       = sentido antihorario.
+    */
+
+    const knobAnimation =
+        knob.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) rotate(0deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) rotate(-360deg)"
+                }
+
+            ],
+
+            {
+                duration:
+                    900,
+
+                easing:
+                    "cubic-bezier(.2,.75,.2,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    /*
+       Empezamos movimiento
+       de cápsulas.
+    */
+
+    animateCapsulesInside();
+
+
+    knobAnimation.onfinish =
+        () => {
+
+            knob.classList.remove(
+                "turning"
+            );
+
+            knob.classList.add(
+                "locked"
+            );
+
+
+            knobIsTurning = false;
+
+
+            setTimeout(
+
+                () => {
+
+                    dispenseCapsule();
+
+                },
+
+                160
+
+            );
+
+        };
+
+}
+
+
+
+/* =========================================
+   MOVER CÁPSULAS DENTRO
+   ========================================= */
+
+function animateCapsulesInside() {
+
+    capsules.forEach(
+
+        (capsule, index) => {
+
+            const direction =
+                index % 2 === 0
+                    ? 1
+                    : -1;
+
+
+            const moveAmount =
+                5 +
+                Math.random() * 8;
+
+
+            capsule.animate(
+
+                [
+
+                    {
+                        translate:
+                            "0px 0px",
+
+                        rotate:
+                            "0deg"
+                    },
+
+                    {
+                        translate:
+                            `${direction * moveAmount}px -6px`,
+
+                        rotate:
+                            `${direction * 8}deg`
+                    },
+
+                    {
+                        translate:
+                            `${-direction * moveAmount}px 4px`,
+
+                        rotate:
+                            `${-direction * 6}deg`
+                    },
+
+                    {
+                        translate:
+                            "0px 0px",
+
+                        rotate:
+                            "0deg"
+                    }
+
+                ],
+
+                {
+                    duration:
+                        1050 +
+                        Math.random() * 300,
+
+                    easing:
+                        "ease-in-out",
+
+                    iterations:
+                        1
+                }
+
+            );
 
         }
+
     );
 
 }
 
 
+
 /* =========================================
-   ACTIVAR GACHA
+   SACAR RESULTADO ACTUAL
    ========================================= */
 
-function runGacha() {
+function getCurrentResult() {
+
+    return (
+        gachaQueue[
+            currentTokenIndex
+        ]
+    );
+
+}
+
+
+
+/* =========================================
+   DISPENSAR CÁPSULA
+   ========================================= */
+
+function dispenseCapsule() {
+
+    currentGachaResult =
+        getCurrentResult();
+
+
+    dispensedCapsule =
+        document.createElement(
+            "img"
+        );
+
+
+    dispensedCapsule.src =
+        currentGachaResult.closed;
+
+
+    dispensedCapsule.alt =
+        "";
+
+
+    dispensedCapsule.draggable =
+        false;
+
+
+    Object.assign(
+
+        dispensedCapsule.style,
+
+        {
+
+            position:
+                "absolute",
+
+            zIndex:
+                "200",
+
+            left:
+                `${DISPENSER_X}%`,
+
+            top:
+                `${DISPENSER_Y}%`,
+
+            width:
+                `${DISPENSED_CAPSULE_WIDTH}%`,
+
+            height:
+                "auto",
+
+            transform:
+                "translate(-50%, -50%)",
+
+            transformOrigin:
+                "center center",
+
+            userSelect:
+                "none",
+
+            WebkitUserDrag:
+                "none",
+
+            cursor:
+                "default",
+
+            willChange:
+                "left, top, width, transform, opacity"
+
+        }
+
+    );
+
+
+    machine.appendChild(
+        dispensedCapsule
+    );
+
+
+    /*
+       Sale de la máquina y crece
+       suavemente hasta el centro.
+    */
+
+    const emergeAnimation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    left:
+                        `${DISPENSER_X}%`,
+
+                    top:
+                        `${DISPENSER_Y}%`,
+
+                    width:
+                        `${DISPENSED_CAPSULE_WIDTH}%`,
+
+                    transform:
+                        "translate(-50%, -50%) scale(0.75)",
+
+                    opacity:
+                        0
+                },
+
+                {
+                    offset:
+                        0.18,
+
+                    opacity:
+                        1
+                },
+
+                {
+                    left:
+                        `${
+                            DISPENSER_X +
+                            CAPSULE_MOVE_X
+                        }%`,
+
+                    top:
+                        `${
+                            DISPENSER_Y +
+                            CAPSULE_MOVE_Y
+                        }%`,
+
+                    width:
+                        `${DISPENSED_CAPSULE_WIDTH}%`,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    left:
+                        "50%",
+
+                    top:
+                        "50%",
+
+                    width:
+                        `${CENTER_CAPSULE_SIZE}%`,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    CAPSULE_EMERGE_TIME,
+
+                easing:
+                    "cubic-bezier(.18,.75,.25,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    emergeAnimation.onfinish =
+        () => {
+
+            dispensedCapsule.style.left =
+                "50%";
+
+            dispensedCapsule.style.top =
+                "50%";
+
+            dispensedCapsule.style.width =
+                `${CENTER_CAPSULE_SIZE}%`;
+
+            dispensedCapsule.style.transform =
+                "translate(-50%, -50%)";
+
+
+            emergeAnimation.cancel();
+
+
+            startCapsuleShake();
+
+        };
+
+}
+
+
+
+/* =========================================
+   AGITAR CÁPSULA EN EL CENTRO
+   ========================================= */
+
+function startCapsuleShake() {
+
+    if (!dispensedCapsule) {
+        return;
+    }
+
+
+    capsuleShakeAnimation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateX(-6px) rotate(-2.5deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateX(6px) rotate(2.5deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateX(-6px) rotate(-2.5deg)"
+                }
+
+            ],
+
+            {
+                duration:
+                    1300,
+
+                easing:
+                    "ease-in-out",
+
+                iterations:
+                    Infinity
+            }
+
+        );
+
+
+    capsuleCanOpen = true;
+
+
+    dispensedCapsule.style.cursor =
+        "pointer";
+
+
+    dispensedCapsule.addEventListener(
+        "click",
+        capsuleClickHandler
+    );
+
+}
+
+
+
+/* =========================================
+   CLICK EN CÁPSULA / RESULTADO
+   ========================================= */
+
+function capsuleClickHandler() {
 
     if (
-        machineIsRunning
+        !dispensedCapsule ||
+        capsuleIsOpening ||
+        capsuleIsClosing
     ) {
+        return;
+    }
+
+
+    /*
+       Carta ULTRA RARE
+    */
+
+    if (
+        currentGachaResult.name ===
+        "letter"
+    ) {
+
+        handleLetterCapsule();
 
         return;
 
     }
 
 
-    machineIsRunning =
-        true;
+    /*
+       Resultado normal / rare
+    */
+
+    if (
+        capsuleCanOpen
+    ) {
+
+        openNormalCapsule();
+
+        return;
+
+    }
 
 
-    capsules.forEach(
-        (
-            capsule,
-            index
-        ) => {
+    if (
+        capsuleCanClose
+    ) {
 
-            animateCapsule(
-                capsule,
-                index
+        closeResult();
+
+    }
+
+}
+
+
+
+/* =========================================
+   ABRIR RESULTADO NORMAL / RARE
+   ========================================= */
+
+function openNormalCapsule() {
+
+    capsuleCanOpen = false;
+
+    capsuleIsOpening = true;
+
+
+    stopCapsuleShake();
+
+
+    /*
+       Pequeño encogimiento
+       antes del POP.
+    */
+
+    const closeAnimation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.72)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0)"
+                }
+
+            ],
+
+            {
+                duration:
+                    320,
+
+                easing:
+                    "ease-in",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    closeAnimation.onfinish =
+        () => {
+
+            dispensedCapsule.style.opacity =
+                "0";
+
+
+            showRarity(
+
+                currentGachaResult.rarity,
+
+                () => {
+
+                    revealOpenedResult(
+                        currentGachaResult.opened
+                    );
+
+                }
+
             );
 
+        };
+
+}
+
+
+
+/* =========================================
+   MOSTRAR RAREZA
+   ========================================= */
+
+function showRarity(
+    imageSource,
+    callback
+) {
+
+    rarityImage =
+        document.createElement(
+            "img"
+        );
+
+
+    rarityImage.src =
+        imageSource;
+
+
+    rarityImage.alt =
+        "";
+
+
+    Object.assign(
+
+        rarityImage.style,
+
+        {
+
+            position:
+                "absolute",
+
+            zIndex:
+                "400",
+
+            left:
+                "50%",
+
+            top:
+                "50%",
+
+            width:
+                "36%",
+
+            maxWidth:
+                "none",
+
+            height:
+                "auto",
+
+            transform:
+                "translate(-50%, -50%) scale(0)",
+
+            transformOrigin:
+                "center center",
+
+            pointerEvents:
+                "none",
+
+            userSelect:
+                "none",
+
+            WebkitUserDrag:
+                "none"
+
         }
+
     );
 
 
-    setTimeout(
-        () => {
-
-            dispenseCapsule();
-
-        },
-
-        1850
+    machine.appendChild(
+        rarityImage
     );
 
 
+    const popAnimation =
+        rarityImage.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0)",
+
+                    opacity:
+                        0
+                },
+
+                {
+                    offset:
+                        0.55,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1.16)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    480,
+
+                easing:
+                    "cubic-bezier(.15,.9,.25,1.35)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
     setTimeout(
+
         () => {
 
-            machineIsRunning =
-                false;
+            const disappear =
+                rarityImage.animate(
+
+                    [
+
+                        {
+                            opacity:
+                                1,
+
+                            transform:
+                                "translate(-50%, -50%) scale(1)"
+                        },
+
+                        {
+                            opacity:
+                                0,
+
+                            transform:
+                                "translate(-50%, -50%) scale(0.9)"
+                        }
+
+                    ],
+
+                    {
+                        duration:
+                            280,
+
+                        easing:
+                            "ease-in",
+
+                        fill:
+                            "forwards"
+                    }
+
+                );
+
+
+            disappear.onfinish =
+                () => {
+
+                    if (
+                        rarityImage &&
+                        rarityImage.parentNode
+                    ) {
+
+                        rarityImage.remove();
+
+                    }
+
+
+                    rarityImage = null;
+
+
+                    if (callback) {
+                        callback();
+                    }
+
+                };
 
         },
 
-        5000
+        RARITY_TIME
+
     );
 
 }
 
 
+
 /* =========================================
-   CREAR CÁPSULA DE SALIDA
+   REVELAR PREMIO
    ========================================= */
 
-function createDispensedCapsule() {
+function revealOpenedResult(
+    imageSource
+) {
+
+    if (!dispensedCapsule) {
+        return;
+    }
+
+
+    dispensedCapsule.src =
+        imageSource;
+
+
+    dispensedCapsule.style.opacity =
+        "1";
+
+
+    /*
+       AQUÍ ESTÁ EL CAMBIO IMPORTANTE.
+
+       El resultado abierto ahora
+       ocupa 58% del ancho de la máquina.
+    */
+
+    dispensedCapsule.style.width =
+        `${OPENED_RESULT_SIZE}%`;
+
+
+    dispensedCapsule.style.filter =
+        RESULT_DROP_SHADOW;
+
+
+    dispensedCapsule.style.cursor =
+        "pointer";
+
+
+    const revealAnimation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.15)",
+
+                    opacity:
+                        0
+                },
+
+                {
+                    offset:
+                        0.65,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1.08)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    650,
+
+                easing:
+                    "cubic-bezier(.15,.85,.2,1.15)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    revealAnimation.onfinish =
+        () => {
+
+            dispensedCapsule.style.transform =
+                "translate(-50%, -50%)";
+
+
+            revealAnimation.cancel();
+
+
+            capsuleIsOpening = false;
+
+            capsuleCanClose = true;
+
+        };
+
+}
+
+
+
+/* =========================================
+   SECUENCIA ESPECIAL DE LA CARTA
+   ========================================= */
+
+function handleLetterCapsule() {
+
+    /*
+       PASO 1:
+       capsule-letter.png
+       ->
+       ULTRA RARE
+       ->
+       capsule-letter2.png
+    */
+
+    if (
+        capsuleCanOpen
+    ) {
+
+        capsuleCanOpen = false;
+
+        capsuleIsOpening = true;
+
+
+        stopCapsuleShake();
+
+
+        const disappear =
+            dispensedCapsule.animate(
+
+                [
+
+                    {
+                        transform:
+                            "translate(-50%, -50%) scale(1)",
+
+                        opacity:
+                            1
+                    },
+
+                    {
+                        transform:
+                            "translate(-50%, -50%) scale(0)",
+
+                        opacity:
+                            0
+                    }
+
+                ],
+
+                {
+                    duration:
+                        320,
+
+                    easing:
+                        "ease-in",
+
+                    fill:
+                        "forwards"
+                }
+
+            );
+
+
+        disappear.onfinish =
+            () => {
+
+                dispensedCapsule.style.opacity =
+                    "0";
+
+
+                showRarity(
+
+                    LETTER_CAPSULE.rarity,
+
+                    () => {
+
+                        revealLetterSecondStage();
+
+                    }
+
+                );
+
+            };
+
+
+        return;
+
+    }
+
+
+    /*
+       PASO 2:
+       capsule-letter2.png
+       ->
+       capsule-letter3.png
+    */
+
+    if (
+        letterCanRevealFinal
+    ) {
+
+        revealLetterFinal();
+
+        return;
+
+    }
+
+
+    /*
+       PASO 3:
+       cerrar letter3
+    */
+
+    if (
+        capsuleCanClose
+    ) {
+
+        closeResult();
+
+    }
+
+}
+
+
+
+/* =========================================
+   LETTER 2
+   ========================================= */
+
+function revealLetterSecondStage() {
+
+    if (!dispensedCapsule) {
+        return;
+    }
+
+
+    dispensedCapsule.src =
+        LETTER_CAPSULE.opened;
+
+
+    dispensedCapsule.style.opacity =
+        "1";
+
+
+    /*
+       También grande.
+    */
+
+    dispensedCapsule.style.width =
+        `${OPENED_RESULT_SIZE}%`;
+
+
+    dispensedCapsule.style.filter =
+        RESULT_DROP_SHADOW;
+
+
+    const animation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.12)",
+
+                    opacity:
+                        0
+                },
+
+                {
+                    offset:
+                        0.65,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1.08)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    700,
+
+                easing:
+                    "cubic-bezier(.15,.85,.2,1.15)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    animation.onfinish =
+        () => {
+
+            dispensedCapsule.style.transform =
+                "translate(-50%, -50%)";
+
+
+            animation.cancel();
+
+
+            capsuleIsOpening =
+                false;
+
+            letterCanRevealFinal =
+                true;
+
+            capsuleCanClose =
+                false;
+
+        };
+
+}
+
+
+
+/* =========================================
+   LETTER 3
+   ========================================= */
+
+function revealLetterFinal() {
+
+    if (!dispensedCapsule) {
+        return;
+    }
+
+
+    letterCanRevealFinal =
+        false;
+
+
+    dispensedCapsule.src =
+        LETTER_CAPSULE.final;
+
+
+    /*
+       El resultado final Ultra Rare
+       es todavía un poquito mayor.
+    */
+
+    dispensedCapsule.style.width =
+        `${FINAL_LETTER_SIZE}%`;
+
+
+    dispensedCapsule.style.filter =
+        RESULT_DROP_SHADOW;
+
+
+    const animation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.82)",
+
+                    opacity:
+                        0.5
+                },
+
+                {
+                    offset:
+                        0.62,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1.08)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    650,
+
+                easing:
+                    "cubic-bezier(.15,.85,.2,1.15)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    animation.onfinish =
+        () => {
+
+            dispensedCapsule.style.transform =
+                "translate(-50%, -50%)";
+
+
+            animation.cancel();
+
+
+            capsuleCanClose =
+                true;
+
+        };
+
+}
+
+
+
+/* =========================================
+   DETENER AGITACIÓN
+   ========================================= */
+
+function stopCapsuleShake() {
 
     if (
         capsuleShakeAnimation
@@ -797,18 +2084,6 @@ function createDispensedCapsule() {
         capsuleShakeAnimation.cancel();
 
         capsuleShakeAnimation =
-            null;
-
-    }
-
-
-    if (
-        rarityImage
-    ) {
-
-        rarityImage.remove();
-
-        rarityImage =
             null;
 
     }
@@ -818,1551 +2093,13 @@ function createDispensedCapsule() {
         dispensedCapsule
     ) {
 
-        dispensedCapsule.remove();
-
-        dispensedCapsule =
-            null;
-
-    }
-
-
-    capsuleCanOpen =
-        false;
-
-
-    capsuleIsOpening =
-        false;
-
-
-    capsuleCanClose =
-        false;
-
-
-    capsuleIsClosing =
-        false;
-
-
-    letterCanRevealFinal =
-        false;
-
-
-    currentGachaResult =
-        getNextGachaResult();
-
-
-    const capsule =
-        document.createElement(
-            "img"
-        );
-
-
-    capsule.src =
-        currentGachaResult.closed;
-
-
-    capsule.alt =
-        "Cápsula obtenida";
-
-
-    capsule.draggable =
-        false;
-
-
-    capsule.style.position =
-        "absolute";
-
-
-    capsule.style.zIndex =
-        "80";
-
-
-    capsule.style.left =
-        `${DISPENSER_X}%`;
-
-
-    capsule.style.top =
-        `${DISPENSER_Y}%`;
-
-
-    capsule.style.width =
-        `${DISPENSED_CAPSULE_WIDTH}%`;
-
-
-    capsule.style.height =
-        "auto";
-
-
-    capsule.style.opacity =
-        "0";
-
-
-    capsule.style.filter =
-        "none";
-
-
-    capsule.style.pointerEvents =
-        "none";
-
-
-    capsule.style.userSelect =
-        "none";
-
-
-    capsule.style.webkitUserDrag =
-        "none";
-
-
-    capsule.style.transformOrigin =
-        "center center";
-
-
-    capsule.style.transform =
-        `
-        translate(-50%, -50%)
-        scale(0.18)
-        `;
-
-
-    machine.appendChild(
-        capsule
-    );
-
-
-    dispensedCapsule =
-        capsule;
-
-
-    return capsule;
-
-}
-
-
-/* =========================================
-   HACER SALIR CÁPSULA
-   ========================================= */
-
-function dispenseCapsule() {
-
-    const capsule =
-        createDispensedCapsule();
-
-
-    const startAnimation =
-        () => {
-
-
-            const exitAnimation =
-                capsule.animate(
-                    [
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(0px, -4px)
-                                scale(0.18)
-                                rotate(-8deg)
-                                `,
-
-                            opacity:
-                                0,
-
-                            offset:
-                                0
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(-1px, 0px)
-                                scale(0.35)
-                                rotate(-4deg)
-                                `,
-
-                            opacity:
-                                0.30,
-
-                            offset:
-                                0.18
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(-4px, 8px)
-                                scale(0.58)
-                                rotate(4deg)
-                                `,
-
-                            opacity:
-                                0.68,
-
-                            offset:
-                                0.36
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(
-                                    ${CAPSULE_MOVE_X * 0.25}px,
-                                    ${CAPSULE_MOVE_Y * 0.25}px
-                                )
-                                scale(0.82)
-                                rotate(-5deg)
-                                `,
-
-                            opacity:
-                                0.92,
-
-                            offset:
-                                0.55
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(
-                                    ${CAPSULE_MOVE_X * 0.58}px,
-                                    ${CAPSULE_MOVE_Y * 0.58}px
-                                )
-                                scale(1)
-                                rotate(6deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            offset:
-                                0.72
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(
-                                    ${CAPSULE_MOVE_X}px,
-                                    ${CAPSULE_MOVE_Y}px
-                                )
-                                scale(1)
-                                rotate(-3deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            offset:
-                                0.90
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                translate(
-                                    ${CAPSULE_MOVE_X}px,
-                                    ${CAPSULE_MOVE_Y - 4}px
-                                )
-                                scale(1)
-                                rotate(0deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            offset:
-                                1
-                        }
-
-                    ],
-
-                    {
-
-                        duration:
-                            1550,
-
-                        easing:
-                            "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                        fill:
-                            "forwards"
-
-                    }
-                );
-
-
-            exitAnimation.onfinish =
-                () => {
-
-
-                    setTimeout(
-                        () => {
-
-                            moveCapsuleToCenter(
-                                capsule
-                            );
-
-                        },
-
-                        300
-                    );
-
-                };
-
-        };
-
-
-    if (
-        capsule.complete &&
-        capsule.naturalWidth > 0
-    ) {
-
-        startAnimation();
-
-    } else {
-
-        capsule.addEventListener(
-            "load",
-            startAnimation,
-            {
-                once:
-                    true
-            }
-        );
+        dispensedCapsule.style.transform =
+            "translate(-50%, -50%)";
 
     }
 
 }
 
-
-/* =========================================
-   MOVER AL CENTRO
-   ========================================= */
-
-function moveCapsuleToCenter(
-    capsule
-) {
-
-    const rect =
-        capsule.getBoundingClientRect();
-
-
-    capsule.getAnimations().forEach(
-        animation =>
-            animation.cancel()
-    );
-
-
-    const startX =
-        rect.left +
-        rect.width / 2;
-
-
-    const startY =
-        rect.top +
-        rect.height / 2;
-
-
-    capsule.style.position =
-        "fixed";
-
-
-    capsule.style.left =
-        `${startX}px`;
-
-
-    capsule.style.top =
-        `${startY}px`;
-
-
-    capsule.style.width =
-        `${rect.width}px`;
-
-
-    capsule.style.height =
-        "auto";
-
-
-    capsule.style.opacity =
-        "1";
-
-
-    capsule.style.zIndex =
-        "9999";
-
-
-    capsule.style.pointerEvents =
-        "none";
-
-
-    capsule.style.transformOrigin =
-        "center center";
-
-
-    capsule.style.transform =
-        `
-        translate(-50%, -50%)
-        scale(1)
-        `;
-
-
-    const finalSize =
-        Math.min(
-            window.innerWidth,
-            window.innerHeight
-        ) *
-        (
-            CENTER_CAPSULE_SIZE /
-            100
-        );
-
-
-    const finalScale =
-        finalSize /
-        rect.width;
-
-
-    const finalX =
-        window.innerWidth /
-        2;
-
-
-    const finalY =
-        window.innerHeight /
-        2;
-
-
-    const centerAnimation =
-        capsule.animate(
-            [
-
-                {
-                    left:
-                        `${startX}px`,
-
-                    top:
-                        `${startY}px`,
-
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1)
-                        rotate(0deg)
-                        `
-                },
-
-                {
-                    left:
-                        `${finalX}px`,
-
-                    top:
-                        `${finalY}px`,
-
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(${finalScale})
-                        rotate(-2deg)
-                        `
-                }
-
-            ],
-
-            {
-
-                duration:
-                    900,
-
-                easing:
-                    "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                fill:
-                    "forwards"
-
-            }
-        );
-
-
-    centerAnimation.onfinish =
-        () => {
-
-
-            capsule.getAnimations().forEach(
-                animation =>
-                    animation.cancel()
-            );
-
-
-            capsule.style.left =
-                `${finalX}px`;
-
-
-            capsule.style.top =
-                `${finalY}px`;
-
-
-            capsule.style.width =
-                `${finalSize}px`;
-
-
-            capsule.style.height =
-                "auto";
-
-
-            capsule.style.transform =
-                `
-                translate(-50%, -50%)
-                rotate(0deg)
-                `;
-
-
-            capsuleCanOpen =
-                true;
-
-
-            capsule.style.pointerEvents =
-                "auto";
-
-
-            capsule.style.cursor =
-                "pointer";
-
-
-            startCapsuleShake(
-                capsule
-            );
-
-        };
-
-}
-
-
-/* =========================================
-   AGITAR CÁPSULA
-   ========================================= */
-
-function startCapsuleShake(
-    capsule
-) {
-
-    if (
-        capsuleShakeAnimation
-    ) {
-
-        capsuleShakeAnimation.cancel();
-
-        capsuleShakeAnimation =
-            null;
-
-    }
-
-
-    capsuleShakeAnimation =
-        capsule.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        translateX(0px)
-                        rotate(0deg)
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        translateX(-6px)
-                        rotate(-2.5deg)
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        translateX(0px)
-                        rotate(0deg)
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        translateX(6px)
-                        rotate(2.5deg)
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        translateX(0px)
-                        rotate(0deg)
-                        `
-                }
-
-            ],
-
-            {
-
-                duration:
-                    1300,
-
-                iterations:
-                    Infinity,
-
-                easing:
-                    "ease-in-out"
-
-            }
-        );
-
-}
-
-
-/* =========================================
-   ABRIR CÁPSULA
-   ========================================= */
-
-function openCapsule() {
-
-    if (
-        !capsuleCanOpen ||
-        capsuleIsOpening ||
-        !dispensedCapsule ||
-        !currentGachaResult
-    ) {
-
-        return;
-
-    }
-
-
-    capsuleCanOpen =
-        false;
-
-
-    capsuleIsOpening =
-        true;
-
-
-    if (
-        capsuleShakeAnimation
-    ) {
-
-        capsuleShakeAnimation.cancel();
-
-        capsuleShakeAnimation =
-            null;
-
-    }
-
-
-    const capsule =
-        dispensedCapsule;
-
-
-    capsule.style.pointerEvents =
-        "none";
-
-
-    capsule.style.cursor =
-        "default";
-
-
-    const anticipation =
-        capsule.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1)
-                        rotate(0deg)
-                        `,
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(0.94)
-                        rotate(-2deg)
-                        `,
-
-                    opacity:
-                        1,
-
-                    offset:
-                        0.40
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1.10)
-                        rotate(2deg)
-                        `,
-
-                    opacity:
-                        0,
-
-                    offset:
-                        1
-                }
-
-            ],
-
-            {
-
-                duration:
-                    300,
-
-                easing:
-                    "ease-out",
-
-                fill:
-                    "forwards"
-
-            }
-        );
-
-
-    anticipation.onfinish =
-        () => {
-
-
-            capsule.style.visibility =
-                "hidden";
-
-
-            showRarity();
-
-        };
-
-}
-
-
-/* =========================================
-   MOSTRAR RAREZA
-   ========================================= */
-
-function showRarity() {
-
-    const badge =
-        document.createElement(
-            "img"
-        );
-
-
-    badge.src =
-        currentGachaResult.rarity;
-
-
-    badge.alt =
-        "Rareza";
-
-
-    badge.draggable =
-        false;
-
-
-    badge.style.position =
-        "fixed";
-
-
-    badge.style.left =
-        "50%";
-
-
-    badge.style.top =
-        "50%";
-
-
-    badge.style.width =
-        "min(48vw, 380px)";
-
-
-    badge.style.maxHeight =
-        "42vh";
-
-
-    badge.style.height =
-        "auto";
-
-
-    badge.style.objectFit =
-        "contain";
-
-
-    badge.style.zIndex =
-        "10001";
-
-
-    badge.style.opacity =
-        "0";
-
-
-    badge.style.pointerEvents =
-        "none";
-
-
-    badge.style.userSelect =
-        "none";
-
-
-    badge.style.webkitUserDrag =
-        "none";
-
-
-    badge.style.transformOrigin =
-        "center center";
-
-
-    badge.style.transform =
-        `
-        translate(-50%, -50%)
-        scale(0.25)
-        `;
-
-
-    badge.style.filter =
-        `
-        drop-shadow(
-            0 8px 14px
-            rgba(0, 0, 0, 0.15)
-        )
-        `;
-
-
-    document.body.appendChild(
-        badge
-    );
-
-
-    rarityImage =
-        badge;
-
-
-    const startAnimation =
-        () => {
-
-
-            const pop =
-                badge.animate(
-                    [
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(0.25)
-                                rotate(-5deg)
-                                `,
-
-                            opacity:
-                                0
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(1.14)
-                                rotate(3deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            offset:
-                                0.65
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(0.96)
-                                rotate(-1deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            offset:
-                                0.82
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(1)
-                                rotate(0deg)
-                                `,
-
-                            opacity:
-                                1
-                        }
-
-                    ],
-
-                    {
-
-                        duration:
-                            520,
-
-                        easing:
-                            "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                        fill:
-                            "forwards"
-
-                    }
-                );
-
-
-            pop.onfinish =
-                () => {
-
-
-                    setTimeout(
-                        () => {
-
-                            hideRarityAndRevealResult(
-                                badge
-                            );
-
-                        },
-
-                        RARITY_DISPLAY_TIME
-                    );
-
-                };
-
-        };
-
-
-    if (
-        badge.complete &&
-        badge.naturalWidth > 0
-    ) {
-
-        startAnimation();
-
-    } else {
-
-        badge.addEventListener(
-            "load",
-            startAnimation,
-            {
-                once:
-                    true
-            }
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   OCULTAR RAREZA
-   ========================================= */
-
-function hideRarityAndRevealResult(
-    badge
-) {
-
-    const animation =
-        badge.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1)
-                        `,
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1.10)
-                        `,
-
-                    opacity:
-                        1,
-
-                    offset:
-                        0.35
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(0.60)
-                        `,
-
-                    opacity:
-                        0
-                }
-
-            ],
-
-            {
-
-                duration:
-                    340,
-
-                easing:
-                    "ease-in",
-
-                fill:
-                    "forwards"
-
-            }
-        );
-
-
-    animation.onfinish =
-        () => {
-
-
-            badge.remove();
-
-
-            rarityImage =
-                null;
-
-
-            revealOpenedCapsule();
-
-        };
-
-}
-
-
-/* =========================================
-   MOSTRAR IMAGEN 2
-   ========================================= */
-
-function revealOpenedCapsule() {
-
-    if (
-        !dispensedCapsule ||
-        !currentGachaResult
-    ) {
-
-        return;
-
-    }
-
-
-    const capsule =
-        dispensedCapsule;
-
-
-    capsule.src =
-        currentGachaResult.opened;
-
-
-    const showResult =
-        () => {
-
-
-            capsule.getAnimations().forEach(
-                animation =>
-                    animation.cancel()
-            );
-
-
-            capsule.style.visibility =
-                "visible";
-
-
-            capsule.style.height =
-                "auto";
-
-
-            capsule.style.opacity =
-                "1";
-
-
-            capsule.style.pointerEvents =
-                "none";
-
-
-            capsule.style.filter =
-                `
-                drop-shadow(
-                    0 10px 18px
-                    rgba(0, 0, 0, 0.22)
-                )
-                `;
-
-
-            capsule.style.transform =
-                `
-                translate(-50%, -50%)
-                scale(1)
-                rotate(0deg)
-                `;
-
-
-            const resultAnimation =
-                capsule.animate(
-                    [
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(0.72)
-                                rotate(-3deg)
-                                `,
-
-                            opacity:
-                                0,
-
-                            filter:
-                                `
-                                drop-shadow(
-                                    0 2px 4px
-                                    rgba(0,0,0,0)
-                                )
-                                `
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(1.10)
-                                rotate(2deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            filter:
-                                `
-                                drop-shadow(
-                                    0 12px 22px
-                                    rgba(0,0,0,0.24)
-                                )
-                                `,
-
-                            offset:
-                                0.62
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(0.97)
-                                rotate(-1deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            offset:
-                                0.82
-                        },
-
-                        {
-                            transform:
-                                `
-                                translate(-50%, -50%)
-                                scale(1)
-                                rotate(0deg)
-                                `,
-
-                            opacity:
-                                1,
-
-                            filter:
-                                `
-                                drop-shadow(
-                                    0 10px 18px
-                                    rgba(0,0,0,0.22)
-                                )
-                                `
-                        }
-
-                    ],
-
-                    {
-
-                        duration:
-                            600,
-
-                        easing:
-                            "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                        fill:
-                            "forwards"
-
-                    }
-                );
-
-
-            resultAnimation.onfinish =
-                () => {
-
-
-                    capsuleIsOpening =
-                        false;
-
-
-                    /*
-                       LETTER todavía NO se
-                       puede cerrar.
-
-                       Primero hay que hacer
-                       click en letter2.
-                    */
-
-                    if (
-                        currentGachaResult.name ===
-                        "letter"
-                    ) {
-
-                        letterCanRevealFinal =
-                            true;
-
-
-                        capsuleCanClose =
-                            false;
-
-                    } else {
-
-                        capsuleCanClose =
-                            true;
-
-                    }
-
-
-                    capsule.style.pointerEvents =
-                        "auto";
-
-
-                    capsule.style.cursor =
-                        "pointer";
-
-                };
-
-        };
-
-
-    if (
-        capsule.complete &&
-        capsule.naturalWidth > 0
-    ) {
-
-        showResult();
-
-    } else {
-
-        capsule.addEventListener(
-            "load",
-            showResult,
-            {
-                once:
-                    true
-            }
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   LETTER2 -> LETTER3
-   ========================================= */
-
-function revealLetterFinal() {
-
-    if (
-        !letterCanRevealFinal ||
-        !dispensedCapsule ||
-        !currentGachaResult ||
-        currentGachaResult.name !==
-            "letter"
-    ) {
-
-        return;
-
-    }
-
-
-    letterCanRevealFinal =
-        false;
-
-
-    capsuleCanClose =
-        false;
-
-
-    const capsule =
-        dispensedCapsule;
-
-
-    capsule.style.pointerEvents =
-        "none";
-
-
-    capsule.style.cursor =
-        "default";
-
-
-    /*
-       Pequeño pop de salida de letter2.
-    */
-
-    const transitionOut =
-        capsule.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1)
-                        rotate(0deg)
-                        `,
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1.08)
-                        rotate(2deg)
-                        `,
-
-                    opacity:
-                        1,
-
-                    offset:
-                        0.45
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(0.78)
-                        rotate(-3deg)
-                        `,
-
-                    opacity:
-                        0
-                }
-
-            ],
-
-            {
-
-                duration:
-                    320,
-
-                easing:
-                    "ease-in",
-
-                fill:
-                    "forwards"
-
-            }
-        );
-
-
-    transitionOut.onfinish =
-        () => {
-
-
-            capsule.src =
-                currentGachaResult.final;
-
-
-            const showFinal =
-                () => {
-
-
-                    capsule.getAnimations().forEach(
-                        animation =>
-                            animation.cancel()
-                    );
-
-
-                    capsule.style.opacity =
-                        "1";
-
-
-                    capsule.style.visibility =
-                        "visible";
-
-
-                    capsule.style.filter =
-                        `
-                        drop-shadow(
-                            0 10px 18px
-                            rgba(0, 0, 0, 0.22)
-                        )
-                        `;
-
-
-                    const finalAnimation =
-                        capsule.animate(
-                            [
-
-                                {
-                                    transform:
-                                        `
-                                        translate(-50%, -50%)
-                                        scale(0.72)
-                                        rotate(-3deg)
-                                        `,
-
-                                    opacity:
-                                        0
-                                },
-
-                                {
-                                    transform:
-                                        `
-                                        translate(-50%, -50%)
-                                        scale(1.12)
-                                        rotate(2deg)
-                                        `,
-
-                                    opacity:
-                                        1,
-
-                                    offset:
-                                        0.62
-                                },
-
-                                {
-                                    transform:
-                                        `
-                                        translate(-50%, -50%)
-                                        scale(0.97)
-                                        rotate(-1deg)
-                                        `,
-
-                                    opacity:
-                                        1,
-
-                                    offset:
-                                        0.82
-                                },
-
-                                {
-                                    transform:
-                                        `
-                                        translate(-50%, -50%)
-                                        scale(1)
-                                        rotate(0deg)
-                                        `,
-
-                                    opacity:
-                                        1
-                                }
-
-                            ],
-
-                            {
-
-                                duration:
-                                    620,
-
-                                easing:
-                                    "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                                fill:
-                                    "forwards"
-
-                            }
-                        );
-
-
-                    finalAnimation.onfinish =
-                        () => {
-
-
-                            /*
-                               Ahora sí letter3
-                               se puede cerrar.
-                            */
-
-                            capsuleCanClose =
-                                true;
-
-
-                            capsule.style.pointerEvents =
-                                "auto";
-
-
-                            capsule.style.cursor =
-                                "pointer";
-
-                        };
-
-                };
-
-
-            if (
-                capsule.complete &&
-                capsule.naturalWidth > 0
-            ) {
-
-                showFinal();
-
-            } else {
-
-                capsule.addEventListener(
-                    "load",
-                    showFinal,
-                    {
-                        once:
-                            true
-                    }
-                );
-
-            }
-
-        };
-
-}
 
 
 /* =========================================
@@ -2372,152 +2109,120 @@ function revealLetterFinal() {
 function closeResult() {
 
     if (
-        !capsuleCanClose ||
-        capsuleIsClosing ||
-        !dispensedCapsule
+        !dispensedCapsule ||
+        capsuleIsClosing
     ) {
-
         return;
-
     }
 
 
-    capsuleCanClose =
-        false;
+    capsuleIsClosing = true;
+
+    capsuleCanClose = false;
+
+    letterCanRevealFinal = false;
 
 
-    capsuleIsClosing =
-        true;
+    const animation =
+        dispensedCapsule.animate(
 
-
-    const capsule =
-        dispensedCapsule;
-
-
-    capsule.style.pointerEvents =
-        "none";
-
-
-    capsule.style.cursor =
-        "default";
-
-
-    const closeAnimation =
-        capsule.animate(
             [
 
                 {
                     transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1)
-                        rotate(0deg)
-                        `,
+                        "translate(-50%, -50%) scale(1)",
 
                     opacity:
-                        1,
-
-                    filter:
-                        `
-                        drop-shadow(
-                            0 10px 18px
-                            rgba(0,0,0,0.22)
-                        )
-                        `
+                        1
                 },
 
                 {
                     transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(1.05)
-                        rotate(2deg)
-                        `,
+                        "translate(-50%, -50%) scale(0.85)",
 
                     opacity:
-                        1,
-
-                    offset:
-                        0.30
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        scale(0.70)
-                        rotate(-4deg)
-                        `,
-
-                    opacity:
-                        0,
-
-                    filter:
-                        `
-                        drop-shadow(
-                            0 2px 4px
-                            rgba(0,0,0,0)
-                        )
-                        `
+                        0
                 }
 
             ],
 
             {
-
                 duration:
-                    420,
+                    350,
 
                 easing:
-                    "cubic-bezier(0.4, 0, 0.2, 1)",
+                    "ease-in",
 
                 fill:
                     "forwards"
-
             }
+
         );
 
 
-    closeAnimation.onfinish =
+    animation.onfinish =
         () => {
 
+            if (
+                dispensedCapsule &&
+                dispensedCapsule.parentNode
+            ) {
 
-            capsule.remove();
+                dispensedCapsule.remove();
+
+            }
 
 
             dispensedCapsule =
                 null;
 
 
-            currentGachaResult =
-                null;
-
-
-            capsuleIsOpening =
-                false;
-
-
-            capsuleIsClosing =
-                false;
-
-
-            capsuleCanOpen =
-                false;
-
-
-            capsuleCanClose =
-                false;
-
-
-            letterCanRevealFinal =
-                false;
-
-
-            unlockNextToken();
+            resetAfterResult();
 
         };
 
 }
+
+
+
+/* =========================================
+   PREPARAR SIGUIENTE TOKEN
+   ========================================= */
+
+function resetAfterResult() {
+
+    capsuleCanOpen =
+        false;
+
+    capsuleIsOpening =
+        false;
+
+    capsuleCanClose =
+        false;
+
+    capsuleIsClosing =
+        false;
+
+    machineIsRunning =
+        false;
+
+    knobIsTurning =
+        false;
+
+    tokenInserted =
+        false;
+
+    currentGachaResult =
+        null;
+
+    letterCanRevealFinal =
+        false;
+
+
+    unlockNextToken();
+
+}
+
 
 
 /* =========================================
@@ -2559,1002 +2264,9 @@ function unlockNextToken() {
         ];
 
 
-    tokenMoveX =
-        0;
-
-
-    tokenMoveY =
-        0;
-
-
-    tokenScale =
-        1;
-
-
-    activateCurrentToken();
-
-}
-
-
-/* =========================================
-   POSICIÓN DE RANURA
-   ========================================= */
-
-function getTokenSlotPosition() {
-
-    const machineRect =
-        machine.getBoundingClientRect();
-
-
-    return {
-
-        x:
-            machineRect.left +
-            machineRect.width *
-            0.32,
-
-        y:
-            machineRect.top +
-            machineRect.height *
-            0.695,
-
-        radiusX:
-            machineRect.width *
-            0.055,
-
-        radiusY:
-            machineRect.height *
-            0.045
-
-    };
-
-}
-
-
-/* =========================================
-   CENTRO DEL TOKEN
-   ========================================= */
-
-function getTokenCenter() {
-
-    if (
-        !currentToken
-    ) {
-
-        return {
-            x: 0,
-            y: 0
-        };
-
-    }
-
-
-    const rect =
-        currentToken.getBoundingClientRect();
-
-
-    return {
-
-        x:
-            rect.left +
-            rect.width / 2,
-
-        y:
-            rect.top +
-            rect.height / 2
-
-    };
-
-}
-
-
-/* =========================================
-   DISTANCIA A RANURA
-   ========================================= */
-
-function getTokenDistanceFromSlot() {
-
-    const tokenCenter =
-        getTokenCenter();
-
-
-    const slot =
-        getTokenSlotPosition();
-
-
-    const dx =
-        tokenCenter.x -
-        slot.x;
-
-
-    const dy =
-        tokenCenter.y -
-        slot.y;
-
-
-    return Math.sqrt(
-        dx * dx +
-        dy * dy
-    );
-
-}
-
-
-/* =========================================
-   ESCALA DEL TOKEN
-   ========================================= */
-
-function calculateTokenScale() {
-
-    const machineRect =
-        machine.getBoundingClientRect();
-
-
-    const distance =
-        getTokenDistanceFromSlot();
-
-
-    const influenceDistance =
-        machineRect.width *
-        0.23;
-
-
-    if (
-        distance >=
-        influenceDistance
-    ) {
-
-        return 1;
-
-    }
-
-
-    const progress =
-        distance /
-        influenceDistance;
-
-
-    return (
-        TOKEN_MIN_SCALE +
-        (
-            1 -
-            TOKEN_MIN_SCALE
-        ) *
-        progress
-    );
-
-}
-
-
-/* =========================================
-   TRANSFORM DEL TOKEN
-   ========================================= */
-
-function updateTokenTransform() {
-
-    if (
-        !currentToken
-    ) {
-
-        return;
-
-    }
-
-
-    currentToken.style.transform =
-        `
-        translate(
-            ${tokenMoveX}px,
-            ${tokenMoveY}px
-        )
-        scale(${tokenScale})
-        `;
-
-}
-
-
-/* =========================================
-   DETECTAR RANURA
-   ========================================= */
-
-function tokenIsNearSlot() {
-
-    if (
-        !currentToken
-    ) {
-
-        return false;
-
-    }
-
-
-    const tokenCenter =
-        getTokenCenter();
-
-
-    const slot =
-        getTokenSlotPosition();
-
-
-    const distanceX =
-        Math.abs(
-            tokenCenter.x -
-            slot.x
-        );
-
-
-    const distanceY =
-        Math.abs(
-            tokenCenter.y -
-            slot.y
-        );
-
-
-    return (
-        distanceX <=
-        slot.radiusX &&
-        distanceY <=
-        slot.radiusY
-    );
-
-}
-
-
-/* =========================================
-   AGARRAR TOKEN
-   ========================================= */
-
-function startTokenDrag(
-    event
-) {
-
-    if (
-        event.currentTarget !==
-        currentToken
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        tokenInserted ||
-        dispensedCapsule ||
-        capsuleIsOpening ||
-        capsuleIsClosing
-    ) {
-
-        return;
-
-    }
-
-
-    tokenIsDragging =
-        true;
-
-
-    startPointerX =
-        event.clientX -
-        tokenMoveX;
-
-
-    startPointerY =
-        event.clientY -
-        tokenMoveY;
-
-
     currentToken.classList.add(
-        "dragging"
-    );
-
-
-    currentToken.setPointerCapture(
-        event.pointerId
-    );
-
-}
-
-
-/* =========================================
-   MOVER TOKEN
-   ========================================= */
-
-function moveToken(
-    event
-) {
-
-    if (
-        !tokenIsDragging ||
-        event.currentTarget !==
-        currentToken
-    ) {
-
-        return;
-
-    }
-
-
-    tokenMoveX =
-        event.clientX -
-        startPointerX;
-
-
-    tokenMoveY =
-        event.clientY -
-        startPointerY;
-
-
-    tokenScale =
-        calculateTokenScale();
-
-
-    updateTokenTransform();
-
-
-    if (
-        tokenIsNearSlot()
-    ) {
-
-        currentToken.classList.add(
-            "near-slot"
-        );
-
-    } else {
-
-        currentToken.classList.remove(
-            "near-slot"
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   SOLTAR TOKEN
-   ========================================= */
-
-function endTokenDrag(
-    event
-) {
-
-    if (
-        !tokenIsDragging ||
-        event.currentTarget !==
-        currentToken
-    ) {
-
-        return;
-
-    }
-
-
-    tokenIsDragging =
-        false;
-
-
-    currentToken.classList.remove(
-        "dragging"
-    );
-
-
-    if (
-        currentToken.hasPointerCapture(
-            event.pointerId
-        )
-    ) {
-
-        currentToken.releasePointerCapture(
-            event.pointerId
-        );
-
-    }
-
-
-    if (
-        tokenIsNearSlot()
-    ) {
-
-        insertToken();
-
-        return;
-
-    }
-
-
-    returnTokenHome();
-
-}
-
-
-/* =========================================
-   REGRESAR TOKEN
-   ========================================= */
-
-function returnTokenHome() {
-
-    if (
-        !currentToken
-    ) {
-
-        return;
-
-    }
-
-
-    currentToken.classList.remove(
-        "near-slot"
-    );
-
-
-    const tokenBeingMoved =
-        currentToken;
-
-
-    const currentX =
-        tokenMoveX;
-
-
-    const currentY =
-        tokenMoveY;
-
-
-    const currentScale =
-        tokenScale;
-
-
-    const animation =
-        tokenBeingMoved.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(
-                            ${currentX}px,
-                            ${currentY}px
-                        )
-                        scale(${currentScale})
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(0px, 0px)
-                        scale(1)
-                        `
-                }
-
-            ],
-
-            {
-
-                duration:
-                    450,
-
-                easing:
-                    "cubic-bezier(0.22, 1, 0.36, 1)"
-
-            }
-        );
-
-
-    animation.onfinish =
-        () => {
-
-
-            tokenMoveX =
-                0;
-
-
-            tokenMoveY =
-                0;
-
-
-            tokenScale =
-                1;
-
-
-            tokenBeingMoved.style.transform =
-                `
-                translate(0px, 0px)
-                scale(1)
-                `;
-
-        };
-
-}
-
-
-/* =========================================
-   INSERTAR TOKEN
-   ========================================= */
-
-function insertToken() {
-
-    if (
-        tokenInserted ||
-        !currentToken
-    ) {
-
-        return;
-
-    }
-
-
-    tokenInserted =
-        true;
-
-
-    const tokenBeingUsed =
-        currentToken;
-
-
-    tokenBeingUsed.classList.remove(
-        "near-slot"
-    );
-
-
-    tokenBeingUsed.classList.remove(
         "active-token"
     );
-
-
-    tokenBeingUsed.classList.add(
-        "used-token"
-    );
-
-
-    const tokenRect =
-        tokenBeingUsed.getBoundingClientRect();
-
-
-    const tokenCenterX =
-        tokenRect.left +
-        tokenRect.width / 2;
-
-
-    const tokenCenterY =
-        tokenRect.top +
-        tokenRect.height / 2;
-
-
-    const slot =
-        getTokenSlotPosition();
-
-
-    const finalX =
-        tokenMoveX +
-        (
-            slot.x -
-            tokenCenterX
-        );
-
-
-    const finalY =
-        tokenMoveY +
-        (
-            slot.y -
-            tokenCenterY
-        );
-
-
-    const startingScale =
-        tokenScale;
-
-
-    const animation =
-        tokenBeingUsed.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(
-                            ${tokenMoveX}px,
-                            ${tokenMoveY}px
-                        )
-                        scale(${startingScale})
-                        `,
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        `
-                        translate(
-                            ${finalX}px,
-                            ${finalY}px
-                        )
-                        scale(0.35)
-                        `,
-
-                    opacity:
-                        1,
-
-                    offset:
-                        0.55
-                },
-
-                {
-                    transform:
-                        `
-                        translate(
-                            ${finalX}px,
-                            ${finalY}px
-                        )
-                        scale(0.08)
-                        `,
-
-                    opacity:
-                        0
-                }
-
-            ],
-
-            {
-
-                duration:
-                    600,
-
-                easing:
-                    "cubic-bezier(0.22, 1, 0.36, 1)",
-
-                fill:
-                    "forwards"
-
-            }
-        );
-
-
-    animation.onfinish =
-        () => {
-
-
-            tokenBeingUsed.style.visibility =
-                "hidden";
-
-
-            knob.classList.remove(
-                "locked"
-            );
-
-
-            knob.classList.add(
-                "ready"
-            );
-
-        };
-
-}
-
-
-/* =========================================
-   ÁNGULO DE PERILLA
-   ========================================= */
-
-function getPointerAngle(
-    event
-) {
-
-    const knobRect =
-        knob.getBoundingClientRect();
-
-
-    const centerX =
-        knobRect.left +
-        knobRect.width / 2;
-
-
-    const centerY =
-        knobRect.top +
-        knobRect.height / 2;
-
-
-    const radians =
-        Math.atan2(
-            event.clientY -
-            centerY,
-
-            event.clientX -
-            centerX
-        );
-
-
-    return (
-        radians *
-        180 /
-        Math.PI
-    );
-
-}
-
-
-/* =========================================
-   EMPEZAR GIRO
-   ========================================= */
-
-function startKnobTurn(
-    event
-) {
-
-    if (
-        !tokenInserted ||
-        machineIsRunning ||
-        dispensedCapsule
-    ) {
-
-        return;
-
-    }
-
-
-    knobIsTurning =
-        true;
-
-
-    knobRotation =
-        0;
-
-
-    knobLastPointerAngle =
-        getPointerAngle(
-            event
-        );
-
-
-    knob.classList.add(
-        "turning"
-    );
-
-
-    knob.setPointerCapture(
-        event.pointerId
-    );
-
-
-    event.preventDefault();
-
-}
-
-
-/* =========================================
-   MOVER PERILLA
-   ========================================= */
-
-function moveKnob(
-    event
-) {
-
-    if (
-        !knobIsTurning
-    ) {
-
-        return;
-
-    }
-
-
-    const currentAngle =
-        getPointerAngle(
-            event
-        );
-
-
-    let difference =
-        currentAngle -
-        knobLastPointerAngle;
-
-
-    if (
-        difference > 180
-    ) {
-
-        difference -=
-            360;
-
-    }
-
-
-    if (
-        difference < -180
-    ) {
-
-        difference +=
-            360;
-
-    }
-
-
-    knobRotation +=
-        -difference;
-
-
-    knobRotation =
-        Math.max(
-            0,
-            knobRotation
-        );
-
-
-    knobRotation =
-        Math.min(
-            360,
-            knobRotation
-        );
-
-
-    knob.style.transform =
-        `
-        translate(-50%, -50%)
-        rotate(${-knobRotation}deg)
-        `;
-
-
-    knobLastPointerAngle =
-        currentAngle;
-
-
-    if (
-        knobRotation >=
-        KNOB_REQUIRED_TURN
-    ) {
-
-        completeKnobTurn(
-            event.pointerId
-        );
-
-    }
-
-
-    event.preventDefault();
-
-}
-
-
-/* =========================================
-   SOLTAR PERILLA ANTES
-   ========================================= */
-
-function endKnobTurn(
-    event
-) {
-
-    if (
-        !knobIsTurning
-    ) {
-
-        return;
-
-    }
-
-
-    knobIsTurning =
-        false;
-
-
-    knob.classList.remove(
-        "turning"
-    );
-
-
-    if (
-        knob.hasPointerCapture(
-            event.pointerId
-        )
-    ) {
-
-        knob.releasePointerCapture(
-            event.pointerId
-        );
-
-    }
-
-
-    resetKnob();
-
-}
-
-
-/* =========================================
-   RESET PERILLA
-   ========================================= */
-
-function resetKnob() {
-
-    const startingRotation =
-        knobRotation;
-
-
-    const animation =
-        knob.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        rotate(${-startingRotation}deg)
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        rotate(0deg)
-                        `
-                }
-
-            ],
-
-            {
-
-                duration:
-                    450,
-
-                easing:
-                    "cubic-bezier(0.22, 1, 0.36, 1)"
-
-            }
-        );
-
-
-    animation.onfinish =
-        () => {
-
-
-            knobRotation =
-                0;
-
-
-            knob.style.transform =
-                `
-                translate(-50%, -50%)
-                rotate(0deg)
-                `;
-
-        };
-
-}
-
-
-/* =========================================
-   GIRO COMPLETADO
-   ========================================= */
-
-function completeKnobTurn(
-    pointerId
-) {
-
-    knobIsTurning =
-        false;
-
-
-    knob.classList.remove(
-        "turning"
-    );
-
-
-    if (
-        knob.hasPointerCapture(
-            pointerId
-        )
-    ) {
-
-        knob.releasePointerCapture(
-            pointerId
-        );
-
-    }
-
-
-    tokenInserted =
-        false;
 
 
     knob.classList.remove(
@@ -3566,186 +2278,12 @@ function completeKnobTurn(
         "locked"
     );
 
-
-    const animation =
-        knob.animate(
-            [
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        rotate(${-knobRotation}deg)
-                        `
-                },
-
-                {
-                    transform:
-                        `
-                        translate(-50%, -50%)
-                        rotate(-360deg)
-                        `
-                }
-
-            ],
-
-            {
-
-                duration:
-                    220,
-
-                easing:
-                    "ease-out"
-
-            }
-        );
-
-
-    animation.onfinish =
-        () => {
-
-
-            knobRotation =
-                0;
-
-
-            knob.style.transform =
-                `
-                translate(-50%, -50%)
-                rotate(0deg)
-                `;
-
-        };
-
-
-    runGacha();
-
 }
 
 
-/* =========================================
-   EVENTOS TOKENS
-   ========================================= */
-
-tokens.forEach(
-    token => {
-
-
-        token.addEventListener(
-            "pointerdown",
-            startTokenDrag
-        );
-
-
-        token.addEventListener(
-            "pointermove",
-            moveToken
-        );
-
-
-        token.addEventListener(
-            "pointerup",
-            endTokenDrag
-        );
-
-
-        token.addEventListener(
-            "pointercancel",
-            endTokenDrag
-        );
-
-    }
-);
-
 
 /* =========================================
-   EVENTOS PERILLA
+   INICIALIZACIÓN
    ========================================= */
 
-knob.addEventListener(
-    "pointerdown",
-    startKnobTurn
-);
-
-
-knob.addEventListener(
-    "pointermove",
-    moveKnob
-);
-
-
-knob.addEventListener(
-    "pointerup",
-    endKnobTurn
-);
-
-
-knob.addEventListener(
-    "pointercancel",
-    endKnobTurn
-);
-
-
-/* =========================================
-   CLICK EN RESULTADO
-   ========================================= */
-
-document.addEventListener(
-    "click",
-    event => {
-
-
-        if (
-            event.target !==
-            dispensedCapsule
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-           1. Cápsula cerrada.
-        */
-
-        if (
-            capsuleCanOpen
-        ) {
-
-            openCapsule();
-
-            return;
-
-        }
-
-
-        /*
-           2. LETTER2 -> LETTER3.
-        */
-
-        if (
-            letterCanRevealFinal
-        ) {
-
-            revealLetterFinal();
-
-            return;
-
-        }
-
-
-        /*
-           3. Cerrar resultado.
-        */
-
-        if (
-            capsuleCanClose
-        ) {
-
-            closeResult();
-
-        }
-
-    }
-);
+activateCurrentToken();
