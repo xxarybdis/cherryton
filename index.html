@@ -1,50 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Cherryton Gacha</title>
+    <title>Cherryton Gacha</title>
 
-  <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="page">
+    <main class="page">
 
-    <div class="machine-wrap">
+        <div class="machine-wrap">
 
-      <div class="capsule-area">
+            <!-- =========================
+                 CÁPSULAS
+                 ========================= -->
 
-        <img src="assets/capsule-dog.png" class="capsule capsule-1">
-        <img src="assets/capsule-cat.png" class="capsule capsule-2">
-        <img src="assets/capsule-letter.png" class="capsule capsule-3">
-        <img src="assets/capsule-candy.png" class="capsule capsule-4">
-        <img src="assets/capsule-friends.png" class="capsule capsule-5">
+            <div class="capsule-area">
 
-        <img src="assets/capsule-cat.png" class="capsule capsule-6">
-        <img src="assets/capsule-candy.png" class="capsule capsule-7">
-        <img src="assets/capsule-dog.png" class="capsule capsule-8">
-        <img src="assets/capsule-friends.png" class="capsule capsule-9">
-        <img src="assets/capsule-letter.png" class="capsule capsule-10">
+                <img src="assets/capsule-dog.png" class="capsule capsule-1" alt="">
+                <img src="assets/capsule-cat.png" class="capsule capsule-2" alt="">
+                <img src="assets/capsule-letter.png" class="capsule capsule-3" alt="">
+                <img src="assets/capsule-candy.png" class="capsule capsule-4" alt="">
+                <img src="assets/capsule-friends.png" class="capsule capsule-5" alt="">
 
-        <img src="assets/capsule-dog.png" class="capsule capsule-11">
-        <img src="assets/capsule-cat.png" class="capsule capsule-12">
+                <img src="assets/capsule-cat.png" class="capsule capsule-6" alt="">
+                <img src="assets/capsule-candy.png" class="capsule capsule-7" alt="">
+                <img src="assets/capsule-dog.png" class="capsule capsule-8" alt="">
+                <img src="assets/capsule-friends.png" class="capsule capsule-9" alt="">
+                <img src="assets/capsule-letter.png" class="capsule capsule-10" alt="">
 
-      </div>
+                <img src="assets/capsule-dog.png" class="capsule capsule-11" alt="">
+                <img src="assets/capsule-cat.png" class="capsule capsule-12" alt="">
 
-      <img
-        src="assets/machine.png"
-        alt="Máquina de gachapón"
-        class="machine-img"
-      >
+            </div>
 
-    </div>
 
-  </main>
+            <!-- =========================
+                 MÁQUINA
+                 ========================= -->
 
-  <script src="script.js"></script>
+            <img
+                src="assets/machine.png"
+                alt="Máquina de gachapón"
+                class="machine-img"
+            >
+
+
+            <!-- =========================
+                 ZONA DE LA RANURA
+
+                 Es invisible.
+                 JS detecta cuando el token
+                 llega hasta aquí.
+                 ========================= -->
+
+            <div
+                class="token-slot"
+                aria-hidden="true"
+            ></div>
+
+
+            <!-- =========================
+                 TOKEN
+                 ========================= -->
+
+            <img
+                src="assets/token.png"
+                alt="Token Cherryton"
+                class="token"
+                draggable="false"
+            >
+
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
 
 </body>
 </html>
