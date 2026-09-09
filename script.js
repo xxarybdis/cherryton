@@ -46,19 +46,7 @@ let startPointerY = 0;
 let tokenMoveX = 0;
 let tokenMoveY = 0;
 
-/*
-   Escala actual del token.
-
-   1 = tamaño normal.
-*/
-
 let tokenScale = 1;
-
-
-/*
-   Tamaño mínimo cuando está justo
-   sobre la ranura.
-*/
 
 const TOKEN_MIN_SCALE = 0.55;
 
@@ -70,11 +58,6 @@ const TOKEN_MIN_SCALE = 0.55;
 let knobRotation = 0;
 
 let knobLastPointerAngle = 0;
-
-
-/*
-   Aproximadamente 3/4 de vuelta.
-*/
 
 const KNOB_REQUIRED_TURN = 280;
 
@@ -435,9 +418,17 @@ function getTokenSlotPosition() {
             machineRect.left +
             machineRect.width * 0.32,
 
+        /*
+           Antes: 0.71
+           Ahora: 0.695
+
+           Esto sube un poco el punto
+           donde el token es absorbido.
+        */
+
         y:
             machineRect.top +
-            machineRect.height * 0.71,
+            machineRect.height * 0.695,
 
         radiusX:
             machineRect.width * 0.055,
@@ -509,18 +500,6 @@ function getTokenDistanceFromSlot() {
    TOKEN - CALCULAR TAMAÑO
    ========================================= */
 
-/*
-   Conforme el token se acerca,
-   pasa gradualmente de:
-
-   scale(1)
-       ↓
-   scale(0.55)
-
-   Si se vuelve a alejar,
-   recupera el tamaño.
-*/
-
 function calculateTokenScale() {
 
     const machineRect =
@@ -531,22 +510,9 @@ function calculateTokenScale() {
         getTokenDistanceFromSlot();
 
 
-    /*
-       Radio alrededor de la ranura
-       en el que comienza el efecto.
-
-       Cuanto mayor sea este número,
-       antes empezará a encogerse.
-    */
-
     const influenceDistance =
         machineRect.width * 0.23;
 
-
-    /*
-       Fuera de esa distancia:
-       tamaño completamente normal.
-    */
 
     if (
         distance >=
@@ -558,20 +524,10 @@ function calculateTokenScale() {
     }
 
 
-    /*
-       0 = justo en la ranura
-       1 = borde exterior de influencia
-    */
-
     const progress =
         distance /
         influenceDistance;
 
-
-    /*
-       Interpolamos entre
-       TOKEN_MIN_SCALE y 1.
-    */
 
     return (
         TOKEN_MIN_SCALE +
@@ -690,28 +646,12 @@ function moveToken(event) {
         startPointerY;
 
 
-    /*
-       Primero calculamos dónde está
-       con respecto a la ranura.
-    */
-
     tokenScale =
         calculateTokenScale();
 
 
-    /*
-       Después aplicamos movimiento
-       + tamaño al mismo tiempo.
-    */
-
     updateTokenTransform();
 
-
-    /*
-       Conservamos el brillo que ya
-       teníamos al llegar a la zona
-       válida de inserción.
-    */
 
     if (tokenIsNearSlot()) {
 
@@ -762,12 +702,6 @@ function endTokenDrag(event) {
     }
 
 
-    /*
-       Si está en la ranura,
-       mantenemos la animación
-       de introducción y desaparición.
-    */
-
     if (tokenIsNearSlot()) {
 
         insertToken();
@@ -775,11 +709,6 @@ function endTokenDrag(event) {
         return;
     }
 
-
-    /*
-       Si no, vuelve a casa y
-       recupera su tamaño normal.
-    */
 
     returnTokenHome();
 
@@ -908,17 +837,6 @@ function insertToken() {
         );
 
 
-    /*
-       IMPORTANTE:
-
-       La animación comienza desde el
-       tamaño que tenga el token en ese
-       preciso momento.
-
-       Así no da un salto de vuelta al
-       100% antes de desaparecer.
-    */
-
     const startingScale =
         tokenScale;
 
@@ -978,11 +896,6 @@ function insertToken() {
         token.style.visibility =
             "hidden";
 
-
-        /*
-           Token aceptado:
-           desbloqueamos la perilla.
-        */
 
         knob.classList.remove(
             "locked"
@@ -1097,10 +1010,6 @@ function moveKnob(event) {
         difference += 360;
     }
 
-
-    /*
-       Sentido antihorario.
-    */
 
     knobRotation +=
         -difference;
