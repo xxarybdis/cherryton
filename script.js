@@ -21,18 +21,15 @@ const tokenOrder = [
 ];
 
 
-
 /* =========================================
    CONFIGURACIÓN
    ========================================= */
 
 
-/*
+/* -----------------------------------------
    RANURA DEL TOKEN
-
-   NO CAMBIAR:
-   ya está calibrada.
-*/
+   NO CAMBIAR
+   ----------------------------------------- */
 
 const TOKEN_SLOT_X = 0.32;
 const TOKEN_SLOT_Y = 0.695;
@@ -41,12 +38,10 @@ const TOKEN_SLOT_RADIUS_X = 0.055;
 const TOKEN_SLOT_RADIUS_Y = 0.045;
 
 
-/*
+/* -----------------------------------------
    SALIDA DE LA CÁPSULA
-
-   NO CAMBIAR:
-   ya está calibrada.
-*/
+   NO CAMBIAR
+   ----------------------------------------- */
 
 const DISPENSER_X = 62;
 const DISPENSER_Y = 81;
@@ -57,55 +52,47 @@ const CAPSULE_MOVE_X = -26;
 const CAPSULE_MOVE_Y = 64;
 
 
-/*
-   TAMAÑO DE LA CÁPSULA CERRADA
-   EN EL CENTRO
-*/
+/* -----------------------------------------
+   TAMAÑOS
+   ----------------------------------------- */
 
 const CENTER_CAPSULE_SIZE = 34;
 
-
-/*
-   NUEVO:
-   TAMAÑO DEL RESULTADO ABIERTO
-
-   Antes se veía pequeño.
-   Ahora ocupará 58% del ancho
-   de la máquina.
-*/
-
 const OPENED_RESULT_SIZE = 58;
-
-
-/*
-   Carta final ULTRA RARE.
-
-   La hacemos todavía un poquito
-   más grande.
-*/
 
 const FINAL_LETTER_SIZE = 62;
 
 
-/*
+/* -----------------------------------------
    TIEMPOS
-*/
+   ----------------------------------------- */
 
 const CAPSULE_EMERGE_TIME = 1550;
 
 const RARITY_TIME = 1900;
 
 
-/*
-   DROP SHADOW
-
-   Dejamos el valor que tú cambiaste:
-   0.75
-*/
+/* -----------------------------------------
+   SOMBRA DEL RESULTADO
+   ----------------------------------------- */
 
 const RESULT_DROP_SHADOW =
     "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.75))";
 
+
+/* -----------------------------------------
+   PERILLA
+   ----------------------------------------- */
+
+/*
+   La persona debe girarla manualmente.
+
+   Al llegar aproximadamente a 300°
+   antihorarios se completa el giro.
+*/
+
+const KNOB_COMPLETE_ROTATION = -300;
+const KNOB_FINAL_ROTATION = -360;
 
 
 /* =========================================
@@ -138,10 +125,15 @@ let rarityImage = null;
 
 let letterCanRevealFinal = false;
 
+
+/* =========================================
+   TOKEN ACTUAL
+   ========================================= */
+
 let currentTokenIndex = 0;
 
-let currentToken = tokenOrder[currentTokenIndex];
-
+let currentToken =
+    tokenOrder[currentTokenIndex];
 
 
 /* =========================================
@@ -196,9 +188,8 @@ const LETTER_CAPSULE = {
 };
 
 
-
 /* =========================================
-   MEZCLAR RESULTADOS
+   MEZCLAR LOS PRIMEROS 4 RESULTADOS
    ========================================= */
 
 function shuffleArray(array) {
@@ -232,11 +223,10 @@ function shuffleArray(array) {
 
 
 /*
-   Los primeros cuatro resultados
-   salen una sola vez cada uno,
-   en orden aleatorio.
+   4 resultados normales/rare
+   una sola vez cada uno.
 
-   La carta SIEMPRE es la quinta.
+   La carta siempre sale quinta.
 */
 
 const gachaQueue = [
@@ -250,26 +240,23 @@ const gachaQueue = [
 ];
 
 
-
 /* =========================================
-   TOKEN ACTIVO
+   ACTIVAR TOKEN
    ========================================= */
 
 function activateCurrentToken() {
 
-    tokenOrder.forEach(
-        token => {
+    tokenOrder.forEach(token => {
 
-            if (!token) {
-                return;
-            }
-
-            token.classList.remove(
-                "active-token"
-            );
-
+        if (!token) {
+            return;
         }
-    );
+
+        token.classList.remove(
+            "active-token"
+        );
+
+    });
 
 
     currentToken =
@@ -287,7 +274,6 @@ function activateCurrentToken() {
         );
 
         return;
-
     }
 
 
@@ -296,7 +282,6 @@ function activateCurrentToken() {
     );
 
 }
-
 
 
 /* =========================================
@@ -334,9 +319,8 @@ function getSlotPosition() {
 }
 
 
-
 /* =========================================
-   DISTANCIA DEL TOKEN A LA RANURA
+   DISTANCIA TOKEN → RANURA
    ========================================= */
 
 function getTokenSlotDistance(token) {
@@ -400,7 +384,6 @@ function getTokenSlotDistance(token) {
 }
 
 
-
 /* =========================================
    DRAG DEL TOKEN
    ========================================= */
@@ -412,7 +395,6 @@ let tokenStartPointerY = 0;
 
 let tokenMoveX = 0;
 let tokenMoveY = 0;
-
 
 
 function tokenPointerDown(event) {
@@ -459,7 +441,6 @@ function tokenPointerDown(event) {
 }
 
 
-
 function tokenPointerMove(event) {
 
     if (
@@ -491,8 +472,8 @@ function tokenPointerMove(event) {
 
 
     /*
-       El token se encoge suavemente
-       mientras se acerca.
+       Se encoge gradualmente
+       al acercarse a la ranura.
     */
 
     const shrinkDistance =
@@ -540,7 +521,6 @@ function tokenPointerMove(event) {
     event.preventDefault();
 
 }
-
 
 
 /* =========================================
@@ -594,7 +574,6 @@ function tokenPointerUp(event) {
 }
 
 
-
 /* =========================================
    REGRESAR TOKEN
    ========================================= */
@@ -630,7 +609,8 @@ function returnToken(token) {
             ],
 
             {
-                duration: 450,
+                duration:
+                    450,
 
                 easing:
                     "cubic-bezier(.2,.8,.2,1)",
@@ -658,7 +638,6 @@ function returnToken(token) {
 }
 
 
-
 /* =========================================
    INSERTAR TOKEN
    ========================================= */
@@ -666,6 +645,7 @@ function returnToken(token) {
 function insertToken(token) {
 
     tokenInserted = true;
+
 
     token.classList.remove(
         "near-slot"
@@ -757,8 +737,18 @@ function insertToken(token) {
                 "used-token"
             );
 
+
             token.style.opacity =
                 "0";
+
+
+            /*
+               Ahora la perilla queda
+               disponible para arrastrar.
+            */
+
+            resetKnobPosition();
+
 
             knob.classList.remove(
                 "locked"
@@ -773,85 +763,152 @@ function insertToken(token) {
 }
 
 
-
 /* =========================================
-   EVENTOS DE LOS TOKENS
+   EVENTOS DE TOKENS
    ========================================= */
 
-tokenOrder.forEach(
+tokenOrder.forEach(token => {
 
-    token => {
-
-        if (!token) {
-            return;
-        }
+    if (!token) {
+        return;
+    }
 
 
-        token.addEventListener(
-            "pointerdown",
-            tokenPointerDown
-        );
+    token.addEventListener(
+        "pointerdown",
+        tokenPointerDown
+    );
 
 
-        token.addEventListener(
-            "pointermove",
-            tokenPointerMove
-        );
+    token.addEventListener(
+        "pointermove",
+        tokenPointerMove
+    );
 
 
-        token.addEventListener(
-            "pointerup",
-            tokenPointerUp
-        );
+    token.addEventListener(
+        "pointerup",
+        tokenPointerUp
+    );
 
 
-        token.addEventListener(
-            "pointercancel",
-            tokenPointerUp
-        );
+    token.addEventListener(
+        "pointercancel",
+        tokenPointerUp
+    );
+
+});
+
+
+/* =========================================
+   PERILLA MANUAL
+   ========================================= */
+
+let knobPointerId = null;
+
+let knobPreviousPointerAngle = 0;
+
+let knobRotation = 0;
+
+let knobTurnCompleted = false;
+
+
+/* =========================================
+   OBTENER ÁNGULO DEL PUNTERO
+   ========================================= */
+
+function getPointerAngleAroundKnob(
+    clientX,
+    clientY
+) {
+
+    const rect =
+        knob.getBoundingClientRect();
+
+
+    const centerX =
+        rect.left +
+        rect.width / 2;
+
+    const centerY =
+        rect.top +
+        rect.height / 2;
+
+
+    return (
+        Math.atan2(
+            clientY - centerY,
+            clientX - centerX
+        )
+
+        *
+
+        180 /
+        Math.PI
+    );
+
+}
+
+
+/* =========================================
+   NORMALIZAR DIFERENCIA DE ÁNGULO
+   ========================================= */
+
+function normalizeAngleDifference(
+    difference
+) {
+
+    while (
+        difference > 180
+    ) {
+
+        difference -= 360;
 
     }
 
-);
 
+    while (
+        difference < -180
+    ) {
 
-
-/* =========================================
-   PERILLA
-   ========================================= */
-
-knob.addEventListener(
-
-    "pointerdown",
-
-    () => {
-
-        if (
-            !tokenInserted ||
-            knobIsTurning ||
-            machineIsRunning
-        ) {
-            return;
-        }
-
-
-        turnKnob();
+        difference += 360;
 
     }
 
-);
 
+    return difference;
+
+}
 
 
 /* =========================================
-   GIRAR PERILLA
+   EMPEZAR A GIRAR
    ========================================= */
 
-function turnKnob() {
+function knobPointerDown(event) {
+
+    if (
+        !tokenInserted ||
+        machineIsRunning ||
+        knobIsTurning
+    ) {
+        return;
+    }
+
 
     knobIsTurning = true;
 
-    machineIsRunning = true;
+    knobTurnCompleted = false;
+
+    knobPointerId =
+        event.pointerId;
+
+
+    knobPreviousPointerAngle =
+        getPointerAngleAroundKnob(
+            event.clientX,
+            event.clientY
+        );
 
 
     knob.classList.remove(
@@ -863,34 +920,291 @@ function turnKnob() {
     );
 
 
+    knob.setPointerCapture(
+        event.pointerId
+    );
+
+
+    event.preventDefault();
+
+}
+
+
+/* =========================================
+   GIRAR PERILLA CON EL DEDO / MOUSE
+   ========================================= */
+
+function knobPointerMove(event) {
+
+    if (
+        !knobIsTurning ||
+        knobTurnCompleted ||
+        event.pointerId !== knobPointerId
+    ) {
+        return;
+    }
+
+
+    const currentAngle =
+        getPointerAngleAroundKnob(
+            event.clientX,
+            event.clientY
+        );
+
+
+    let difference =
+        currentAngle -
+        knobPreviousPointerAngle;
+
+
+    difference =
+        normalizeAngleDifference(
+            difference
+        );
+
+
     /*
-       Giro hacia la izquierda
-       = sentido antihorario.
+       Solamente permitimos movimiento
+       antihorario.
+
+       Si el dedo se mueve un poquito
+       hacia el otro lado, simplemente
+       no suma giro.
     */
 
-    const knobAnimation =
+    if (
+        difference < 0
+    ) {
+
+        knobRotation +=
+            difference;
+
+
+        knobRotation =
+            Math.max(
+                KNOB_FINAL_ROTATION,
+                knobRotation
+            );
+
+
+        knob.style.transform =
+            `translate(-50%, -50%) rotate(${knobRotation}deg)`;
+
+    }
+
+
+    knobPreviousPointerAngle =
+        currentAngle;
+
+
+    /*
+       Cuando la persona ya realizó
+       prácticamente todo el giro,
+       completamos los últimos grados.
+    */
+
+    if (
+        knobRotation <=
+        KNOB_COMPLETE_ROTATION
+    ) {
+
+        completeKnobTurn();
+
+    }
+
+
+    event.preventDefault();
+
+}
+
+
+/* =========================================
+   SOLTAR PERILLA
+   ========================================= */
+
+function knobPointerUp(event) {
+
+    if (
+        event.pointerId !==
+        knobPointerId
+    ) {
+        return;
+    }
+
+
+    if (
+        knobTurnCompleted
+    ) {
+
+        knobPointerId =
+            null;
+
+        return;
+
+    }
+
+
+    knobIsTurning =
+        false;
+
+
+    knobPointerId =
+        null;
+
+
+    knob.classList.remove(
+        "turning"
+    );
+
+
+    /*
+       Si no hizo suficiente giro,
+       la perilla vuelve suavemente.
+    */
+
+    returnKnobToStart();
+
+}
+
+
+/* =========================================
+   REGRESAR PERILLA
+   ========================================= */
+
+function returnKnobToStart() {
+
+    const startRotation =
+        knobRotation;
+
+
+    const animation =
         knob.animate(
 
             [
 
                 {
                     transform:
-                        "translate(-50%, -50%) rotate(0deg)"
+                        `translate(-50%, -50%) rotate(${startRotation}deg)`
                 },
 
                 {
                     transform:
-                        "translate(-50%, -50%) rotate(-360deg)"
+                        "translate(-50%, -50%) rotate(0deg)"
                 }
 
             ],
 
             {
                 duration:
-                    900,
+                    320,
 
                 easing:
-                    "cubic-bezier(.2,.75,.2,1)",
+                    "cubic-bezier(.25,.8,.25,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    animation.onfinish =
+        () => {
+
+            knobRotation =
+                0;
+
+
+            knob.style.transform =
+                "translate(-50%, -50%) rotate(0deg)";
+
+
+            animation.cancel();
+
+
+            if (
+                tokenInserted &&
+                !machineIsRunning
+            ) {
+
+                knob.classList.remove(
+                    "locked"
+                );
+
+                knob.classList.add(
+                    "ready"
+                );
+
+            }
+
+        };
+
+}
+
+
+/* =========================================
+   COMPLETAR GIRO
+   ========================================= */
+
+function completeKnobTurn() {
+
+    if (
+        knobTurnCompleted
+    ) {
+        return;
+    }
+
+
+    knobTurnCompleted =
+        true;
+
+    machineIsRunning =
+        true;
+
+
+    knob.classList.remove(
+        "ready"
+    );
+
+    knob.classList.add(
+        "turning"
+    );
+
+
+    const startRotation =
+        knobRotation;
+
+
+    /*
+       Solo completa el pequeño tramo
+       restante.
+
+       NO da una vuelta completa sola.
+    */
+
+    const finishAnimation =
+        knob.animate(
+
+            [
+
+                {
+                    transform:
+                        `translate(-50%, -50%) rotate(${startRotation}deg)`
+                },
+
+                {
+                    transform:
+                        `translate(-50%, -50%) rotate(${KNOB_FINAL_ROTATION}deg)`
+                }
+
+            ],
+
+            {
+                duration:
+                    180,
+
+                easing:
+                    "ease-out",
 
                 fill:
                     "forwards"
@@ -900,15 +1214,25 @@ function turnKnob() {
 
 
     /*
-       Empezamos movimiento
-       de cápsulas.
+       Las cápsulas se mueven suavemente.
     */
 
     animateCapsulesInside();
 
 
-    knobAnimation.onfinish =
+    finishAnimation.onfinish =
         () => {
+
+            knobRotation =
+                KNOB_FINAL_ROTATION;
+
+
+            knob.style.transform =
+                `translate(-50%, -50%) rotate(${KNOB_FINAL_ROTATION}deg)`;
+
+
+            finishAnimation.cancel();
+
 
             knob.classList.remove(
                 "turning"
@@ -919,19 +1243,13 @@ function turnKnob() {
             );
 
 
-            knobIsTurning = false;
+            knobIsTurning =
+                false;
 
 
             setTimeout(
-
-                () => {
-
-                    dispenseCapsule();
-
-                },
-
+                dispenseCapsule,
                 160
-
             );
 
         };
@@ -939,16 +1257,71 @@ function turnKnob() {
 }
 
 
+/* =========================================
+   EVENTOS PERILLA
+   ========================================= */
+
+knob.addEventListener(
+    "pointerdown",
+    knobPointerDown
+);
+
+
+knob.addEventListener(
+    "pointermove",
+    knobPointerMove
+);
+
+
+knob.addEventListener(
+    "pointerup",
+    knobPointerUp
+);
+
+
+knob.addEventListener(
+    "pointercancel",
+    knobPointerUp
+);
+
 
 /* =========================================
-   MOVER CÁPSULAS DENTRO
+   RESETEAR PERILLA
+   ========================================= */
+
+function resetKnobPosition() {
+
+    knobRotation =
+        0;
+
+    knobTurnCompleted =
+        false;
+
+    knobIsTurning =
+        false;
+
+
+    knob.style.transform =
+        "translate(-50%, -50%) rotate(0deg)";
+
+}
+
+
+/* =========================================
+   MOVIMIENTO SUAVE DE CÁPSULAS
    ========================================= */
 
 function animateCapsulesInside() {
 
     capsules.forEach(
-
         (capsule, index) => {
+
+            /*
+               Movimientos pequeños.
+
+               No sustituimos el transform
+               original de cada cápsula.
+            */
 
             const direction =
                 index % 2 === 0
@@ -956,9 +1329,14 @@ function animateCapsulesInside() {
                     : -1;
 
 
-            const moveAmount =
-                5 +
-                Math.random() * 8;
+            const amountX =
+                2 +
+                Math.random() * 2.5;
+
+
+            const amountY =
+                1 +
+                Math.random() * 2;
 
 
             capsule.animate(
@@ -967,42 +1345,63 @@ function animateCapsulesInside() {
 
                     {
                         translate:
-                            "0px 0px",
+                            "0px 0px"
+                    },
 
-                        rotate:
-                            "0deg"
+                    {
+                        offset:
+                            0.28,
+
+                        translate:
+                            `${
+                                direction *
+                                amountX
+                            }px ${
+                                -amountY
+                            }px`
+                    },
+
+                    {
+                        offset:
+                            0.58,
+
+                        translate:
+                            `${
+                                -direction *
+                                amountX *
+                                0.8
+                            }px ${
+                                amountY *
+                                0.6
+                            }px`
+                    },
+
+                    {
+                        offset:
+                            0.82,
+
+                        translate:
+                            `${
+                                direction *
+                                amountX *
+                                0.35
+                            }px ${
+                                -amountY *
+                                0.25
+                            }px`
                     },
 
                     {
                         translate:
-                            `${direction * moveAmount}px -6px`,
-
-                        rotate:
-                            `${direction * 8}deg`
-                    },
-
-                    {
-                        translate:
-                            `${-direction * moveAmount}px 4px`,
-
-                        rotate:
-                            `${-direction * 6}deg`
-                    },
-
-                    {
-                        translate:
-                            "0px 0px",
-
-                        rotate:
-                            "0deg"
+                            "0px 0px"
                     }
 
                 ],
 
                 {
                     duration:
-                        1050 +
-                        Math.random() * 300,
+                        950 +
+                        Math.random() * 180,
 
                     easing:
                         "ease-in-out",
@@ -1020,9 +1419,8 @@ function animateCapsulesInside() {
 }
 
 
-
 /* =========================================
-   SACAR RESULTADO ACTUAL
+   RESULTADO ACTUAL
    ========================================= */
 
 function getCurrentResult() {
@@ -1034,7 +1432,6 @@ function getCurrentResult() {
     );
 
 }
-
 
 
 /* =========================================
@@ -1116,11 +1513,6 @@ function dispenseCapsule() {
         dispensedCapsule
     );
 
-
-    /*
-       Sale de la máquina y crece
-       suavemente hasta el centro.
-    */
 
     const emergeAnimation =
         dispensedCapsule.animate(
@@ -1234,9 +1626,8 @@ function dispenseCapsule() {
 }
 
 
-
 /* =========================================
-   AGITAR CÁPSULA EN EL CENTRO
+   AGITAR CÁPSULA DEL RESULTADO
    ========================================= */
 
 function startCapsuleShake() {
@@ -1282,7 +1673,8 @@ function startCapsuleShake() {
         );
 
 
-    capsuleCanOpen = true;
+    capsuleCanOpen =
+        true;
 
 
     dispensedCapsule.style.cursor =
@@ -1297,9 +1689,8 @@ function startCapsuleShake() {
 }
 
 
-
 /* =========================================
-   CLICK EN CÁPSULA / RESULTADO
+   CLICK EN RESULTADO
    ========================================= */
 
 function capsuleClickHandler() {
@@ -1313,10 +1704,6 @@ function capsuleClickHandler() {
     }
 
 
-    /*
-       Carta ULTRA RARE
-    */
-
     if (
         currentGachaResult.name ===
         "letter"
@@ -1328,10 +1715,6 @@ function capsuleClickHandler() {
 
     }
 
-
-    /*
-       Resultado normal / rare
-    */
 
     if (
         capsuleCanOpen
@@ -1355,25 +1738,21 @@ function capsuleClickHandler() {
 }
 
 
-
 /* =========================================
-   ABRIR RESULTADO NORMAL / RARE
+   ABRIR NORMAL / RARE
    ========================================= */
 
 function openNormalCapsule() {
 
-    capsuleCanOpen = false;
+    capsuleCanOpen =
+        false;
 
-    capsuleIsOpening = true;
+    capsuleIsOpening =
+        true;
 
 
     stopCapsuleShake();
 
-
-    /*
-       Pequeño encogimiento
-       antes del POP.
-    */
 
     const closeAnimation =
         dispensedCapsule.animate(
@@ -1435,7 +1814,6 @@ function openNormalCapsule() {
         };
 
 }
-
 
 
 /* =========================================
@@ -1513,52 +1891,51 @@ function showRarity(
     );
 
 
-    const popAnimation =
-        rarityImage.animate(
+    rarityImage.animate(
 
-            [
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(0)",
-
-                    opacity:
-                        0
-                },
-
-                {
-                    offset:
-                        0.55,
-
-                    transform:
-                        "translate(-50%, -50%) scale(1.16)",
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(1)",
-
-                    opacity:
-                        1
-                }
-
-            ],
+        [
 
             {
-                duration:
-                    480,
+                transform:
+                    "translate(-50%, -50%) scale(0)",
 
-                easing:
-                    "cubic-bezier(.15,.9,.25,1.35)",
+                opacity:
+                    0
+            },
 
-                fill:
-                    "forwards"
+            {
+                offset:
+                    0.55,
+
+                transform:
+                    "translate(-50%, -50%) scale(1.16)",
+
+                opacity:
+                    1
+            },
+
+            {
+                transform:
+                    "translate(-50%, -50%) scale(1)",
+
+                opacity:
+                    1
             }
 
-        );
+        ],
+
+        {
+            duration:
+                480,
+
+            easing:
+                "cubic-bezier(.15,.9,.25,1.35)",
+
+            fill:
+                "forwards"
+        }
+
+    );
 
 
     setTimeout(
@@ -1615,7 +1992,8 @@ function showRarity(
                     }
 
 
-                    rarityImage = null;
+                    rarityImage =
+                        null;
 
 
                     if (callback) {
@@ -1631,7 +2009,6 @@ function showRarity(
     );
 
 }
-
 
 
 /* =========================================
@@ -1656,10 +2033,7 @@ function revealOpenedResult(
 
 
     /*
-       AQUÍ ESTÁ EL CAMBIO IMPORTANTE.
-
-       El resultado abierto ahora
-       ocupa 58% del ancho de la máquina.
+       Resultado mucho más grande.
     */
 
     dispensedCapsule.style.width =
@@ -1732,38 +2106,40 @@ function revealOpenedResult(
             revealAnimation.cancel();
 
 
-            capsuleIsOpening = false;
+            capsuleIsOpening =
+                false;
 
-            capsuleCanClose = true;
+            capsuleCanClose =
+                true;
 
         };
 
 }
 
 
-
 /* =========================================
-   SECUENCIA ESPECIAL DE LA CARTA
+   CARTA ULTRA RARE
    ========================================= */
 
 function handleLetterCapsule() {
 
     /*
-       PASO 1:
-       capsule-letter.png
-       ->
+       LETTER 1
+       →
        ULTRA RARE
-       ->
-       capsule-letter2.png
+       →
+       LETTER 2
     */
 
     if (
         capsuleCanOpen
     ) {
 
-        capsuleCanOpen = false;
+        capsuleCanOpen =
+            false;
 
-        capsuleIsOpening = true;
+        capsuleIsOpening =
+            true;
 
 
         stopCapsuleShake();
@@ -1817,11 +2193,7 @@ function handleLetterCapsule() {
 
                     LETTER_CAPSULE.rarity,
 
-                    () => {
-
-                        revealLetterSecondStage();
-
-                    }
+                    revealLetterSecondStage
 
                 );
 
@@ -1834,10 +2206,9 @@ function handleLetterCapsule() {
 
 
     /*
-       PASO 2:
-       capsule-letter2.png
-       ->
-       capsule-letter3.png
+       LETTER 2
+       →
+       LETTER 3
     */
 
     if (
@@ -1852,8 +2223,7 @@ function handleLetterCapsule() {
 
 
     /*
-       PASO 3:
-       cerrar letter3
+       CERRAR LETTER 3
     */
 
     if (
@@ -1865,7 +2235,6 @@ function handleLetterCapsule() {
     }
 
 }
-
 
 
 /* =========================================
@@ -1886,10 +2255,6 @@ function revealLetterSecondStage() {
     dispensedCapsule.style.opacity =
         "1";
 
-
-    /*
-       También grande.
-    */
 
     dispensedCapsule.style.width =
         `${OPENED_RESULT_SIZE}%`;
@@ -1960,8 +2325,10 @@ function revealLetterSecondStage() {
             capsuleIsOpening =
                 false;
 
+
             letterCanRevealFinal =
                 true;
+
 
             capsuleCanClose =
                 false;
@@ -1969,7 +2336,6 @@ function revealLetterSecondStage() {
         };
 
 }
-
 
 
 /* =========================================
@@ -1990,11 +2356,6 @@ function revealLetterFinal() {
     dispensedCapsule.src =
         LETTER_CAPSULE.final;
 
-
-    /*
-       El resultado final Ultra Rare
-       es todavía un poquito mayor.
-    */
 
     dispensedCapsule.style.width =
         `${FINAL_LETTER_SIZE}%`;
@@ -2070,9 +2431,8 @@ function revealLetterFinal() {
 }
 
 
-
 /* =========================================
-   DETENER AGITACIÓN
+   DETENER SHAKE
    ========================================= */
 
 function stopCapsuleShake() {
@@ -2101,7 +2461,6 @@ function stopCapsuleShake() {
 }
 
 
-
 /* =========================================
    CERRAR RESULTADO
    ========================================= */
@@ -2116,11 +2475,14 @@ function closeResult() {
     }
 
 
-    capsuleIsClosing = true;
+    capsuleIsClosing =
+        true;
 
-    capsuleCanClose = false;
+    capsuleCanClose =
+        false;
 
-    letterCanRevealFinal = false;
+    letterCanRevealFinal =
+        false;
 
 
     const animation =
@@ -2184,9 +2546,8 @@ function closeResult() {
 }
 
 
-
 /* =========================================
-   PREPARAR SIGUIENTE TOKEN
+   PREPARAR SIGUIENTE TURNO
    ========================================= */
 
 function resetAfterResult() {
@@ -2219,10 +2580,12 @@ function resetAfterResult() {
         false;
 
 
+    resetKnobPosition();
+
+
     unlockNextToken();
 
 }
-
 
 
 /* =========================================
@@ -2281,9 +2644,10 @@ function unlockNextToken() {
 }
 
 
-
 /* =========================================
-   INICIALIZACIÓN
+   INICIO
    ========================================= */
+
+resetKnobPosition();
 
 activateCurrentToken();
