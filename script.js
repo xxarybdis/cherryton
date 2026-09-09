@@ -82,10 +82,10 @@ function animateCapsule(capsule, index) {
 
     const limits = getCapsuleLimits(capsule);
 
-
     /*
-       En vez de muchos golpes rápidos,
-       hacemos pocos movimientos largos.
+       Trayectorias suaves y relativamente
+       pequeñas para que parezcan cápsulas
+       pesadas revolviéndose.
     */
 
     const x1 = random(limits.left, limits.right);
@@ -99,10 +99,7 @@ function animateCapsule(capsule, index) {
 
 
     /*
-       Rotaciones pequeñas.
-
-       Esto hace que parezcan cápsulas
-       pesadas en vez de objetos vibrando.
+       Rotaciones pequeñas y suaves.
     */
 
     const r1 = random(-9, 9);
@@ -111,8 +108,9 @@ function animateCapsule(capsule, index) {
 
 
     /*
-       Cada cápsula se mueve a una
-       velocidad ligeramente diferente.
+       Cada cápsula se mueve a una velocidad
+       ligeramente distinta para evitar que
+       parezcan sincronizadas.
     */
 
     const duration = random(1900, 2400);
@@ -156,68 +154,19 @@ function animateCapsule(capsule, index) {
         ],
         {
             duration: duration,
-
-            /*
-               Solo un ciclo largo.
-               Nada de repetir el mismo
-               movimiento tres veces.
-            */
             iterations: 1,
-
             delay: delay,
 
             /*
-               Esta curva hace que aceleren
-               y desaceleren suavemente.
+               Aceleración y frenado suaves.
             */
             easing: "cubic-bezier(0.45, 0, 0.25, 1)",
 
+            /*
+               Al terminar, cada cápsula
+               vuelve a su posición original.
+            */
             fill: "none"
-        }
-    );
-}
-
-
-/* =========================================
-   PEQUEÑO MOVIMIENTO DE LA MÁQUINA
-   ========================================= */
-
-function animateMachine() {
-
-    /*
-       La máquina apenas se balancea.
-       Es MUY sutil para que no parezca
-       un terremoto jajaja.
-    */
-
-    machine.animate(
-        [
-            {
-                transform: "translateX(0px)"
-            },
-
-            {
-                transform: "translateX(-1.5px)",
-                offset: 0.25
-            },
-
-            {
-                transform: "translateX(1.5px)",
-                offset: 0.55
-            },
-
-            {
-                transform: "translateX(-0.7px)",
-                offset: 0.78
-            },
-
-            {
-                transform: "translateX(0px)"
-            }
-        ],
-        {
-            duration: 2200,
-            easing: "ease-in-out"
         }
     );
 }
@@ -229,6 +178,11 @@ function animateMachine() {
 
 function runGacha() {
 
+    /*
+       No permite volver a activarlo
+       mientras sigue funcionando.
+    */
+
     if (machineIsRunning) {
         return;
     }
@@ -236,28 +190,24 @@ function runGacha() {
     machineIsRunning = true;
 
 
-    /* Movimiento sutil de la máquina */
-    animateMachine();
+    /*
+       SOLO se mueven las cápsulas.
+       La máquina permanece completamente
+       inmóvil.
+    */
 
-
-    /* Movimiento individual de cápsulas */
     capsules.forEach((capsule, index) => {
-
         animateCapsule(capsule, index);
-
     });
 
 
     /*
-       Esperamos a que termine toda
-       la animación antes de permitir
-       otra activación.
+       Volvemos a permitir otra activación
+       cuando todas hayan terminado.
     */
 
     setTimeout(() => {
-
         machineIsRunning = false;
-
     }, 2700);
 }
 
@@ -265,8 +215,8 @@ function runGacha() {
 /* =========================================
    ACTIVACIÓN TEMPORAL
 
-   Seguimos usando clic en la máquina
-   solamente para probar.
+   Por ahora un clic en la máquina
+   activa las cápsulas.
    ========================================= */
 
 machine.addEventListener("click", runGacha);
