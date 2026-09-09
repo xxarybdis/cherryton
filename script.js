@@ -49,7 +49,7 @@ const DISPENSER_Y = 81;
 const DISPENSED_CAPSULE_WIDTH = 10;
 
 const CAPSULE_MOVE_X = -26;
-const CAPSULE_MOVE_Y = 64;
+const CAPSULE_MOVE_Y = 20;
 
 
 /* -----------------------------------------
