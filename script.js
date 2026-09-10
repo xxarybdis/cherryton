@@ -37,22 +37,18 @@ const TOKEN_SLOT_RADIUS_Y = 0.045;
    ========================================= */
 
 /*
-   POSICIÓN CORRECTA QUE YA HABÍAMOS
-   CALIBRADO ANTERIORMENTE.
+   Un poquito más a la izquierda.
 */
 
-const DISPENSER_X = 62;
+const DISPENSER_X = 60.5;
 const DISPENSER_Y = 81;
 
 const DISPENSED_CAPSULE_WIDTH = 10;
 
 
 /*
-   Estas variables se conservan para no
-   alterar la estructura que ya teníamos.
-
-   La nueva animación flotante ya no depende
-   de ellas para lanzar la cápsula en diagonal.
+   Se conservan para no alterar
+   la estructura anterior.
 */
 
 const CAPSULE_MOVE_X = -26;
@@ -75,13 +71,11 @@ const FINAL_LETTER_SIZE = 62;
    ========================================= */
 
 /*
-   Antes todo el recorrido duraba 1550 ms.
-
-   Ahora dura 3 segundos para que la cápsula
-   se sienta flotante y no salga disparada.
+   Antes: 3000 ms
+   Ahora: 2600 ms
 */
 
-const CAPSULE_EMERGE_TIME = 3000;
+const CAPSULE_EMERGE_TIME = 2600;
 
 const RARITY_TIME = 1900;
 
@@ -192,11 +186,7 @@ function shuffleArray(array) {
 
     const copy = [...array];
 
-    for (
-        let i = copy.length - 1;
-        i > 0;
-        i--
-    ) {
+    for (let i = copy.length - 1; i > 0; i--) {
 
         const j =
             Math.floor(
@@ -230,14 +220,8 @@ const gachaQueue = [
 
 
 /* =========================================
-   PRECARGAR IMÁGENES DE RESULTADOS
+   PRECARGAR IMÁGENES
    ========================================= */
-
-/*
-   Esto ayuda a evitar flashes o glitches
-   cuando cambiamos de la cápsula cerrada
-   al resultado abierto.
-*/
 
 function preloadImage(source) {
 
@@ -987,10 +971,6 @@ function knobPointerMove(event) {
         );
 
 
-    /*
-       SOLO GIRO ANTIHORARIO.
-    */
-
     if (
         difference < 0
     ) {
@@ -1297,7 +1277,6 @@ function resetKnobPosition() {
 
 /* =========================================
    CÁPSULAS INTERNAS
-   MOVIMIENTO SUAVE
    ========================================= */
 
 function animateCapsulesInside() {
@@ -1409,11 +1388,6 @@ function dispenseCapsule() {
         getCurrentResult();
 
 
-    /*
-       Precargamos específicamente las imágenes
-       del resultado que acaba de salir.
-    */
-
     preloadImage(
         currentGachaResult.opened
     );
@@ -1516,28 +1490,17 @@ function dispenseCapsule() {
        SALIDA FLOTANTE
        =====================================
 
-       La cápsula YA NO es lanzada hacia
-       abajo y hacia la izquierda.
+       Nueva salida:
+       un poquito más a la izquierda.
 
-       Trayectoria:
-
-       salida
-       ↓ muy poquito
-       ↖ flotación suave
-       ↖
-       centro
-
-       El crecimiento también es progresivo.
+       Duración:
+       2.6 segundos.
     */
 
     const emergeAnimation =
         dispensedCapsule.animate(
 
             [
-
-                /*
-                   Dentro de la compuerta.
-                */
 
                 {
                     offset:
@@ -1559,10 +1522,6 @@ function dispenseCapsule() {
                         0
                 },
 
-
-                /*
-                   Aparece todavía en la salida.
-                */
 
                 {
                     offset:
@@ -1586,7 +1545,8 @@ function dispenseCapsule() {
 
 
                 /*
-                   Pequeñísima caída natural.
+                   Pequeña caída,
+                   sin moverse a la derecha.
                 */
 
                 {
@@ -1594,7 +1554,7 @@ function dispenseCapsule() {
                         0.27,
 
                     left:
-                        "62%",
+                        `${DISPENSER_X}%`,
 
                     top:
                         "82.5%",
@@ -1611,7 +1571,7 @@ function dispenseCapsule() {
 
 
                 /*
-                   Comienza a flotar.
+                   Empieza a flotar.
                 */
 
                 {
@@ -1619,7 +1579,7 @@ function dispenseCapsule() {
                         0.43,
 
                     left:
-                        "61.5%",
+                        "60%",
 
                     top:
                         "80%",
@@ -1635,16 +1595,12 @@ function dispenseCapsule() {
                 },
 
 
-                /*
-                   Subida suave.
-                */
-
                 {
                     offset:
                         0.60,
 
                     left:
-                        "60%",
+                        "59%",
 
                     top:
                         "74%",
@@ -1660,16 +1616,12 @@ function dispenseCapsule() {
                 },
 
 
-                /*
-                   Sigue flotando.
-                */
-
                 {
                     offset:
                         0.74,
 
                     left:
-                        "57.5%",
+                        "57%",
 
                     top:
                         "66.5%",
@@ -1685,16 +1637,12 @@ function dispenseCapsule() {
                 },
 
 
-                /*
-                   Cerca del centro.
-                */
-
                 {
                     offset:
                         0.87,
 
                     left:
-                        "54%",
+                        "53.5%",
 
                     top:
                         "58.5%",
@@ -1709,10 +1657,6 @@ function dispenseCapsule() {
                         1
                 },
 
-
-                /*
-                   Centro.
-                */
 
                 {
                     offset:
@@ -1741,11 +1685,6 @@ function dispenseCapsule() {
                 duration:
                     CAPSULE_EMERGE_TIME,
 
-                /*
-                   Curva suave, sin acelerón
-                   violento al principio.
-                */
-
                 easing:
                     "cubic-bezier(.35,.15,.20,1)",
 
@@ -1759,10 +1698,6 @@ function dispenseCapsule() {
 
     emergeAnimation.onfinish =
         () => {
-
-            /*
-               Primero fijamos el estado final.
-            */
 
             dispensedCapsule.style.left =
                 "50%";
@@ -1779,11 +1714,6 @@ function dispenseCapsule() {
             dispensedCapsule.style.opacity =
                 "1";
 
-
-            /*
-               Después quitamos la animación.
-               Así no hay salto al terminar.
-            */
 
             emergeAnimation.cancel();
 
@@ -1970,20 +1900,6 @@ function openNormalCapsule() {
 
     animation.onfinish =
         () => {
-
-            /*
-               IMPORTANTE:
-
-               Antes de mostrar el letrero
-               ocultamos COMPLETAMENTE la cápsula.
-
-               Luego cancelamos la animación
-               anterior.
-
-               Esto evita que pueda aparecer
-               durante un frame al desaparecer
-               el letrero.
-            */
 
             dispensedCapsule.style.opacity =
                 "0";
@@ -2203,12 +2119,6 @@ function showRarity(
             disappear.onfinish =
                 () => {
 
-                    /*
-                       Quitamos completamente
-                       el letrero ANTES de revelar
-                       la siguiente imagen.
-                    */
-
                     if (
                         currentRarity &&
                         currentRarity.parentNode
@@ -2266,11 +2176,6 @@ function revealOpenedResult(
     }
 
 
-    /*
-       Mantenemos el elemento totalmente oculto
-       mientras cambiamos el archivo PNG.
-    */
-
     dispensedCapsule.style.visibility =
         "hidden";
 
@@ -2296,14 +2201,6 @@ function revealOpenedResult(
     dispensedCapsule.style.cursor =
         "pointer";
 
-
-    /*
-       Esperamos dos frames.
-
-       Esto le da al navegador oportunidad
-       de actualizar el src antes de volver
-       a hacer visible el elemento.
-    */
 
     requestAnimationFrame(
 
@@ -2464,13 +2361,6 @@ function handleLetterCapsule() {
 
         animation.onfinish =
             () => {
-
-                /*
-                   Igual que con las normales:
-                   la cápsula cerrada queda
-                   totalmente escondida antes
-                   del ULTRA RARO.
-                */
 
                 dispensedCapsule.style.opacity =
                     "0";
@@ -2670,14 +2560,6 @@ function revealLetterFinal() {
     letterCanRevealFinal =
         false;
 
-
-    /*
-       Ocultamos primero LETTER 2,
-       cambiamos el PNG y después mostramos
-       LETTER 3.
-
-       Evita flashes durante el cambio.
-    */
 
     dispensedCapsule.style.visibility =
         "hidden";
