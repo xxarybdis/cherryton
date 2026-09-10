@@ -1,6 +1,6 @@
 /* =========================================
    CHERRYTON GACHA
-   SCRIPT.JS COMPLETO
+   SCRIPT.JS
    ========================================= */
 
 
@@ -22,14 +22,8 @@ const tokenOrder = [
 
 
 /* =========================================
-   CONFIGURACIÓN
-   ========================================= */
-
-
-/* -----------------------------------------
    RANURA DEL TOKEN
-   NO CAMBIAR
-   ----------------------------------------- */
+   ========================================= */
 
 const TOKEN_SLOT_X = 0.32;
 const TOKEN_SLOT_Y = 0.695;
@@ -38,61 +32,60 @@ const TOKEN_SLOT_RADIUS_X = 0.055;
 const TOKEN_SLOT_RADIUS_Y = 0.045;
 
 
-/* -----------------------------------------
+/* =========================================
    SALIDA DE LA CÁPSULA
-   NO CAMBIAR
-   ----------------------------------------- */
+   ========================================= */
+
+/*
+   Esta es la salida suavizada.
+
+   La cápsula ya no se va tan abajo
+   ni sale disparada.
+*/
 
 const DISPENSER_X = 62;
-const DISPENSER_Y = 81;
+const DISPENSER_Y = 70;
 
 const DISPENSED_CAPSULE_WIDTH = 10;
 
 const CAPSULE_MOVE_X = -26;
-const CAPSULE_MOVE_Y = 64;
+const CAPSULE_MOVE_Y = 20;
 
 
-/* -----------------------------------------
+/* =========================================
    TAMAÑOS
-   ----------------------------------------- */
+   ========================================= */
 
 const CENTER_CAPSULE_SIZE = 34;
 
+/*
+   Resultado abierto más grande.
+*/
+
 const OPENED_RESULT_SIZE = 58;
+
+/*
+   Resultado final de la carta.
+*/
 
 const FINAL_LETTER_SIZE = 62;
 
 
-/* -----------------------------------------
+/* =========================================
    TIEMPOS
-   ----------------------------------------- */
+   ========================================= */
 
 const CAPSULE_EMERGE_TIME = 1550;
 
 const RARITY_TIME = 1900;
 
 
-/* -----------------------------------------
-   SOMBRA DEL RESULTADO
-   ----------------------------------------- */
+/* =========================================
+   SOMBRA
+   ========================================= */
 
 const RESULT_DROP_SHADOW =
     "drop-shadow(0 10px 18px rgba(0, 0, 0, 0.75))";
-
-
-/* -----------------------------------------
-   PERILLA
-   ----------------------------------------- */
-
-/*
-   La persona debe girarla manualmente.
-
-   Al llegar aproximadamente a 300°
-   antihorarios se completa el giro.
-*/
-
-const KNOB_COMPLETE_ROTATION = -300;
-const KNOB_FINAL_ROTATION = -360;
 
 
 /* =========================================
@@ -102,7 +95,6 @@ const KNOB_FINAL_ROTATION = -360;
 let machineIsRunning = false;
 
 let tokenInserted = false;
-
 let tokenIsDragging = false;
 
 let knobIsTurning = false;
@@ -112,11 +104,9 @@ let dispensedCapsule = null;
 let capsuleShakeAnimation = null;
 
 let capsuleCanOpen = false;
-
 let capsuleIsOpening = false;
 
 let capsuleCanClose = false;
-
 let capsuleIsClosing = false;
 
 let currentGachaResult = null;
@@ -189,7 +179,7 @@ const LETTER_CAPSULE = {
 
 
 /* =========================================
-   MEZCLAR LOS PRIMEROS 4 RESULTADOS
+   MEZCLAR RESULTADOS
    ========================================= */
 
 function shuffleArray(array) {
@@ -221,13 +211,6 @@ function shuffleArray(array) {
 
 }
 
-
-/*
-   4 resultados normales/rare
-   una sola vez cada uno.
-
-   La carta siempre sale quinta.
-*/
 
 const gachaQueue = [
 
@@ -385,7 +368,7 @@ function getTokenSlotDistance(token) {
 
 
 /* =========================================
-   DRAG DEL TOKEN
+   TOKEN DRAG
    ========================================= */
 
 let tokenPointerId = null;
@@ -471,11 +454,6 @@ function tokenPointerMove(event) {
         );
 
 
-    /*
-       Se encoge gradualmente
-       al acercarse a la ranura.
-    */
-
     const shrinkDistance =
         Math.min(
             info.distance,
@@ -522,10 +500,6 @@ function tokenPointerMove(event) {
 
 }
 
-
-/* =========================================
-   SOLTAR TOKEN
-   ========================================= */
 
 function tokenPointerUp(event) {
 
@@ -742,14 +716,6 @@ function insertToken(token) {
                 "0";
 
 
-            /*
-               Ahora la perilla queda
-               disponible para arrastrar.
-            */
-
-            resetKnobPosition();
-
-
             knob.classList.remove(
                 "locked"
             );
@@ -764,7 +730,7 @@ function insertToken(token) {
 
 
 /* =========================================
-   EVENTOS DE TOKENS
+   EVENTOS TOKENS
    ========================================= */
 
 tokenOrder.forEach(token => {
@@ -779,18 +745,15 @@ tokenOrder.forEach(token => {
         tokenPointerDown
     );
 
-
     token.addEventListener(
         "pointermove",
         tokenPointerMove
     );
 
-
     token.addEventListener(
         "pointerup",
         tokenPointerUp
     );
-
 
     token.addEventListener(
         "pointercancel",
@@ -813,8 +776,20 @@ let knobRotation = 0;
 let knobTurnCompleted = false;
 
 
+/*
+   La perilla debe girarse manualmente.
+
+   Al llegar casi a la vuelta completa,
+   termina suavemente el pequeño
+   tramo restante.
+*/
+
+const KNOB_TRIGGER_ROTATION = -300;
+const KNOB_FINAL_ROTATION = -360;
+
+
 /* =========================================
-   OBTENER ÁNGULO DEL PUNTERO
+   ÁNGULO ALREDEDOR DE LA PERILLA
    ========================================= */
 
 function getPointerAngleAroundKnob(
@@ -836,6 +811,7 @@ function getPointerAngleAroundKnob(
 
 
     return (
+
         Math.atan2(
             clientY - centerY,
             clientX - centerX
@@ -845,14 +821,11 @@ function getPointerAngleAroundKnob(
 
         180 /
         Math.PI
+
     );
 
 }
 
-
-/* =========================================
-   NORMALIZAR DIFERENCIA DE ÁNGULO
-   ========================================= */
 
 function normalizeAngleDifference(
     difference
@@ -882,7 +855,7 @@ function normalizeAngleDifference(
 
 
 /* =========================================
-   EMPEZAR A GIRAR
+   EMPEZAR GIRO
    ========================================= */
 
 function knobPointerDown(event) {
@@ -931,7 +904,7 @@ function knobPointerDown(event) {
 
 
 /* =========================================
-   GIRAR PERILLA CON EL DEDO / MOUSE
+   MOVER PERILLA
    ========================================= */
 
 function knobPointerMove(event) {
@@ -964,12 +937,7 @@ function knobPointerMove(event) {
 
 
     /*
-       Solamente permitimos movimiento
-       antihorario.
-
-       Si el dedo se mueve un poquito
-       hacia el otro lado, simplemente
-       no suma giro.
+       Solo giro antihorario.
     */
 
     if (
@@ -997,15 +965,9 @@ function knobPointerMove(event) {
         currentAngle;
 
 
-    /*
-       Cuando la persona ya realizó
-       prácticamente todo el giro,
-       completamos los últimos grados.
-    */
-
     if (
         knobRotation <=
-        KNOB_COMPLETE_ROTATION
+        KNOB_TRIGGER_ROTATION
     ) {
 
         completeKnobTurn();
@@ -1044,23 +1006,18 @@ function knobPointerUp(event) {
     }
 
 
-    knobIsTurning =
-        false;
-
-
     knobPointerId =
         null;
+
+
+    knobIsTurning =
+        false;
 
 
     knob.classList.remove(
         "turning"
     );
 
-
-    /*
-       Si no hizo suficiente giro,
-       la perilla vuelve suavemente.
-    */
 
     returnKnobToStart();
 
@@ -1127,10 +1084,6 @@ function returnKnobToStart() {
                 !machineIsRunning
             ) {
 
-                knob.classList.remove(
-                    "locked"
-                );
-
                 knob.classList.add(
                     "ready"
                 );
@@ -1162,27 +1115,11 @@ function completeKnobTurn() {
         true;
 
 
-    knob.classList.remove(
-        "ready"
-    );
-
-    knob.classList.add(
-        "turning"
-    );
-
-
     const startRotation =
         knobRotation;
 
 
-    /*
-       Solo completa el pequeño tramo
-       restante.
-
-       NO da una vuelta completa sola.
-    */
-
-    const finishAnimation =
+    const animation =
         knob.animate(
 
             [
@@ -1214,13 +1151,14 @@ function completeKnobTurn() {
 
 
     /*
-       Las cápsulas se mueven suavemente.
+       Movimiento ligero de las cápsulas
+       dentro de la máquina.
     */
 
     animateCapsulesInside();
 
 
-    finishAnimation.onfinish =
+    animation.onfinish =
         () => {
 
             knobRotation =
@@ -1231,7 +1169,7 @@ function completeKnobTurn() {
                 `translate(-50%, -50%) rotate(${KNOB_FINAL_ROTATION}deg)`;
 
 
-            finishAnimation.cancel();
+            animation.cancel();
 
 
             knob.classList.remove(
@@ -1248,8 +1186,15 @@ function completeKnobTurn() {
 
 
             setTimeout(
-                dispenseCapsule,
+
+                () => {
+
+                    dispenseCapsule();
+
+                },
+
                 160
+
             );
 
         };
@@ -1266,18 +1211,15 @@ knob.addEventListener(
     knobPointerDown
 );
 
-
 knob.addEventListener(
     "pointermove",
     knobPointerMove
 );
 
-
 knob.addEventListener(
     "pointerup",
     knobPointerUp
 );
-
 
 knob.addEventListener(
     "pointercancel",
@@ -1308,7 +1250,8 @@ function resetKnobPosition() {
 
 
 /* =========================================
-   MOVIMIENTO SUAVE DE CÁPSULAS
+   CÁPSULAS INTERNAS
+   MOVIMIENTO SUAVE
    ========================================= */
 
 function animateCapsulesInside() {
@@ -1316,27 +1259,24 @@ function animateCapsulesInside() {
     capsules.forEach(
         (capsule, index) => {
 
-            /*
-               Movimientos pequeños.
-
-               No sustituimos el transform
-               original de cada cápsula.
-            */
-
             const direction =
                 index % 2 === 0
                     ? 1
                     : -1;
 
 
-            const amountX =
-                2 +
-                Math.random() * 2.5;
+            /*
+               Movimiento pequeño.
+               No las avienta.
+            */
 
+            const amountX =
+                1.5 +
+                Math.random() * 2;
 
             const amountY =
                 1 +
-                Math.random() * 2;
+                Math.random() * 1.5;
 
 
             capsule.animate(
@@ -1350,7 +1290,7 @@ function animateCapsulesInside() {
 
                     {
                         offset:
-                            0.28,
+                            0.30,
 
                         translate:
                             `${
@@ -1363,31 +1303,15 @@ function animateCapsulesInside() {
 
                     {
                         offset:
-                            0.58,
+                            0.62,
 
                         translate:
                             `${
                                 -direction *
-                                amountX *
-                                0.8
+                                amountX
                             }px ${
                                 amountY *
-                                0.6
-                            }px`
-                    },
-
-                    {
-                        offset:
-                            0.82,
-
-                        translate:
-                            `${
-                                direction *
-                                amountX *
-                                0.35
-                            }px ${
-                                -amountY *
-                                0.25
+                                0.5
                             }px`
                     },
 
@@ -1400,7 +1324,7 @@ function animateCapsulesInside() {
 
                 {
                     duration:
-                        950 +
+                        1000 +
                         Math.random() * 180,
 
                     easing:
@@ -1514,6 +1438,16 @@ function dispenseCapsule() {
     );
 
 
+    /*
+       SALIDA SUAVE
+
+       Primero aparece en la compuerta,
+       hace un recorrido corto y después
+       va al centro.
+
+       No baja hasta fuera de la máquina.
+    */
+
     const emergeAnimation =
         dispensedCapsule.animate(
 
@@ -1530,7 +1464,7 @@ function dispenseCapsule() {
                         `${DISPENSED_CAPSULE_WIDTH}%`,
 
                     transform:
-                        "translate(-50%, -50%) scale(0.75)",
+                        "translate(-50%, -50%) scale(0.82)",
 
                     opacity:
                         0
@@ -1538,13 +1472,28 @@ function dispenseCapsule() {
 
                 {
                     offset:
-                        0.18,
+                        0.15,
+
+                    left:
+                        `${DISPENSER_X}%`,
+
+                    top:
+                        `${DISPENSER_Y}%`,
+
+                    width:
+                        `${DISPENSED_CAPSULE_WIDTH}%`,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
 
                     opacity:
                         1
                 },
 
                 {
+                    offset:
+                        0.42,
+
                     left:
                         `${
                             DISPENSER_X +
@@ -1627,7 +1576,7 @@ function dispenseCapsule() {
 
 
 /* =========================================
-   AGITAR CÁPSULA DEL RESULTADO
+   SHAKE CÁPSULA
    ========================================= */
 
 function startCapsuleShake() {
@@ -1690,7 +1639,7 @@ function startCapsuleShake() {
 
 
 /* =========================================
-   CLICK EN RESULTADO
+   CLICK CÁPSULA
    ========================================= */
 
 function capsuleClickHandler() {
@@ -1754,7 +1703,7 @@ function openNormalCapsule() {
     stopCapsuleShake();
 
 
-    const closeAnimation =
+    const animation =
         dispensedCapsule.animate(
 
             [
@@ -1790,7 +1739,7 @@ function openNormalCapsule() {
         );
 
 
-    closeAnimation.onfinish =
+    animation.onfinish =
         () => {
 
             dispensedCapsule.style.opacity =
@@ -1817,7 +1766,7 @@ function openNormalCapsule() {
 
 
 /* =========================================
-   MOSTRAR RAREZA
+   RAREZA
    ========================================= */
 
 function showRarity(
@@ -1859,9 +1808,6 @@ function showRarity(
 
             width:
                 "36%",
-
-            maxWidth:
-                "none",
 
             height:
                 "auto",
@@ -2012,7 +1958,7 @@ function showRarity(
 
 
 /* =========================================
-   REVELAR PREMIO
+   RESULTADO ABIERTO
    ========================================= */
 
 function revealOpenedResult(
@@ -2032,10 +1978,6 @@ function revealOpenedResult(
         "1";
 
 
-    /*
-       Resultado mucho más grande.
-    */
-
     dispensedCapsule.style.width =
         `${OPENED_RESULT_SIZE}%`;
 
@@ -2048,7 +1990,7 @@ function revealOpenedResult(
         "pointer";
 
 
-    const revealAnimation =
+    const animation =
         dispensedCapsule.animate(
 
             [
@@ -2096,14 +2038,14 @@ function revealOpenedResult(
         );
 
 
-    revealAnimation.onfinish =
+    animation.onfinish =
         () => {
 
             dispensedCapsule.style.transform =
                 "translate(-50%, -50%)";
 
 
-            revealAnimation.cancel();
+            animation.cancel();
 
 
             capsuleIsOpening =
@@ -2118,18 +2060,10 @@ function revealOpenedResult(
 
 
 /* =========================================
-   CARTA ULTRA RARE
+   CARTA
    ========================================= */
 
 function handleLetterCapsule() {
-
-    /*
-       LETTER 1
-       →
-       ULTRA RARE
-       →
-       LETTER 2
-    */
 
     if (
         capsuleCanOpen
@@ -2145,7 +2079,7 @@ function handleLetterCapsule() {
         stopCapsuleShake();
 
 
-        const disappear =
+        const animation =
             dispensedCapsule.animate(
 
                 [
@@ -2182,7 +2116,7 @@ function handleLetterCapsule() {
             );
 
 
-        disappear.onfinish =
+        animation.onfinish =
             () => {
 
                 dispensedCapsule.style.opacity =
@@ -2205,12 +2139,6 @@ function handleLetterCapsule() {
     }
 
 
-    /*
-       LETTER 2
-       →
-       LETTER 3
-    */
-
     if (
         letterCanRevealFinal
     ) {
@@ -2221,10 +2149,6 @@ function handleLetterCapsule() {
 
     }
 
-
-    /*
-       CERRAR LETTER 3
-    */
 
     if (
         capsuleCanClose
@@ -2325,10 +2249,8 @@ function revealLetterSecondStage() {
             capsuleIsOpening =
                 false;
 
-
             letterCanRevealFinal =
                 true;
-
 
             capsuleCanClose =
                 false;
@@ -2547,7 +2469,7 @@ function closeResult() {
 
 
 /* =========================================
-   PREPARAR SIGUIENTE TURNO
+   SIGUIENTE TURNO
    ========================================= */
 
 function resetAfterResult() {
@@ -2610,7 +2532,6 @@ function unlockNextToken() {
             "ready"
         );
 
-
         knob.classList.add(
             "locked"
         );
@@ -2635,7 +2556,6 @@ function unlockNextToken() {
     knob.classList.remove(
         "ready"
     );
-
 
     knob.classList.add(
         "locked"
