@@ -36,20 +36,21 @@ const TOKEN_SLOT_RADIUS_Y = 0.045;
    SALIDA DE LA CÁPSULA
    ========================================= */
 
-/*
-   Un poquito más a la izquierda.
-*/
-
 const DISPENSER_X = 60.5;
 const DISPENSER_Y = 81;
 
-const DISPENSED_CAPSULE_WIDTH = 10;
-
 
 /*
-   Se conservan para no alterar
-   la estructura anterior.
+   CAMBIO:
+   Antes: 10
+   Ahora: 7.5
+
+   La cápsula aparece más pequeña
+   al salir de la máquina.
 */
+
+const DISPENSED_CAPSULE_WIDTH = 7.5;
+
 
 const CAPSULE_MOVE_X = -26;
 const CAPSULE_MOVE_Y = 64;
@@ -59,7 +60,17 @@ const CAPSULE_MOVE_Y = 64;
    TAMAÑOS
    ========================================= */
 
-const CENTER_CAPSULE_SIZE = 34;
+/*
+   CAMBIO:
+   Antes: 34
+   Ahora: 40
+
+   La cápsula queda más grande cuando
+   llega al centro y comienza a temblar.
+*/
+
+const CENTER_CAPSULE_SIZE = 40;
+
 
 const OPENED_RESULT_SIZE = 58;
 
@@ -69,11 +80,6 @@ const FINAL_LETTER_SIZE = 62;
 /* =========================================
    TIEMPOS
    ========================================= */
-
-/*
-   Antes: 3000 ms
-   Ahora: 2600 ms
-*/
 
 const CAPSULE_EMERGE_TIME = 2600;
 
@@ -1485,18 +1491,6 @@ function dispenseCapsule() {
     );
 
 
-    /*
-       =====================================
-       SALIDA FLOTANTE
-       =====================================
-
-       Nueva salida:
-       un poquito más a la izquierda.
-
-       Duración:
-       2.6 segundos.
-    */
-
     const emergeAnimation =
         dispensedCapsule.animate(
 
@@ -1544,11 +1538,6 @@ function dispenseCapsule() {
                 },
 
 
-                /*
-                   Pequeña caída,
-                   sin moverse a la derecha.
-                */
-
                 {
                     offset:
                         0.27,
@@ -1560,7 +1549,7 @@ function dispenseCapsule() {
                         "82.5%",
 
                     width:
-                        "11%",
+                        "9%",
 
                     transform:
                         "translate(-50%, -50%) scale(1) rotate(1deg)",
@@ -1569,10 +1558,6 @@ function dispenseCapsule() {
                         1
                 },
 
-
-                /*
-                   Empieza a flotar.
-                */
 
                 {
                     offset:
@@ -1585,7 +1570,7 @@ function dispenseCapsule() {
                         "80%",
 
                     width:
-                        "13%",
+                        "12%",
 
                     transform:
                         "translate(-50%, -50%) scale(1) rotate(-1.5deg)",
@@ -1627,7 +1612,7 @@ function dispenseCapsule() {
                         "66.5%",
 
                     width:
-                        "22%",
+                        "24%",
 
                     transform:
                         "translate(-50%, -50%) scale(1) rotate(-0.8deg)",
@@ -1648,7 +1633,7 @@ function dispenseCapsule() {
                         "58.5%",
 
                     width:
-                        "28%",
+                        "32%",
 
                     transform:
                         "translate(-50%, -50%) scale(1) rotate(0.5deg)",
