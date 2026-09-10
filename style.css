@@ -66,12 +66,6 @@ body {
    WALLPAPER
    ========================================= */
 
-/*
-   Lo ponemos en una capa independiente
-   para evitar que body/html o Chrome móvil
-   lo oculten.
-*/
-
 .page::before {
     content: "";
 
@@ -621,14 +615,6 @@ body {
 
 @media (max-width: 700px) {
 
-    /*
-       AQUÍ CAMIAMOS EL WALLPAPER.
-
-       No depende de portrait/landscape.
-       Cualquier pantalla de 700px
-       o menos utilizará wallpaper-mobile.
-    */
-
     .page::before {
         background-image:
             url("./assets/wallpaper-mobile.png");
@@ -698,10 +684,6 @@ body {
    ========================================= */
 
 @media (max-height: 600px) and (orientation: landscape) {
-
-    /*
-       También wallpaper móvil.
-    */
 
     .page::before {
         background-image:
