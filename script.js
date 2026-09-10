@@ -44,12 +44,12 @@ const TOKEN_SLOT_RADIUS_Y = 0.045;
    ----------------------------------------- */
 
 const DISPENSER_X = 62;
-const DISPENSER_Y = 70;
+const DISPENSER_Y = 81;
 
 const DISPENSED_CAPSULE_WIDTH = 10;
 
 const CAPSULE_MOVE_X = -26;
-const CAPSULE_MOVE_Y = 20;
+const CAPSULE_MOVE_Y = 64;
 
 
 /* -----------------------------------------
