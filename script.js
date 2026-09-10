@@ -1,6 +1,6 @@
 /* =========================================
    CHERRYTON GACHA
-   SCRIPT.JS
+   SCRIPT.JS COMPLETO
    ========================================= */
 
 
@@ -37,19 +37,26 @@ const TOKEN_SLOT_RADIUS_Y = 0.045;
    ========================================= */
 
 /*
-   Esta es la salida suavizada.
-
-   La cápsula ya no se va tan abajo
-   ni sale disparada.
+   POSICIÓN CORRECTA QUE YA HABÍAMOS
+   CALIBRADO ANTERIORMENTE.
 */
 
 const DISPENSER_X = 62;
-const DISPENSER_Y = 70;
+const DISPENSER_Y = 81;
 
 const DISPENSED_CAPSULE_WIDTH = 10;
 
+
+/*
+   Estas variables se conservan para no
+   alterar la estructura que ya teníamos.
+
+   La nueva animación flotante ya no depende
+   de ellas para lanzar la cápsula en diagonal.
+*/
+
 const CAPSULE_MOVE_X = -26;
-const CAPSULE_MOVE_Y = 20;
+const CAPSULE_MOVE_Y = 64;
 
 
 /* =========================================
@@ -58,15 +65,7 @@ const CAPSULE_MOVE_Y = 20;
 
 const CENTER_CAPSULE_SIZE = 34;
 
-/*
-   Resultado abierto más grande.
-*/
-
 const OPENED_RESULT_SIZE = 58;
-
-/*
-   Resultado final de la carta.
-*/
 
 const FINAL_LETTER_SIZE = 62;
 
@@ -75,9 +74,16 @@ const FINAL_LETTER_SIZE = 62;
    TIEMPOS
    ========================================= */
 
-const CAPSULE_EMERGE_TIME = 2800;
+/*
+   Antes todo el recorrido duraba 1550 ms.
 
-const RARITY_TIME = 1700;
+   Ahora dura 3 segundos para que la cápsula
+   se sienta flotante y no salga disparada.
+*/
+
+const CAPSULE_EMERGE_TIME = 3000;
+
+const RARITY_TIME = 1900;
 
 
 /* =========================================
@@ -221,6 +227,59 @@ const gachaQueue = [
     LETTER_CAPSULE
 
 ];
+
+
+/* =========================================
+   PRECARGAR IMÁGENES DE RESULTADOS
+   ========================================= */
+
+/*
+   Esto ayuda a evitar flashes o glitches
+   cuando cambiamos de la cápsula cerrada
+   al resultado abierto.
+*/
+
+function preloadImage(source) {
+
+    if (!source) {
+        return;
+    }
+
+    const image =
+        new Image();
+
+    image.src =
+        source;
+
+}
+
+
+NORMAL_GACHA_CAPSULES.forEach(
+    result => {
+
+        preloadImage(
+            result.opened
+        );
+
+        preloadImage(
+            result.rarity
+        );
+
+    }
+);
+
+
+preloadImage(
+    LETTER_CAPSULE.opened
+);
+
+preloadImage(
+    LETTER_CAPSULE.final
+);
+
+preloadImage(
+    LETTER_CAPSULE.rarity
+);
 
 
 /* =========================================
@@ -776,14 +835,6 @@ let knobRotation = 0;
 let knobTurnCompleted = false;
 
 
-/*
-   La perilla debe girarse manualmente.
-
-   Al llegar casi a la vuelta completa,
-   termina suavemente el pequeño
-   tramo restante.
-*/
-
 const KNOB_TRIGGER_ROTATION = -300;
 const KNOB_FINAL_ROTATION = -360;
 
@@ -937,7 +988,7 @@ function knobPointerMove(event) {
 
 
     /*
-       Solo giro antihorario.
+       SOLO GIRO ANTIHORARIO.
     */
 
     if (
@@ -1150,11 +1201,6 @@ function completeKnobTurn() {
         );
 
 
-    /*
-       Movimiento ligero de las cápsulas
-       dentro de la máquina.
-    */
-
     animateCapsulesInside();
 
 
@@ -1265,11 +1311,6 @@ function animateCapsulesInside() {
                     : -1;
 
 
-            /*
-               Movimiento pequeño.
-               No las avienta.
-            */
-
             const amountX =
                 1.5 +
                 Math.random() * 2;
@@ -1368,6 +1409,32 @@ function dispenseCapsule() {
         getCurrentResult();
 
 
+    /*
+       Precargamos específicamente las imágenes
+       del resultado que acaba de salir.
+    */
+
+    preloadImage(
+        currentGachaResult.opened
+    );
+
+    preloadImage(
+        currentGachaResult.rarity
+    );
+
+
+    if (
+        currentGachaResult.name ===
+        "letter"
+    ) {
+
+        preloadImage(
+            currentGachaResult.final
+        );
+
+    }
+
+
     dispensedCapsule =
         document.createElement(
             "img"
@@ -1425,6 +1492,12 @@ function dispenseCapsule() {
             cursor:
                 "default",
 
+            opacity:
+                "0",
+
+            visibility:
+                "visible",
+
             willChange:
                 "left, top, width, transform, opacity"
 
@@ -1439,13 +1512,22 @@ function dispenseCapsule() {
 
 
     /*
-       SALIDA SUAVE
+       =====================================
+       SALIDA FLOTANTE
+       =====================================
 
-       Primero aparece en la compuerta,
-       hace un recorrido corto y después
-       va al centro.
+       La cápsula YA NO es lanzada hacia
+       abajo y hacia la izquierda.
 
-       No baja hasta fuera de la máquina.
+       Trayectoria:
+
+       salida
+       ↓ muy poquito
+       ↖ flotación suave
+       ↖
+       centro
+
+       El crecimiento también es progresivo.
     */
 
     const emergeAnimation =
@@ -1453,7 +1535,14 @@ function dispenseCapsule() {
 
             [
 
+                /*
+                   Dentro de la compuerta.
+                */
+
                 {
+                    offset:
+                        0,
+
                     left:
                         `${DISPENSER_X}%`,
 
@@ -1464,15 +1553,20 @@ function dispenseCapsule() {
                         `${DISPENSED_CAPSULE_WIDTH}%`,
 
                     transform:
-                        "translate(-50%, -50%) scale(0.82)",
+                        "translate(-50%, -50%) scale(0.82) rotate(0deg)",
 
                     opacity:
                         0
                 },
 
+
+                /*
+                   Aparece todavía en la salida.
+                */
+
                 {
                     offset:
-                        0.15,
+                        0.14,
 
                     left:
                         `${DISPENSER_X}%`,
@@ -1484,39 +1578,146 @@ function dispenseCapsule() {
                         `${DISPENSED_CAPSULE_WIDTH}%`,
 
                     transform:
-                        "translate(-50%, -50%) scale(1)",
+                        "translate(-50%, -50%) scale(1) rotate(0deg)",
 
                     opacity:
                         1
                 },
+
+
+                /*
+                   Pequeñísima caída natural.
+                */
 
                 {
                     offset:
-                        0.42,
+                        0.27,
 
                     left:
-                        `${
-                            DISPENSER_X +
-                            CAPSULE_MOVE_X
-                        }%`,
+                        "62%",
 
                     top:
-                        `${
-                            DISPENSER_Y +
-                            CAPSULE_MOVE_Y
-                        }%`,
+                        "82.5%",
 
                     width:
-                        `${DISPENSED_CAPSULE_WIDTH}%`,
+                        "11%",
 
                     transform:
-                        "translate(-50%, -50%) scale(1)",
+                        "translate(-50%, -50%) scale(1) rotate(1deg)",
 
                     opacity:
                         1
                 },
 
+
+                /*
+                   Comienza a flotar.
+                */
+
                 {
+                    offset:
+                        0.43,
+
+                    left:
+                        "61.5%",
+
+                    top:
+                        "80%",
+
+                    width:
+                        "13%",
+
+                    transform:
+                        "translate(-50%, -50%) scale(1) rotate(-1.5deg)",
+
+                    opacity:
+                        1
+                },
+
+
+                /*
+                   Subida suave.
+                */
+
+                {
+                    offset:
+                        0.60,
+
+                    left:
+                        "60%",
+
+                    top:
+                        "74%",
+
+                    width:
+                        "17%",
+
+                    transform:
+                        "translate(-50%, -50%) scale(1) rotate(1.2deg)",
+
+                    opacity:
+                        1
+                },
+
+
+                /*
+                   Sigue flotando.
+                */
+
+                {
+                    offset:
+                        0.74,
+
+                    left:
+                        "57.5%",
+
+                    top:
+                        "66.5%",
+
+                    width:
+                        "22%",
+
+                    transform:
+                        "translate(-50%, -50%) scale(1) rotate(-0.8deg)",
+
+                    opacity:
+                        1
+                },
+
+
+                /*
+                   Cerca del centro.
+                */
+
+                {
+                    offset:
+                        0.87,
+
+                    left:
+                        "54%",
+
+                    top:
+                        "58.5%",
+
+                    width:
+                        "28%",
+
+                    transform:
+                        "translate(-50%, -50%) scale(1) rotate(0.5deg)",
+
+                    opacity:
+                        1
+                },
+
+
+                /*
+                   Centro.
+                */
+
+                {
+                    offset:
+                        1,
+
                     left:
                         "50%",
 
@@ -1527,7 +1728,7 @@ function dispenseCapsule() {
                         `${CENTER_CAPSULE_SIZE}%`,
 
                     transform:
-                        "translate(-50%, -50%) scale(1)",
+                        "translate(-50%, -50%) scale(1) rotate(0deg)",
 
                     opacity:
                         1
@@ -1536,14 +1737,21 @@ function dispenseCapsule() {
             ],
 
             {
+
                 duration:
                     CAPSULE_EMERGE_TIME,
 
+                /*
+                   Curva suave, sin acelerón
+                   violento al principio.
+                */
+
                 easing:
-                    "cubic-bezier(.18,.75,.25,1)",
+                    "cubic-bezier(.35,.15,.20,1)",
 
                 fill:
                     "forwards"
+
             }
 
         );
@@ -1551,6 +1759,10 @@ function dispenseCapsule() {
 
     emergeAnimation.onfinish =
         () => {
+
+            /*
+               Primero fijamos el estado final.
+            */
 
             dispensedCapsule.style.left =
                 "50%";
@@ -1564,6 +1776,14 @@ function dispenseCapsule() {
             dispensedCapsule.style.transform =
                 "translate(-50%, -50%)";
 
+            dispensedCapsule.style.opacity =
+                "1";
+
+
+            /*
+               Después quitamos la animación.
+               Así no hay salto al terminar.
+            */
 
             emergeAnimation.cancel();
 
@@ -1710,17 +1930,26 @@ function openNormalCapsule() {
 
                 {
                     transform:
-                        "translate(-50%, -50%) scale(1)"
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
                 },
 
                 {
                     transform:
-                        "translate(-50%, -50%) scale(0.72)"
+                        "translate(-50%, -50%) scale(0.72)",
+
+                    opacity:
+                        1
                 },
 
                 {
                     transform:
-                        "translate(-50%, -50%) scale(0)"
+                        "translate(-50%, -50%) scale(0)",
+
+                    opacity:
+                        0
                 }
 
             ],
@@ -1742,8 +1971,28 @@ function openNormalCapsule() {
     animation.onfinish =
         () => {
 
+            /*
+               IMPORTANTE:
+
+               Antes de mostrar el letrero
+               ocultamos COMPLETAMENTE la cápsula.
+
+               Luego cancelamos la animación
+               anterior.
+
+               Esto evita que pueda aparecer
+               durante un frame al desaparecer
+               el letrero.
+            */
+
             dispensedCapsule.style.opacity =
                 "0";
+
+            dispensedCapsule.style.visibility =
+                "hidden";
+
+
+            animation.cancel();
 
 
             showRarity(
@@ -1825,7 +2074,10 @@ function showRarity(
                 "none",
 
             WebkitUserDrag:
-                "none"
+                "none",
+
+            opacity:
+                "0"
 
         }
 
@@ -1837,59 +2089,82 @@ function showRarity(
     );
 
 
-    rarityImage.animate(
+    const rarityEnter =
+        rarityImage.animate(
 
-        [
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0)",
+
+                    opacity:
+                        0
+                },
+
+                {
+                    offset:
+                        0.55,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1.16)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
 
             {
-                transform:
-                    "translate(-50%, -50%) scale(0)",
+                duration:
+                    480,
 
-                opacity:
-                    0
-            },
+                easing:
+                    "cubic-bezier(.15,.9,.25,1.35)",
 
-            {
-                offset:
-                    0.55,
-
-                transform:
-                    "translate(-50%, -50%) scale(1.16)",
-
-                opacity:
-                    1
-            },
-
-            {
-                transform:
-                    "translate(-50%, -50%) scale(1)",
-
-                opacity:
-                    1
+                fill:
+                    "forwards"
             }
 
-        ],
+        );
 
-        {
-            duration:
-                480,
 
-            easing:
-                "cubic-bezier(.15,.9,.25,1.35)",
+    rarityEnter.onfinish =
+        () => {
 
-            fill:
-                "forwards"
-        }
+            if (!rarityImage) {
+                return;
+            }
 
-    );
+            rarityImage.style.opacity =
+                "1";
+
+        };
 
 
     setTimeout(
 
         () => {
 
+            if (!rarityImage) {
+                return;
+            }
+
+
+            const currentRarity =
+                rarityImage;
+
+
             const disappear =
-                rarityImage.animate(
+                currentRarity.animate(
 
                     [
 
@@ -1928,22 +2203,43 @@ function showRarity(
             disappear.onfinish =
                 () => {
 
+                    /*
+                       Quitamos completamente
+                       el letrero ANTES de revelar
+                       la siguiente imagen.
+                    */
+
                     if (
-                        rarityImage &&
-                        rarityImage.parentNode
+                        currentRarity &&
+                        currentRarity.parentNode
                     ) {
 
-                        rarityImage.remove();
+                        currentRarity.remove();
 
                     }
 
 
-                    rarityImage =
-                        null;
+                    if (
+                        rarityImage ===
+                        currentRarity
+                    ) {
+
+                        rarityImage =
+                            null;
+
+                    }
 
 
                     if (callback) {
-                        callback();
+
+                        requestAnimationFrame(
+                            () => {
+
+                                callback();
+
+                            }
+                        );
+
                     }
 
                 };
@@ -1970,12 +2266,23 @@ function revealOpenedResult(
     }
 
 
-    dispensedCapsule.src =
-        imageSource;
+    /*
+       Mantenemos el elemento totalmente oculto
+       mientras cambiamos el archivo PNG.
+    */
 
+    dispensedCapsule.style.visibility =
+        "hidden";
 
     dispensedCapsule.style.opacity =
-        "1";
+        "0";
+
+    dispensedCapsule.style.transform =
+        "translate(-50%, -50%)";
+
+
+    dispensedCapsule.src =
+        imageSource;
 
 
     dispensedCapsule.style.width =
@@ -1990,71 +2297,110 @@ function revealOpenedResult(
         "pointer";
 
 
-    const animation =
-        dispensedCapsule.animate(
+    /*
+       Esperamos dos frames.
 
-            [
+       Esto le da al navegador oportunidad
+       de actualizar el src antes de volver
+       a hacer visible el elemento.
+    */
 
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(0.15)",
+    requestAnimationFrame(
 
-                    opacity:
-                        0
-                },
-
-                {
-                    offset:
-                        0.65,
-
-                    transform:
-                        "translate(-50%, -50%) scale(1.08)",
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(1)",
-
-                    opacity:
-                        1
-                }
-
-            ],
-
-            {
-                duration:
-                    650,
-
-                easing:
-                    "cubic-bezier(.15,.85,.2,1.15)",
-
-                fill:
-                    "forwards"
-            }
-
-        );
-
-
-    animation.onfinish =
         () => {
 
-            dispensedCapsule.style.transform =
-                "translate(-50%, -50%)";
+            requestAnimationFrame(
+
+                () => {
+
+                    if (!dispensedCapsule) {
+                        return;
+                    }
 
 
-            animation.cancel();
+                    dispensedCapsule.style.visibility =
+                        "visible";
 
 
-            capsuleIsOpening =
-                false;
+                    const animation =
+                        dispensedCapsule.animate(
 
-            capsuleCanClose =
-                true;
+                            [
 
-        };
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(0.15)",
+
+                                    opacity:
+                                        0
+                                },
+
+                                {
+                                    offset:
+                                        0.65,
+
+                                    transform:
+                                        "translate(-50%, -50%) scale(1.08)",
+
+                                    opacity:
+                                        1
+                                },
+
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(1)",
+
+                                    opacity:
+                                        1
+                                }
+
+                            ],
+
+                            {
+                                duration:
+                                    650,
+
+                                easing:
+                                    "cubic-bezier(.15,.85,.2,1.15)",
+
+                                fill:
+                                    "forwards"
+                            }
+
+                        );
+
+
+                    animation.onfinish =
+                        () => {
+
+                            dispensedCapsule.style.transform =
+                                "translate(-50%, -50%)";
+
+                            dispensedCapsule.style.opacity =
+                                "1";
+
+                            dispensedCapsule.style.visibility =
+                                "visible";
+
+
+                            animation.cancel();
+
+
+                            capsuleIsOpening =
+                                false;
+
+                            capsuleCanClose =
+                                true;
+
+                        };
+
+                }
+
+            );
+
+        }
+
+    );
 
 }
 
@@ -2119,8 +2465,21 @@ function handleLetterCapsule() {
         animation.onfinish =
             () => {
 
+                /*
+                   Igual que con las normales:
+                   la cápsula cerrada queda
+                   totalmente escondida antes
+                   del ULTRA RARO.
+                */
+
                 dispensedCapsule.style.opacity =
                     "0";
+
+                dispensedCapsule.style.visibility =
+                    "hidden";
+
+
+                animation.cancel();
 
 
                 showRarity(
@@ -2172,12 +2531,18 @@ function revealLetterSecondStage() {
     }
 
 
-    dispensedCapsule.src =
-        LETTER_CAPSULE.opened;
-
+    dispensedCapsule.style.visibility =
+        "hidden";
 
     dispensedCapsule.style.opacity =
-        "1";
+        "0";
+
+    dispensedCapsule.style.transform =
+        "translate(-50%, -50%)";
+
+
+    dispensedCapsule.src =
+        LETTER_CAPSULE.opened;
 
 
     dispensedCapsule.style.width =
@@ -2188,74 +2553,105 @@ function revealLetterSecondStage() {
         RESULT_DROP_SHADOW;
 
 
-    const animation =
-        dispensedCapsule.animate(
+    requestAnimationFrame(
 
-            [
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(0.12)",
-
-                    opacity:
-                        0
-                },
-
-                {
-                    offset:
-                        0.65,
-
-                    transform:
-                        "translate(-50%, -50%) scale(1.08)",
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(1)",
-
-                    opacity:
-                        1
-                }
-
-            ],
-
-            {
-                duration:
-                    700,
-
-                easing:
-                    "cubic-bezier(.15,.85,.2,1.15)",
-
-                fill:
-                    "forwards"
-            }
-
-        );
-
-
-    animation.onfinish =
         () => {
 
-            dispensedCapsule.style.transform =
-                "translate(-50%, -50%)";
+            requestAnimationFrame(
+
+                () => {
+
+                    if (!dispensedCapsule) {
+                        return;
+                    }
 
 
-            animation.cancel();
+                    dispensedCapsule.style.visibility =
+                        "visible";
 
 
-            capsuleIsOpening =
-                false;
+                    const animation =
+                        dispensedCapsule.animate(
 
-            letterCanRevealFinal =
-                true;
+                            [
 
-            capsuleCanClose =
-                false;
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(0.12)",
 
-        };
+                                    opacity:
+                                        0
+                                },
+
+                                {
+                                    offset:
+                                        0.65,
+
+                                    transform:
+                                        "translate(-50%, -50%) scale(1.08)",
+
+                                    opacity:
+                                        1
+                                },
+
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(1)",
+
+                                    opacity:
+                                        1
+                                }
+
+                            ],
+
+                            {
+                                duration:
+                                    700,
+
+                                easing:
+                                    "cubic-bezier(.15,.85,.2,1.15)",
+
+                                fill:
+                                    "forwards"
+                            }
+
+                        );
+
+
+                    animation.onfinish =
+                        () => {
+
+                            dispensedCapsule.style.transform =
+                                "translate(-50%, -50%)";
+
+                            dispensedCapsule.style.opacity =
+                                "1";
+
+                            dispensedCapsule.style.visibility =
+                                "visible";
+
+
+                            animation.cancel();
+
+
+                            capsuleIsOpening =
+                                false;
+
+                            letterCanRevealFinal =
+                                true;
+
+                            capsuleCanClose =
+                                false;
+
+                        };
+
+                }
+
+            );
+
+        }
+
+    );
 
 }
 
@@ -2275,6 +2671,21 @@ function revealLetterFinal() {
         false;
 
 
+    /*
+       Ocultamos primero LETTER 2,
+       cambiamos el PNG y después mostramos
+       LETTER 3.
+
+       Evita flashes durante el cambio.
+    */
+
+    dispensedCapsule.style.visibility =
+        "hidden";
+
+    dispensedCapsule.style.opacity =
+        "0";
+
+
     dispensedCapsule.src =
         LETTER_CAPSULE.final;
 
@@ -2287,68 +2698,99 @@ function revealLetterFinal() {
         RESULT_DROP_SHADOW;
 
 
-    const animation =
-        dispensedCapsule.animate(
+    requestAnimationFrame(
 
-            [
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(0.82)",
-
-                    opacity:
-                        0.5
-                },
-
-                {
-                    offset:
-                        0.62,
-
-                    transform:
-                        "translate(-50%, -50%) scale(1.08)",
-
-                    opacity:
-                        1
-                },
-
-                {
-                    transform:
-                        "translate(-50%, -50%) scale(1)",
-
-                    opacity:
-                        1
-                }
-
-            ],
-
-            {
-                duration:
-                    650,
-
-                easing:
-                    "cubic-bezier(.15,.85,.2,1.15)",
-
-                fill:
-                    "forwards"
-            }
-
-        );
-
-
-    animation.onfinish =
         () => {
 
-            dispensedCapsule.style.transform =
-                "translate(-50%, -50%)";
+            requestAnimationFrame(
+
+                () => {
+
+                    if (!dispensedCapsule) {
+                        return;
+                    }
 
 
-            animation.cancel();
+                    dispensedCapsule.style.visibility =
+                        "visible";
 
 
-            capsuleCanClose =
-                true;
+                    const animation =
+                        dispensedCapsule.animate(
 
-        };
+                            [
+
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(0.82)",
+
+                                    opacity:
+                                        0
+                                },
+
+                                {
+                                    offset:
+                                        0.62,
+
+                                    transform:
+                                        "translate(-50%, -50%) scale(1.08)",
+
+                                    opacity:
+                                        1
+                                },
+
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(1)",
+
+                                    opacity:
+                                        1
+                                }
+
+                            ],
+
+                            {
+                                duration:
+                                    650,
+
+                                easing:
+                                    "cubic-bezier(.15,.85,.2,1.15)",
+
+                                fill:
+                                    "forwards"
+                            }
+
+                        );
+
+
+                    animation.onfinish =
+                        () => {
+
+                            dispensedCapsule.style.transform =
+                                "translate(-50%, -50%)";
+
+                            dispensedCapsule.style.opacity =
+                                "1";
+
+                            dispensedCapsule.style.visibility =
+                                "visible";
+
+
+                            animation.cancel();
+
+
+                            capsuleCanClose =
+                                true;
+
+                        };
+
+                }
+
+            );
+
+        }
+
+    );
 
 }
 
