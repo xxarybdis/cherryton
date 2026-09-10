@@ -75,9 +75,9 @@ const FINAL_LETTER_SIZE = 62;
    TIEMPOS
    ========================================= */
 
-const CAPSULE_EMERGE_TIME = 1550;
+const CAPSULE_EMERGE_TIME = 2000;
 
-const RARITY_TIME = 1900;
+const RARITY_TIME = 1700;
 
 
 /* =========================================
