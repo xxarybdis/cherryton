@@ -22,6 +22,184 @@ const tokenOrder = [
 
 
 /* =========================================
+   SONIDOS
+   ========================================= */
+
+const sounds = {
+
+    insertCoin:
+        new Audio(
+            "assets/sounds/insert-coin.wav"
+        ),
+
+    twistKnob:
+        new Audio(
+            "assets/sounds/twist-knob.wav"
+        ),
+
+    capsuleShaking:
+        new Audio(
+            "assets/sounds/capsule-shaking.wav"
+        ),
+
+    capsuleDrop:
+        new Audio(
+            "assets/sounds/capsule-drop.wav"
+        ),
+
+    capsulePop:
+        new Audio(
+            "assets/sounds/capsule-pop.wav"
+        ),
+
+    rarity:
+        new Audio(
+            "assets/sounds/rarity.wav"
+        ),
+
+    prizeOpened:
+        new Audio(
+            "assets/sounds/prize-opened.wav"
+        ),
+
+    openedLetter:
+        new Audio(
+            "assets/sounds/opened-letter.wav"
+        )
+
+};
+
+
+/* =========================================
+   VOLUMEN DE LOS SONIDOS
+   ========================================= */
+
+sounds.insertCoin.volume = 0.40;
+
+sounds.twistKnob.volume = 0.32;
+
+sounds.capsuleShaking.volume = 0.27;
+
+sounds.capsuleDrop.volume = 0.38;
+
+sounds.capsulePop.volume = 0.38;
+
+sounds.rarity.volume = 0.45;
+
+sounds.prizeOpened.volume = 0.42;
+
+sounds.openedLetter.volume = 0.52;
+
+
+/* =========================================
+   PRECARGAR SONIDOS
+   ========================================= */
+
+Object.values(
+    sounds
+).forEach(sound => {
+
+    sound.preload =
+        "auto";
+
+    sound.load();
+
+});
+
+
+/* =========================================
+   REPRODUCIR SONIDO
+   ========================================= */
+
+function playSound(
+    sound,
+    restart = true
+) {
+
+    if (!sound) {
+        return;
+    }
+
+
+    if (restart) {
+
+        try {
+
+            sound.currentTime =
+                0;
+
+        }
+        catch (error) {
+
+            // Algunos navegadores pueden
+            // impedir cambiar currentTime
+            // antes de cargar el audio.
+
+        }
+
+    }
+
+
+    const playPromise =
+        sound.play();
+
+
+    if (
+        playPromise &&
+        typeof playPromise.catch ===
+        "function"
+    ) {
+
+        playPromise.catch(
+            () => {
+
+                /*
+                   No hacemos nada aquí.
+
+                   Si el navegador bloquea
+                   temporalmente un audio,
+                   el gachapón debe seguir
+                   funcionando normalmente.
+                */
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   DETENER SONIDO
+   ========================================= */
+
+function stopSound(sound) {
+
+    if (!sound) {
+        return;
+    }
+
+
+    sound.pause();
+
+
+    try {
+
+        sound.currentTime =
+            0;
+
+    }
+    catch (error) {
+
+        // Mantener funcionando el gacha.
+
+    }
+
+}
+
+
+/* =========================================
    RANURA DEL TOKEN
    ========================================= */
 
@@ -39,18 +217,7 @@ const TOKEN_SLOT_RADIUS_Y = 0.045;
 const DISPENSER_X = 60.5;
 const DISPENSER_Y = 81;
 
-
-/*
-   CAMBIO:
-   Antes: 10
-   Ahora: 7.5
-
-   La cápsula aparece más pequeña
-   al salir de la máquina.
-*/
-
 const DISPENSED_CAPSULE_WIDTH = 7.5;
-
 
 const CAPSULE_MOVE_X = -26;
 const CAPSULE_MOVE_Y = 64;
@@ -60,17 +227,7 @@ const CAPSULE_MOVE_Y = 64;
    TAMAÑOS
    ========================================= */
 
-/*
-   CAMBIO:
-   Antes: 34
-   Ahora: 40
-
-   La cápsula queda más grande cuando
-   llega al centro y comienza a temblar.
-*/
-
 const CENTER_CAPSULE_SIZE = 40;
-
 
 const OPENED_RESULT_SIZE = 58;
 
@@ -123,7 +280,7 @@ let letterCanRevealFinal = false;
 
 
 /* =========================================
-   NUEVA MICROINTERACCIÓN DEL PREMIO
+   MICROINTERACCIÓN DEL PREMIO
    ========================================= */
 
 let prizeFloatAnimation = null;
@@ -205,12 +362,19 @@ function shuffleArray(array) {
 
     const copy = [...array];
 
-    for (let i = copy.length - 1; i > 0; i--) {
+
+    for (
+        let i = copy.length - 1;
+        i > 0;
+        i--
+    ) {
 
         const j =
             Math.floor(
-                Math.random() * (i + 1)
+                Math.random() *
+                (i + 1)
             );
+
 
         [
             copy[i],
@@ -221,6 +385,7 @@ function shuffleArray(array) {
         ];
 
     }
+
 
     return copy;
 
@@ -248,8 +413,10 @@ function preloadImage(source) {
         return;
     }
 
+
     const image =
         new Image();
+
 
     image.src =
         source;
@@ -297,6 +464,7 @@ function activateCurrentToken() {
             return;
         }
 
+
         token.classList.remove(
             "active-token"
         );
@@ -319,6 +487,7 @@ function activateCurrentToken() {
         );
 
         return;
+
     }
 
 
@@ -373,6 +542,7 @@ function getTokenSlotDistance(token) {
     const tokenRect =
         token.getBoundingClientRect();
 
+
     const slot =
         getSlotPosition();
 
@@ -380,6 +550,7 @@ function getTokenSlotDistance(token) {
     const tokenCenterX =
         tokenRect.left +
         tokenRect.width / 2;
+
 
     const tokenCenterY =
         tokenRect.top +
@@ -389,6 +560,7 @@ function getTokenSlotDistance(token) {
     const dx =
         tokenCenterX -
         slot.x;
+
 
     const dy =
         tokenCenterY -
@@ -446,7 +618,8 @@ function tokenPointerDown(event) {
 
     if (
         !currentToken ||
-        event.currentTarget !== currentToken ||
+        event.currentTarget !==
+            currentToken ||
         machineIsRunning ||
         tokenInserted
     ) {
@@ -454,7 +627,9 @@ function tokenPointerDown(event) {
     }
 
 
-    tokenIsDragging = true;
+    tokenIsDragging =
+        true;
+
 
     tokenPointerId =
         event.pointerId;
@@ -463,12 +638,16 @@ function tokenPointerDown(event) {
     tokenStartPointerX =
         event.clientX;
 
+
     tokenStartPointerY =
         event.clientY;
 
 
-    tokenMoveX = 0;
-    tokenMoveY = 0;
+    tokenMoveX =
+        0;
+
+    tokenMoveY =
+        0;
 
 
     currentToken.classList.add(
@@ -491,7 +670,8 @@ function tokenPointerMove(event) {
     if (
         !tokenIsDragging ||
         !currentToken ||
-        event.pointerId !== tokenPointerId
+        event.pointerId !==
+            tokenPointerId
     ) {
         return;
     }
@@ -500,6 +680,7 @@ function tokenPointerMove(event) {
     tokenMoveX =
         event.clientX -
         tokenStartPointerX;
+
 
     tokenMoveY =
         event.clientY -
@@ -541,7 +722,8 @@ function tokenPointerMove(event) {
 
 
     if (
-        info.distance <= 1.4
+        info.distance <=
+        1.4
     ) {
 
         currentToken.classList.add(
@@ -573,7 +755,8 @@ function tokenPointerUp(event) {
     }
 
 
-    tokenIsDragging = false;
+    tokenIsDragging =
+        false;
 
 
     currentToken.classList.remove(
@@ -588,7 +771,8 @@ function tokenPointerUp(event) {
 
 
     if (
-        info.distance <= 1
+        info.distance <=
+        1
     ) {
 
         insertToken(
@@ -605,7 +789,8 @@ function tokenPointerUp(event) {
     }
 
 
-    tokenPointerId = null;
+    tokenPointerId =
+        null;
 
 }
 
@@ -631,7 +816,8 @@ function returnToken(token) {
                         `${tokenMoveX}px ${tokenMoveY}px`,
 
                     scale:
-                        token.style.scale || 1
+                        token.style.scale ||
+                        1
                 },
 
                 {
@@ -645,6 +831,7 @@ function returnToken(token) {
             ],
 
             {
+
                 duration:
                     450,
 
@@ -653,6 +840,7 @@ function returnToken(token) {
 
                 fill:
                     "forwards"
+
             }
 
         );
@@ -664,8 +852,10 @@ function returnToken(token) {
             token.style.translate =
                 "0px 0px";
 
+
             token.style.scale =
                 "1";
+
 
             animation.cancel();
 
@@ -680,12 +870,14 @@ function returnToken(token) {
 
 function insertToken(token) {
 
-    tokenInserted = true;
+    tokenInserted =
+        true;
 
 
     token.classList.remove(
         "near-slot"
     );
+
 
     token.classList.remove(
         "active-token"
@@ -695,6 +887,7 @@ function insertToken(token) {
     const tokenRect =
         token.getBoundingClientRect();
 
+
     const slot =
         getSlotPosition();
 
@@ -702,6 +895,7 @@ function insertToken(token) {
     const tokenCenterX =
         tokenRect.left +
         tokenRect.width / 2;
+
 
     const tokenCenterY =
         tokenRect.top +
@@ -711,6 +905,7 @@ function insertToken(token) {
     const moveX =
         slot.x -
         tokenCenterX;
+
 
     const moveY =
         slot.y -
@@ -727,7 +922,8 @@ function insertToken(token) {
                         `${tokenMoveX}px ${tokenMoveY}px`,
 
                     scale:
-                        token.style.scale || 1,
+                        token.style.scale ||
+                        1,
 
                     opacity:
                         1
@@ -753,6 +949,7 @@ function insertToken(token) {
             ],
 
             {
+
                 duration:
                     620,
 
@@ -761,6 +958,7 @@ function insertToken(token) {
 
                 fill:
                     "forwards"
+
             }
 
         );
@@ -768,6 +966,16 @@ function insertToken(token) {
 
     animation.onfinish =
         () => {
+
+            /*
+               SONIDO:
+               token completamente insertado.
+            */
+
+            playSound(
+                sounds.insertCoin
+            );
+
 
             token.classList.add(
                 "used-token"
@@ -781,6 +989,7 @@ function insertToken(token) {
             knob.classList.remove(
                 "locked"
             );
+
 
             knob.classList.add(
                 "ready"
@@ -807,15 +1016,18 @@ tokenOrder.forEach(token => {
         tokenPointerDown
     );
 
+
     token.addEventListener(
         "pointermove",
         tokenPointerMove
     );
 
+
     token.addEventListener(
         "pointerup",
         tokenPointerUp
     );
+
 
     token.addEventListener(
         "pointercancel",
@@ -838,8 +1050,11 @@ let knobRotation = 0;
 let knobTurnCompleted = false;
 
 
-const KNOB_TRIGGER_ROTATION = -300;
-const KNOB_FINAL_ROTATION = -360;
+const KNOB_TRIGGER_ROTATION =
+    -300;
+
+const KNOB_FINAL_ROTATION =
+    -360;
 
 
 /* =========================================
@@ -858,6 +1073,7 @@ function getPointerAngleAroundKnob(
     const centerX =
         rect.left +
         rect.width / 2;
+
 
     const centerY =
         rect.top +
@@ -889,7 +1105,8 @@ function normalizeAngleDifference(
         difference > 180
     ) {
 
-        difference -= 360;
+        difference -=
+            360;
 
     }
 
@@ -898,7 +1115,8 @@ function normalizeAngleDifference(
         difference < -180
     ) {
 
-        difference += 360;
+        difference +=
+            360;
 
     }
 
@@ -923,9 +1141,13 @@ function knobPointerDown(event) {
     }
 
 
-    knobIsTurning = true;
+    knobIsTurning =
+        true;
 
-    knobTurnCompleted = false;
+
+    knobTurnCompleted =
+        false;
+
 
     knobPointerId =
         event.pointerId;
@@ -938,9 +1160,20 @@ function knobPointerDown(event) {
         );
 
 
+    /*
+       SONIDO:
+       comienza el giro manual.
+    */
+
+    playSound(
+        sounds.twistKnob
+    );
+
+
     knob.classList.remove(
         "ready"
     );
+
 
     knob.classList.add(
         "turning"
@@ -966,7 +1199,8 @@ function knobPointerMove(event) {
     if (
         !knobIsTurning ||
         knobTurnCompleted ||
-        event.pointerId !== knobPointerId
+        event.pointerId !==
+            knobPointerId
     ) {
         return;
     }
@@ -1064,6 +1298,16 @@ function knobPointerUp(event) {
         false;
 
 
+    /*
+       Si no completó el giro,
+       detenemos su sonido.
+    */
+
+    stopSound(
+        sounds.twistKnob
+    );
+
+
     knob.classList.remove(
         "turning"
     );
@@ -1102,6 +1346,7 @@ function returnKnobToStart() {
             ],
 
             {
+
                 duration:
                     320,
 
@@ -1110,6 +1355,7 @@ function returnKnobToStart() {
 
                 fill:
                     "forwards"
+
             }
 
         );
@@ -1161,6 +1407,7 @@ function completeKnobTurn() {
     knobTurnCompleted =
         true;
 
+
     machineIsRunning =
         true;
 
@@ -1187,6 +1434,7 @@ function completeKnobTurn() {
             ],
 
             {
+
                 duration:
                     180,
 
@@ -1195,9 +1443,20 @@ function completeKnobTurn() {
 
                 fill:
                     "forwards"
+
             }
 
         );
+
+
+    /*
+       SONIDO:
+       movimiento de cápsulas internas.
+    */
+
+    playSound(
+        sounds.capsuleShaking
+    );
 
 
     animateCapsulesInside();
@@ -1220,6 +1479,7 @@ function completeKnobTurn() {
             knob.classList.remove(
                 "turning"
             );
+
 
             knob.classList.add(
                 "locked"
@@ -1256,15 +1516,18 @@ knob.addEventListener(
     knobPointerDown
 );
 
+
 knob.addEventListener(
     "pointermove",
     knobPointerMove
 );
 
+
 knob.addEventListener(
     "pointerup",
     knobPointerUp
 );
+
 
 knob.addEventListener(
     "pointercancel",
@@ -1281,8 +1544,10 @@ function resetKnobPosition() {
     knobRotation =
         0;
 
+
     knobTurnCompleted =
         false;
+
 
     knobIsTurning =
         false;
@@ -1401,6 +1666,22 @@ function getCurrentResult() {
    ========================================= */
 
 function dispenseCapsule() {
+
+    /*
+       SONIDO:
+       termina el movimiento interno
+       y cae/sale la cápsula.
+    */
+
+    stopSound(
+        sounds.capsuleShaking
+    );
+
+
+    playSound(
+        sounds.capsuleDrop
+    );
+
 
     currentGachaResult =
         getCurrentResult();
@@ -1824,17 +2105,6 @@ function capsuleClickHandler() {
     }
 
 
-    /*
-       NUEVO:
-
-       Cuando ya apareció dog2 / cat2 /
-       candy2 / friends2, el primer clic
-       reproduce la reacción.
-
-       Solamente después de esa reacción
-       el siguiente clic cierra el premio.
-    */
-
     if (
         capsuleCanClose &&
         !prizeReactionPlayed
@@ -1870,6 +2140,16 @@ function openNormalCapsule() {
 
     capsuleIsOpening =
         true;
+
+
+    /*
+       SONIDO:
+       la cápsula se abre.
+    */
+
+    playSound(
+        sounds.capsulePop
+    );
 
 
     stopCapsuleShake();
@@ -1960,6 +2240,17 @@ function showRarity(
     imageSource,
     callback
 ) {
+
+    /*
+       SONIDO:
+       aparece COMÚN / RARO /
+       ULTRA RARO.
+    */
+
+    playSound(
+        sounds.rarity
+    );
+
 
     rarityImage =
         document.createElement(
@@ -2081,6 +2372,7 @@ function showRarity(
             if (!rarityImage) {
                 return;
             }
+
 
             rarityImage.style.opacity =
                 "1";
@@ -2237,6 +2529,16 @@ function revealOpenedResult(
                     }
 
 
+                    /*
+                       SONIDO:
+                       aparece el premio normal.
+                    */
+
+                    playSound(
+                        sounds.prizeOpened
+                    );
+
+
                     dispensedCapsule.style.visibility =
                         "visible";
 
@@ -2312,18 +2614,12 @@ function revealOpenedResult(
                                 true;
 
 
-                            /*
-                               NUEVO:
-
-                               Al terminar de aparecer el
-                               premio, comienza a flotar.
-                            */
-
                             prizeReactionPlayed =
                                 false;
 
                             prizeIsReacting =
                                 false;
+
 
                             startPrizeFloat();
 
@@ -2893,6 +3189,17 @@ function handleLetterCapsule() {
             true;
 
 
+        /*
+           SONIDO:
+           también usamos el pop cuando
+           se abre la cápsula de la carta.
+        */
+
+        playSound(
+            sounds.capsulePop
+        );
+
+
         stopCapsuleShake();
 
 
@@ -3167,6 +3474,16 @@ function revealLetterFinal() {
                     }
 
 
+                    /*
+                       SONIDO:
+                       revelación final de la carta.
+                    */
+
+                    playSound(
+                        sounds.openedLetter
+                    );
+
+
                     dispensedCapsule.style.visibility =
                         "visible";
 
@@ -3305,12 +3622,6 @@ function closeResult() {
         false;
 
 
-    /*
-       NUEVO:
-       Si el premio normal está flotando,
-       se detiene antes de cerrarse.
-    */
-
     stopPrizeFloat();
 
     clearPrizeParticles();
@@ -3411,21 +3722,30 @@ function resetAfterResult() {
         false;
 
 
-    /*
-       NUEVO:
-       Reiniciar el estado de la
-       microinteracción del premio.
-    */
-
     stopPrizeFloat();
 
     clearPrizeParticles();
+
 
     prizeReactionPlayed =
         false;
 
     prizeIsReacting =
         false;
+
+
+    /*
+       Detenemos cualquier sonido mecánico
+       que pudiera seguir reproduciéndose.
+    */
+
+    stopSound(
+        sounds.twistKnob
+    );
+
+    stopSound(
+        sounds.capsuleShaking
+    );
 
 
     resetKnobPosition();
