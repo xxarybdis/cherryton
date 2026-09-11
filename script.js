@@ -123,6 +123,19 @@ let letterCanRevealFinal = false;
 
 
 /* =========================================
+   NUEVA MICROINTERACCIÓN DEL PREMIO
+   ========================================= */
+
+let prizeFloatAnimation = null;
+
+let prizeReactionPlayed = false;
+
+let prizeIsReacting = false;
+
+let prizeParticles = [];
+
+
+/* =========================================
    TOKEN ACTUAL
    ========================================= */
 
@@ -1280,7 +1293,6 @@ function resetKnobPosition() {
 
 }
 
-
 /* =========================================
    CÁPSULAS INTERNAS
    ========================================= */
@@ -1782,7 +1794,8 @@ function capsuleClickHandler() {
     if (
         !dispensedCapsule ||
         capsuleIsOpening ||
-        capsuleIsClosing
+        capsuleIsClosing ||
+        prizeIsReacting
     ) {
         return;
     }
@@ -1811,8 +1824,32 @@ function capsuleClickHandler() {
     }
 
 
+    /*
+       NUEVO:
+
+       Cuando ya apareció dog2 / cat2 /
+       candy2 / friends2, el primer clic
+       reproduce la reacción.
+
+       Solamente después de esa reacción
+       el siguiente clic cierra el premio.
+    */
+
     if (
-        capsuleCanClose
+        capsuleCanClose &&
+        !prizeReactionPlayed
+    ) {
+
+        playPrizeReaction();
+
+        return;
+
+    }
+
+
+    if (
+        capsuleCanClose &&
+        prizeReactionPlayed
     ) {
 
         closeResult();
@@ -2274,6 +2311,22 @@ function revealOpenedResult(
                             capsuleCanClose =
                                 true;
 
+
+                            /*
+                               NUEVO:
+
+                               Al terminar de aparecer el
+                               premio, comienza a flotar.
+                            */
+
+                            prizeReactionPlayed =
+                                false;
+
+                            prizeIsReacting =
+                                false;
+
+                            startPrizeFloat();
+
                         };
 
                 }
@@ -2286,6 +2339,542 @@ function revealOpenedResult(
 
 }
 
+
+/* =========================================
+   FLOTACIÓN DEL PREMIO
+   ========================================= */
+
+function startPrizeFloat() {
+
+    if (
+        !dispensedCapsule ||
+        currentGachaResult.name ===
+        "letter"
+    ) {
+        return;
+    }
+
+
+    stopPrizeFloat();
+
+
+    prizeFloatAnimation =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateY(0px) rotate(-0.6deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateY(-7px) rotate(0.6deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateY(0px) rotate(-0.6deg)"
+                }
+
+            ],
+
+            {
+                duration:
+                    2200,
+
+                easing:
+                    "ease-in-out",
+
+                iterations:
+                    Infinity
+            }
+
+        );
+
+}
+
+
+/* =========================================
+   DETENER FLOTACIÓN
+   ========================================= */
+
+function stopPrizeFloat() {
+
+    if (
+        prizeFloatAnimation
+    ) {
+
+        prizeFloatAnimation.cancel();
+
+        prizeFloatAnimation =
+            null;
+
+    }
+
+
+    if (
+        dispensedCapsule
+    ) {
+
+        dispensedCapsule.style.transform =
+            "translate(-50%, -50%)";
+
+    }
+
+}
+
+
+/* =========================================
+   REACCIÓN DEL PREMIO
+   ========================================= */
+
+function playPrizeReaction() {
+
+    if (
+        !dispensedCapsule ||
+        prizeReactionPlayed ||
+        prizeIsReacting ||
+        !currentGachaResult
+    ) {
+        return;
+    }
+
+
+    prizeIsReacting =
+        true;
+
+
+    stopPrizeFloat();
+
+
+    createPrizeParticles(
+        currentGachaResult.name
+    );
+
+
+    const reaction =
+        dispensedCapsule.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)"
+                },
+
+                {
+                    offset:
+                        0.18,
+
+                    transform:
+                        "translate(-50%, -50%) scale(0.90, 1.08)"
+                },
+
+                {
+                    offset:
+                        0.42,
+
+                    transform:
+                        "translate(-50%, -50%) translateY(-14px) scale(1.10, 0.94) rotate(-2deg)"
+                },
+
+                {
+                    offset:
+                        0.68,
+
+                    transform:
+                        "translate(-50%, -50%) translateY(2px) scale(0.97, 1.04) rotate(1deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1) rotate(0deg)"
+                }
+
+            ],
+
+            {
+                duration:
+                    720,
+
+                easing:
+                    "cubic-bezier(.2,.8,.25,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    reaction.onfinish =
+        () => {
+
+            if (!dispensedCapsule) {
+                return;
+            }
+
+
+            dispensedCapsule.style.transform =
+                "translate(-50%, -50%)";
+
+
+            reaction.cancel();
+
+
+            prizeReactionPlayed =
+                true;
+
+            prizeIsReacting =
+                false;
+
+
+            startPrizeFloat();
+
+        };
+
+}
+
+
+/* =========================================
+   PARTÍCULAS DEL PREMIO
+   ========================================= */
+
+function getPrizeParticleSymbols(
+    prizeName
+) {
+
+    if (
+        prizeName ===
+        "cat"
+    ) {
+
+        return [
+            "🐾",
+            "♡",
+            "✦",
+            "🐾",
+            "♡",
+            "✧"
+        ];
+
+    }
+
+
+    if (
+        prizeName ===
+        "dog"
+    ) {
+
+        return [
+            "★",
+            "♡",
+            "✦",
+            "★",
+            "♡",
+            "✧"
+        ];
+
+    }
+
+
+    if (
+        prizeName ===
+        "candy"
+    ) {
+
+        return [
+            "🍬",
+            "✦",
+            "♡",
+            "🍭",
+            "✧",
+            "🍬"
+        ];
+
+    }
+
+
+    if (
+        prizeName ===
+        "friends"
+    ) {
+
+        return [
+            "♡",
+            "✦",
+            "♡",
+            "★",
+            "✧",
+            "♡"
+        ];
+
+    }
+
+
+    return [
+        "✦",
+        "♡",
+        "✧"
+    ];
+
+}
+
+
+/* =========================================
+   CREAR PARTÍCULAS
+   ========================================= */
+
+function createPrizeParticles(
+    prizeName
+) {
+
+    clearPrizeParticles();
+
+
+    const symbols =
+        getPrizeParticleSymbols(
+            prizeName
+        );
+
+
+    const positions = [
+
+        {
+            x: -18,
+            y: -7
+        },
+
+        {
+            x: -13,
+            y: -18
+        },
+
+        {
+            x: -4,
+            y: -23
+        },
+
+        {
+            x: 7,
+            y: -22
+        },
+
+        {
+            x: 15,
+            y: -15
+        },
+
+        {
+            x: 19,
+            y: -4
+        }
+
+    ];
+
+
+    symbols.forEach(
+        (symbol, index) => {
+
+            const particle =
+                document.createElement(
+                    "div"
+                );
+
+
+            particle.textContent =
+                symbol;
+
+
+            Object.assign(
+
+                particle.style,
+
+                {
+
+                    position:
+                        "absolute",
+
+                    zIndex:
+                        "350",
+
+                    left:
+                        "50%",
+
+                    top:
+                        "50%",
+
+                    transform:
+                        "translate(-50%, -50%) scale(0)",
+
+                    transformOrigin:
+                        "center center",
+
+                    pointerEvents:
+                        "none",
+
+                    userSelect:
+                        "none",
+
+                    fontSize:
+                        "clamp(18px, 3.2vw, 34px)",
+
+                    lineHeight:
+                        "1",
+
+                    opacity:
+                        "0",
+
+                    filter:
+                        "drop-shadow(0 3px 3px rgba(0, 0, 0, 0.28))"
+
+                }
+
+            );
+
+
+            machine.appendChild(
+                particle
+            );
+
+
+            prizeParticles.push(
+                particle
+            );
+
+
+            const position =
+                positions[
+                    index %
+                    positions.length
+                ];
+
+
+            const rotation =
+                -18 +
+                Math.random() * 36;
+
+
+            const animation =
+                particle.animate(
+
+                    [
+
+                        {
+                            transform:
+                                "translate(-50%, -50%) translate(0px, 0px) scale(0) rotate(0deg)",
+
+                            opacity:
+                                0
+                        },
+
+                        {
+                            offset:
+                                0.22,
+
+                            transform:
+                                `translate(-50%, -50%) translate(${position.x * 0.35}%, ${position.y * 0.35}%) scale(1.15) rotate(${rotation * 0.35}deg)`,
+
+                            opacity:
+                                1
+                        },
+
+                        {
+                            offset:
+                                0.72,
+
+                            transform:
+                                `translate(-50%, -50%) translate(${position.x}vw, ${position.y}vh) scale(1) rotate(${rotation}deg)`,
+
+                            opacity:
+                                1
+                        },
+
+                        {
+                            transform:
+                                `translate(-50%, -50%) translate(${position.x * 1.15}vw, ${position.y * 1.15}vh) scale(0.65) rotate(${rotation * 1.25}deg)`,
+
+                            opacity:
+                                0
+                        }
+
+                    ],
+
+                    {
+
+                        duration:
+                            850 +
+                            index * 55,
+
+                        delay:
+                            index * 35,
+
+                        easing:
+                            "cubic-bezier(.2,.75,.25,1)",
+
+                        fill:
+                            "forwards"
+
+                    }
+
+                );
+
+
+            animation.onfinish =
+                () => {
+
+                    if (
+                        particle.parentNode
+                    ) {
+
+                        particle.remove();
+
+                    }
+
+
+                    prizeParticles =
+                        prizeParticles.filter(
+                            item =>
+                                item !==
+                                particle
+                        );
+
+                };
+
+        }
+
+    );
+
+}
+
+
+/* =========================================
+   LIMPIAR PARTÍCULAS
+   ========================================= */
+
+function clearPrizeParticles() {
+
+    prizeParticles.forEach(
+        particle => {
+
+            if (
+                particle &&
+                particle.parentNode
+            ) {
+
+                particle.remove();
+
+            }
+
+        }
+    );
+
+
+    prizeParticles = [];
+
+}
 
 /* =========================================
    CARTA
@@ -2716,6 +3305,17 @@ function closeResult() {
         false;
 
 
+    /*
+       NUEVO:
+       Si el premio normal está flotando,
+       se detiene antes de cerrarse.
+    */
+
+    stopPrizeFloat();
+
+    clearPrizeParticles();
+
+
     const animation =
         dispensedCapsule.animate(
 
@@ -2808,6 +3408,23 @@ function resetAfterResult() {
         null;
 
     letterCanRevealFinal =
+        false;
+
+
+    /*
+       NUEVO:
+       Reiniciar el estado de la
+       microinteracción del premio.
+    */
+
+    stopPrizeFloat();
+
+    clearPrizeParticles();
+
+    prizeReactionPlayed =
+        false;
+
+    prizeIsReacting =
         false;
 
 
