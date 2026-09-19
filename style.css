@@ -710,4 +710,16 @@ body {
         width: 9%;
     }
 
+
+   /* =========================================
+   QUITAR RESALTADO AZUL AL TOCAR
+   ========================================= */
+
+img,
+.token,
+.knob {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    outline: none;
+
 }
