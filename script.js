@@ -3723,13 +3723,13 @@ function showChoiceButtons() {
                 "520",
 
             left:
-                "42%",
+                "38%",
 
             top:
-                "78%",
+                "86%",
 
             width:
-                "clamp(145px, 18vw, 240px)",
+                "clamp(150px, 18vw, 245px)",
 
             height:
                 "auto",
@@ -3780,13 +3780,13 @@ function showChoiceButtons() {
                 "520",
 
             left:
-                "58%",
+                "65%",
 
             top:
-                "78%",
+                "86%",
 
             width:
-                "clamp(88px, 13vw, 175px)",
+                "clamp(165px, 20vw, 270px)",
 
             height:
                 "auto",
@@ -3850,10 +3850,8 @@ function showChoiceButtons() {
 /* =====================================
    CLICK EN NO
 
-   NO ya no huye.
-
-   Cada click cambia a la siguiente
-   reacción hasta llegar a cant.png.
+   Cada vez que logran darle click:
+   cambia de reacción y huye a otro lugar.
    ===================================== */
 
 noButton.addEventListener(
@@ -3865,24 +3863,12 @@ noButton.addEventListener(
         event.stopPropagation();
 
 
-        if (
-            noReactionIndex <
-            NO_REACTION_IMAGES.length - 1
-        ) {
-
-            noReactionIndex++;
-
-
-            noButton.src =
-                NO_REACTION_IMAGES[
-                    noReactionIndex
-                ];
-
-        }
+        fleeNoButton();
 
     }
 );
 
+   
     /* =====================================
        ENTRADA DE YES
        ===================================== */
