@@ -3786,7 +3786,7 @@ function showChoiceButtons() {
                 "86%",
 
             width:
-                "clamp(155px, 19vw, 255px)",
+                "clamp(125px, 15.5vw, 205px)",
 
             height:
                 "auto",
