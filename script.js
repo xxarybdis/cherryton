@@ -70,7 +70,21 @@ const sounds = {
     cow:
         new Audio(
             "assets/sounds/cow.mp3"
-        )
+        ),
+   
+       laugh1:
+       new Audio(
+             "assets/sounds/laugh1.wav"
+         ),
+   
+    laugh2:
+       new Audio(
+             "assets/sounds/laugh2.wav"
+         ),
+   
+    laugh3: new Audio(
+             "assets/sounds/laugh3.wav"
+         )
 
 };
 
@@ -96,6 +110,12 @@ sounds.prizeOpened.volume = 0.42;
 sounds.openedLetter.volume = 0.52;
 
 sounds.cow.volume = 0.52;
+
+sounds.laugh1.volume = 0.50;
+
+sounds.laugh2.volume = 0.50;
+
+sounds.laugh3.volume = 0.50;
 
 
 /* =========================================
@@ -3999,6 +4019,40 @@ function fleeNoButton() {
 
 
     /*
+       Si YA estamos mostrando cant.png,
+       cada nuevo click reproduce
+       una de las tres risas al azar.
+    */
+
+    if (
+        noReactionIndex ===
+        NO_REACTION_IMAGES.length - 1
+    ) {
+
+        const laughSounds = [
+            sounds.laugh1,
+            sounds.laugh2,
+            sounds.laugh3
+        ];
+
+
+        const randomLaugh =
+            laughSounds[
+                Math.floor(
+                    Math.random() *
+                    laughSounds.length
+                )
+            ];
+
+
+        playSound(
+            randomLaugh
+        );
+
+    }
+
+
+    /*
        Avanzamos por:
 
        no.png
@@ -4009,7 +4063,8 @@ function fleeNoButton() {
        cant.png
 
        Al llegar a cant.png ya no cambia,
-       pero continúa huyendo.
+       pero continúa moviéndose con
+       cada nuevo click.
     */
 
     if (
@@ -4034,7 +4089,6 @@ function fleeNoButton() {
 
     /*
        Movimiento cortito y suave.
-       No es un rebote agresivo.
     */
 
     const escapeAnimation =
@@ -4116,7 +4170,6 @@ function fleeNoButton() {
         };
 
 }
-
 
 /* =========================================
    POSICIÓN SEGURA PARA NO
