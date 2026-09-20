@@ -1789,57 +1789,72 @@ function dispenseCapsule() {
         false;
 
 
-    Object.assign(
+Object.assign(
 
-        dispensedCapsule.style,
+    dispensedCapsule.style,
 
-        {
+    {
 
-            position:
-                "absolute",
+        position:
+            "absolute",
 
-            zIndex:
-                "200",
+        zIndex:
+            "200",
 
-            left:
-                `${DISPENSER_X}%`,
+        left:
+            `${DISPENSER_X}%`,
 
-            top:
-                `${DISPENSER_Y}%`,
+        top:
+            `${DISPENSER_Y}%`,
 
-            width:
-                `${DISPENSED_CAPSULE_WIDTH}%`,
+        width:
+            `${DISPENSED_CAPSULE_WIDTH}%`,
 
-            height:
-                "auto",
+        height:
+            "auto",
 
-            transform:
-                "translate(-50%, -50%)",
+        transform:
+            "translate(-50%, -50%)",
 
-            transformOrigin:
-                "center center",
+        transformOrigin:
+            "center center",
 
-            userSelect:
-                "none",
+        userSelect:
+            "none",
 
-            WebkitUserDrag:
-                "none",
+        WebkitUserSelect:
+            "none",
 
-            cursor:
-                "default",
+        WebkitUserDrag:
+            "none",
 
-            opacity:
-                "0",
+        WebkitTouchCallout:
+            "none",
 
-            visibility:
-                "visible",
+        WebkitTapHighlightColor:
+            "transparent",
 
-            willChange:
-                "left, top, width, transform, opacity"
+        touchAction:
+            "manipulation",
 
-        }
+        outline:
+            "none",
 
-    );
+        cursor:
+            "default",
+
+        opacity:
+            "0",
+
+        visibility:
+            "visible",
+
+        willChange:
+            "left, top, width, transform, opacity"
+
+    }
+
+);
 
 
     machine.appendChild(
