@@ -65,6 +65,11 @@ const sounds = {
     openedLetter:
         new Audio(
             "assets/sounds/opened-letter.wav"
+        ),
+
+    cow:
+        new Audio(
+            "assets/sounds/cow.mp3"
         )
 
 };
@@ -89,6 +94,8 @@ sounds.rarity.volume = 0.45;
 sounds.prizeOpened.volume = 0.42;
 
 sounds.openedLetter.volume = 0.52;
+
+sounds.cow.volume = 0.52;
 
 
 /* =========================================
@@ -293,6 +300,38 @@ let prizeParticles = [];
 
 
 /* =========================================
+   YES / NO / COW
+   ========================================= */
+
+let yesButton = null;
+
+let noButton = null;
+
+let cowImage = null;
+
+let cowFloatAnimation = null;
+
+let noReactionIndex = 0;
+
+let noIsMoving = false;
+
+const NO_REACTION_IMAGES = [
+    "assets/no.png",
+    "assets/eh.png",
+    "assets/stop.png",
+    "assets/why.png",
+    "assets/stop-it.png",
+    "assets/cant.png"
+];
+
+const YES_IMAGE =
+    "assets/yes.png";
+
+const COW_IMAGE =
+    "assets/cow.PNG";
+
+
+/* =========================================
    TOKEN ACTUAL
    ========================================= */
 
@@ -449,6 +488,30 @@ preloadImage(
 
 preloadImage(
     LETTER_CAPSULE.rarity
+);
+
+
+/* =========================================
+   PRECARGAR YES / NO / COW
+   ========================================= */
+
+NO_REACTION_IMAGES.forEach(
+    imageSource => {
+
+        preloadImage(
+            imageSource
+        );
+
+    }
+);
+
+
+preloadImage(
+    YES_IMAGE
+);
+
+preloadImage(
+    COW_IMAGE
 );
 
 
@@ -1189,7 +1252,6 @@ function knobPointerDown(event) {
 
 }
 
-
 /* =========================================
    MOVER PERILLA
    ========================================= */
@@ -1557,6 +1619,7 @@ function resetKnobPosition() {
         "translate(-50%, -50%) rotate(0deg)";
 
 }
+
 
 /* =========================================
    CÁPSULAS INTERNAS
@@ -2230,7 +2293,6 @@ function openNormalCapsule() {
         };
 
 }
-
 
 /* =========================================
    RAREZA
@@ -3552,8 +3614,19 @@ function revealLetterFinal() {
                             animation.cancel();
 
 
+                            /*
+                               Antes aquí la carta se
+                               podía cerrar con otro click.
+
+                               Ahora queda abierta y
+                               aparecen YES / NO.
+                            */
+
                             capsuleCanClose =
-                                true;
+                                false;
+
+
+                            showChoiceButtons();
 
                         };
 
@@ -3564,6 +3637,989 @@ function revealLetterFinal() {
         }
 
     );
+
+}
+
+
+/* =========================================
+   YES / NO DESPUÉS DE LA CARTA
+   ========================================= */
+
+function showChoiceButtons() {
+
+    removeChoiceButtons();
+
+
+    noReactionIndex =
+        0;
+
+    noIsMoving =
+        false;
+
+
+    yesButton =
+        document.createElement(
+            "img"
+        );
+
+    noButton =
+        document.createElement(
+            "img"
+        );
+
+
+    yesButton.src =
+        YES_IMAGE;
+
+    noButton.src =
+        NO_REACTION_IMAGES[0];
+
+
+    yesButton.alt =
+        "Sí";
+
+    noButton.alt =
+        "No";
+
+
+    yesButton.draggable =
+        false;
+
+    noButton.draggable =
+        false;
+
+
+    /*
+       Los botones usan position: fixed
+       para que NO pueda escapar fuera
+       de la pantalla aunque la máquina
+       sea más grande en celular.
+    */
+
+    Object.assign(
+
+        yesButton.style,
+
+        {
+            position:
+                "fixed",
+
+            zIndex:
+                "520",
+
+            left:
+                "42%",
+
+            top:
+                "78%",
+
+            width:
+                "clamp(88px, 13vw, 175px)",
+
+            height:
+                "auto",
+
+            transform:
+                "translate(-50%, -50%) scale(0)",
+
+            transformOrigin:
+                "center center",
+
+            filter:
+                RESULT_DROP_SHADOW,
+
+            cursor:
+                "pointer",
+
+            userSelect:
+                "none",
+
+            WebkitUserDrag:
+                "none",
+
+            WebkitTapHighlightColor:
+                "transparent",
+
+            WebkitTouchCallout:
+                "none",
+
+            touchAction:
+                "manipulation",
+
+            opacity:
+                "0"
+        }
+
+    );
+
+
+    Object.assign(
+
+        noButton.style,
+
+        {
+            position:
+                "fixed",
+
+            zIndex:
+                "520",
+
+            left:
+                "58%",
+
+            top:
+                "78%",
+
+            width:
+                "clamp(88px, 13vw, 175px)",
+
+            height:
+                "auto",
+
+            transform:
+                "translate(-50%, -50%) scale(0)",
+
+            transformOrigin:
+                "center center",
+
+            filter:
+                RESULT_DROP_SHADOW,
+
+            cursor:
+                "pointer",
+
+            userSelect:
+                "none",
+
+            WebkitUserDrag:
+                "none",
+
+            WebkitTapHighlightColor:
+                "transparent",
+
+            WebkitTouchCallout:
+                "none",
+
+            touchAction:
+                "none",
+
+            opacity:
+                "0",
+
+            willChange:
+                "left, top, transform, opacity"
+        }
+
+    );
+
+
+    document.body.appendChild(
+        yesButton
+    );
+
+    document.body.appendChild(
+        noButton
+    );
+
+
+    /* =====================================
+       CLICK EN YES
+       ===================================== */
+
+    yesButton.addEventListener(
+        "click",
+        chooseYes
+    );
+
+
+    /* =====================================
+       NO EN COMPUTADORA
+
+       En cuanto el mouse logra entrar
+       en su área, huye.
+       ===================================== */
+
+    noButton.addEventListener(
+        "pointerenter",
+        event => {
+
+            if (
+                event.pointerType ===
+                "mouse"
+            ) {
+
+                fleeNoButton();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================
+       NO EN TOUCH
+
+       El movimiento ocurre desde
+       pointerdown para que el toque
+       no llegue a convertirse en click.
+       ===================================== */
+
+    noButton.addEventListener(
+        "pointerdown",
+        event => {
+
+            if (
+                event.pointerType !==
+                "mouse"
+            ) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                fleeNoButton();
+
+            }
+
+        }
+    );
+
+
+    /*
+       Seguridad extra:
+       NO nunca ejecuta una acción normal
+       aunque se genere un click.
+    */
+
+    noButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+        }
+    );
+
+
+    /* =====================================
+       ENTRADA DE YES
+       ===================================== */
+
+    yesButton.animate(
+
+        [
+
+            {
+                transform:
+                    "translate(-50%, -50%) scale(0.65)",
+
+                opacity:
+                    0
+            },
+
+            {
+                offset:
+                    0.72,
+
+                transform:
+                    "translate(-50%, -50%) scale(1.08)",
+
+                opacity:
+                    1
+            },
+
+            {
+                transform:
+                    "translate(-50%, -50%) scale(1)",
+
+                opacity:
+                    1
+            }
+
+        ],
+
+        {
+            duration:
+                520,
+
+            easing:
+                "cubic-bezier(.2,.8,.25,1)",
+
+            fill:
+                "forwards"
+        }
+
+    );
+
+
+    /* =====================================
+       ENTRADA DE NO
+       ===================================== */
+
+    noButton.animate(
+
+        [
+
+            {
+                transform:
+                    "translate(-50%, -50%) scale(0.65)",
+
+                opacity:
+                    0
+            },
+
+            {
+                offset:
+                    0.72,
+
+                transform:
+                    "translate(-50%, -50%) scale(1.08)",
+
+                opacity:
+                    1
+            },
+
+            {
+                transform:
+                    "translate(-50%, -50%) scale(1)",
+
+                opacity:
+                    1
+            }
+
+        ],
+
+        {
+            duration:
+                520,
+
+            delay:
+                90,
+
+            easing:
+                "cubic-bezier(.2,.8,.25,1)",
+
+            fill:
+                "forwards"
+        }
+
+    );
+
+}
+
+
+/* =========================================
+   NO HUYE
+   ========================================= */
+
+function fleeNoButton() {
+
+    if (
+        !noButton ||
+        noIsMoving
+    ) {
+        return;
+    }
+
+
+    noIsMoving =
+        true;
+
+
+    /*
+       Avanzamos por:
+
+       no.png
+       eh.png
+       stop.png
+       why.png
+       stop-it.png
+       cant.png
+
+       Al llegar a cant.png ya no cambia,
+       pero continúa huyendo.
+    */
+
+    if (
+        noReactionIndex <
+        NO_REACTION_IMAGES.length - 1
+    ) {
+
+        noReactionIndex++;
+
+    }
+
+
+    noButton.src =
+        NO_REACTION_IMAGES[
+            noReactionIndex
+        ];
+
+
+    const position =
+        getSafeNoPosition();
+
+
+    /*
+       Movimiento cortito y suave.
+       No es un rebote agresivo.
+    */
+
+    const escapeAnimation =
+        noButton.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    offset:
+                        0.42,
+
+                    transform:
+                        "translate(-50%, -50%) scale(0.82) rotate(-3deg)",
+
+                    opacity:
+                        0.78
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1) rotate(0deg)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    260,
+
+                easing:
+                    "cubic-bezier(.2,.8,.25,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    noButton.style.left =
+        `${position.x}px`;
+
+    noButton.style.top =
+        `${position.y}px`;
+
+
+    escapeAnimation.onfinish =
+        () => {
+
+            if (!noButton) {
+                return;
+            }
+
+
+            noButton.style.transform =
+                "translate(-50%, -50%)";
+
+            noButton.style.opacity =
+                "1";
+
+
+            escapeAnimation.cancel();
+
+
+            noIsMoving =
+                false;
+
+        };
+
+}
+
+
+/* =========================================
+   POSICIÓN SEGURA PARA NO
+   ========================================= */
+
+function getSafeNoPosition() {
+
+    /*
+       Margen para que la imagen no
+       termine pegada o cortada por
+       los bordes de la pantalla.
+    */
+
+    const margin =
+        70;
+
+
+    const minX =
+        margin;
+
+    const maxX =
+        Math.max(
+            margin,
+            window.innerWidth - margin
+        );
+
+    const minY =
+        margin;
+
+    const maxY =
+        Math.max(
+            margin,
+            window.innerHeight - margin
+        );
+
+
+    const yesRect =
+        yesButton
+            ? yesButton.getBoundingClientRect()
+            : null;
+
+
+    const letterRect =
+        dispensedCapsule
+            ? dispensedCapsule.getBoundingClientRect()
+            : null;
+
+
+    /*
+       Posición de emergencia en el
+       improbable caso de no encontrar
+       una posición perfecta.
+    */
+
+    let fallback = {
+
+        x:
+            window.innerWidth * 0.72,
+
+        y:
+            window.innerHeight * 0.72
+
+    };
+
+
+    /*
+       Probamos varias posiciones para
+       evitar principalmente YES y la
+       carta final.
+    */
+
+    for (
+        let attempt = 0;
+        attempt < 40;
+        attempt++
+    ) {
+
+        const x =
+            minX +
+            Math.random() *
+            Math.max(
+                1,
+                maxX - minX
+            );
+
+
+        const y =
+            minY +
+            Math.random() *
+            Math.max(
+                1,
+                maxY - minY
+            );
+
+
+        fallback = {
+            x,
+            y
+        };
+
+
+        const pointNearYes =
+            yesRect &&
+
+            x >
+                yesRect.left - 90 &&
+
+            x <
+                yesRect.right + 90 &&
+
+            y >
+                yesRect.top - 90 &&
+
+            y <
+                yesRect.bottom + 90;
+
+
+        const pointNearLetter =
+            letterRect &&
+
+            x >
+                letterRect.left - 45 &&
+
+            x <
+                letterRect.right + 45 &&
+
+            y >
+                letterRect.top - 45 &&
+
+            y <
+                letterRect.bottom + 45;
+
+
+        if (
+            !pointNearYes &&
+            !pointNearLetter
+        ) {
+
+            return {
+                x,
+                y
+            };
+
+        }
+
+    }
+
+
+    return fallback;
+
+}
+
+
+/* =========================================
+   ELEGIR SÍ
+   ========================================= */
+
+function chooseYes(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
+
+
+    /*
+       YES y NO desaparecen.
+    */
+
+    removeChoiceButtons();
+
+
+    /*
+       Reproducimos exactamente:
+       assets/sounds/cow.mp3
+    */
+
+    playSound(
+        sounds.cow
+    );
+
+
+    /*
+       Mostramos:
+       assets/cow.PNG
+    */
+
+    showCowImage();
+
+}
+
+
+/* =========================================
+   QUITAR YES / NO
+   ========================================= */
+
+function removeChoiceButtons() {
+
+    if (
+        yesButton &&
+        yesButton.parentNode
+    ) {
+
+        yesButton.remove();
+
+    }
+
+
+    if (
+        noButton &&
+        noButton.parentNode
+    ) {
+
+        noButton.remove();
+
+    }
+
+
+    yesButton =
+        null;
+
+    noButton =
+        null;
+
+
+    noIsMoving =
+        false;
+
+}
+
+/* =========================================
+   MOSTRAR COW
+   ========================================= */
+
+function showCowImage() {
+
+    if (
+        cowImage &&
+        cowImage.parentNode
+    ) {
+
+        cowImage.remove();
+
+    }
+
+
+    if (
+        cowFloatAnimation
+    ) {
+
+        cowFloatAnimation.cancel();
+
+        cowFloatAnimation =
+            null;
+
+    }
+
+
+    cowImage =
+        document.createElement(
+            "img"
+        );
+
+
+    cowImage.src =
+        COW_IMAGE;
+
+    cowImage.alt =
+        "";
+
+    cowImage.draggable =
+        false;
+
+
+    Object.assign(
+
+        cowImage.style,
+
+        {
+            position:
+                "fixed",
+
+            zIndex:
+                "600",
+
+            left:
+                "50%",
+
+            top:
+                "50%",
+
+            width:
+                "min(68vw, 620px)",
+
+            maxHeight:
+                "82vh",
+
+            objectFit:
+                "contain",
+
+            transform:
+                "translate(-50%, -50%) scale(0.72)",
+
+            transformOrigin:
+                "center center",
+
+            filter:
+                RESULT_DROP_SHADOW,
+
+            pointerEvents:
+                "none",
+
+            userSelect:
+                "none",
+
+            WebkitUserDrag:
+                "none",
+
+            opacity:
+                "0",
+
+            willChange:
+                "transform, opacity"
+        }
+
+    );
+
+
+    document.body.appendChild(
+        cowImage
+    );
+
+
+    /*
+       Aparición suave de COW.
+    */
+
+    const reveal =
+        cowImage.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.72)",
+
+                    opacity:
+                        0
+                },
+
+                {
+                    offset:
+                        0.72,
+
+                    transform:
+                        "translate(-50%, -50%) scale(1.035)",
+
+                    opacity:
+                        1
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)",
+
+                    opacity:
+                        1
+                }
+
+            ],
+
+            {
+                duration:
+                    900,
+
+                easing:
+                    "cubic-bezier(.2,.75,.25,1)",
+
+                fill:
+                    "forwards"
+            }
+
+        );
+
+
+    reveal.onfinish =
+        () => {
+
+            if (!cowImage) {
+                return;
+            }
+
+
+            cowImage.style.transform =
+                "translate(-50%, -50%)";
+
+            cowImage.style.opacity =
+                "1";
+
+
+            reveal.cancel();
+
+
+            /*
+               Después de aparecer,
+               comienza a flotar suavemente.
+            */
+
+            startCowFloat();
+
+        };
+
+}
+
+
+/* =========================================
+   FLOTACIÓN DREAMY DE COW
+   ========================================= */
+
+function startCowFloat() {
+
+    if (!cowImage) {
+        return;
+    }
+
+
+    if (
+        cowFloatAnimation
+    ) {
+
+        cowFloatAnimation.cancel();
+
+    }
+
+
+    cowFloatAnimation =
+        cowImage.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateY(0px) rotate(-0.35deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateY(-9px) rotate(0.35deg)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) translateY(0px) rotate(-0.35deg)"
+                }
+
+            ],
+
+            {
+                duration:
+                    4200,
+
+                easing:
+                    "ease-in-out",
+
+                iterations:
+                    Infinity
+            }
+
+        );
 
 }
 
