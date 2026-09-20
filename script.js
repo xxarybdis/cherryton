@@ -3729,7 +3729,7 @@ function showChoiceButtons() {
                 "78%",
 
             width:
-                "clamp(88px, 13vw, 175px)",
+                "clamp(145px, 18vw, 240px)",
 
             height:
                 "auto",
@@ -3847,77 +3847,41 @@ function showChoiceButtons() {
     );
 
 
-    /* =====================================
-       NO EN COMPUTADORA
+/* =====================================
+   CLICK EN NO
 
-       En cuanto el mouse logra entrar
-       en su área, huye.
-       ===================================== */
+   NO ya no huye.
 
-    noButton.addEventListener(
-        "pointerenter",
-        event => {
+   Cada click cambia a la siguiente
+   reacción hasta llegar a cant.png.
+   ===================================== */
 
-            if (
-                event.pointerType ===
-                "mouse"
-            ) {
+noButton.addEventListener(
+    "click",
+    event => {
 
-                fleeNoButton();
+        event.preventDefault();
 
-            }
-
-        }
-    );
+        event.stopPropagation();
 
 
-    /* =====================================
-       NO EN TOUCH
+        if (
+            noReactionIndex <
+            NO_REACTION_IMAGES.length - 1
+        ) {
 
-       El movimiento ocurre desde
-       pointerdown para que el toque
-       no llegue a convertirse en click.
-       ===================================== */
-
-    noButton.addEventListener(
-        "pointerdown",
-        event => {
-
-            if (
-                event.pointerType !==
-                "mouse"
-            ) {
-
-                event.preventDefault();
-
-                event.stopPropagation();
+            noReactionIndex++;
 
 
-                fleeNoButton();
-
-            }
+            noButton.src =
+                NO_REACTION_IMAGES[
+                    noReactionIndex
+                ];
 
         }
-    );
 
-
-    /*
-       Seguridad extra:
-       NO nunca ejecuta una acción normal
-       aunque se genere un click.
-    */
-
-    noButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-        }
-    );
-
+    }
+);
 
     /* =====================================
        ENTRADA DE YES
@@ -4339,7 +4303,30 @@ function chooseYes(event) {
 
 
     /*
-       Reproducimos exactamente:
+       La carta final permanece detrás,
+       pero se desenfoca y oscurece
+       suavemente para destacar COW.
+    */
+
+    if (dispensedCapsule) {
+
+        dispensedCapsule.style.transition =
+            "filter 700ms ease, opacity 700ms ease";
+
+        dispensedCapsule.style.filter =
+            "blur(5px) brightness(0.58) drop-shadow(0 10px 18px rgba(0, 0, 0, 0.75))";
+
+        dispensedCapsule.style.opacity =
+            "0.72";
+
+        dispensedCapsule.style.pointerEvents =
+            "none";
+
+    }
+
+
+    /*
+       Reproducimos:
        assets/sounds/cow.mp3
     */
 
@@ -4356,7 +4343,6 @@ function chooseYes(event) {
     showCowImage();
 
 }
-
 
 /* =========================================
    QUITAR YES / NO
@@ -4473,7 +4459,7 @@ function showCowImage() {
                 "center center",
 
             filter:
-                RESULT_DROP_SHADOW,
+                "drop-shadow(0 14px 26px rgba(0, 0, 0, 0.90))",
 
             pointerEvents:
                 "none",
