@@ -332,8 +332,8 @@ let cowImage = null;
 let cowFloatAnimation = null;
 
 let noReactionIndex = 0;
-
 let noIsMoving = false;
+let lastLaughIndex = -1;
 
 const NO_REACTION_IMAGES = [
     "assets/no.png",
