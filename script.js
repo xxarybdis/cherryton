@@ -3722,8 +3722,10 @@ function showChoiceButtons() {
             zIndex:
                 "520",
 
-            left:
-                "38%",
+left:
+    window.innerWidth <= 700
+        ? "30%"
+        : "38%",
 
             top:
                 "86%",
@@ -3779,8 +3781,10 @@ function showChoiceButtons() {
             zIndex:
                 "520",
 
-            left:
-                "65%",
+left:
+    window.innerWidth <= 700
+        ? "70%"
+        : "65%",
 
             top:
                 "86%",
