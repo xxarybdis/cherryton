@@ -325,7 +325,7 @@ const NO_REACTION_IMAGES = [
 ];
 
 const YES_IMAGE =
-    "assets/yes.png";
+    "assets/yes.PNG";
 
 const COW_IMAGE =
     "assets/cow.PNG";
