@@ -4860,3 +4860,133 @@ function unlockNextToken() {
 resetKnobPosition();
 
 activateCurrentToken();
+
+
+
+
+
+
+/* ==================================================================================================================================================
+   MODO PRUEBA - CARTA FINAL
+   BORRAR AL TERMINAR LAS PRUEBAS
+   ================================================================================================================================================== */
+
+setTimeout(() => {
+
+    currentGachaResult =
+        LETTER_CAPSULE;
+
+    machineIsRunning =
+        true;
+
+    tokenInserted =
+        true;
+
+    capsuleCanOpen =
+        false;
+
+    capsuleCanClose =
+        false;
+
+    capsuleIsOpening =
+        false;
+
+    capsuleIsClosing =
+        false;
+
+    letterCanRevealFinal =
+        false;
+
+
+    dispensedCapsule =
+        document.createElement(
+            "img"
+        );
+
+
+    dispensedCapsule.src =
+        LETTER_CAPSULE.final;
+
+    dispensedCapsule.alt =
+        "";
+
+    dispensedCapsule.draggable =
+        false;
+
+
+    Object.assign(
+
+        dispensedCapsule.style,
+
+        {
+
+            position:
+                "absolute",
+
+            zIndex:
+                "200",
+
+            left:
+                "50%",
+
+            top:
+                "50%",
+
+            width:
+                `${FINAL_LETTER_SIZE}%`,
+
+            height:
+                "auto",
+
+            transform:
+                "translate(-50%, -50%)",
+
+            transformOrigin:
+                "center center",
+
+            filter:
+                RESULT_DROP_SHADOW,
+
+            userSelect:
+                "none",
+
+            WebkitUserSelect:
+                "none",
+
+            WebkitUserDrag:
+                "none",
+
+            WebkitTouchCallout:
+                "none",
+
+            WebkitTapHighlightColor:
+                "transparent",
+
+            touchAction:
+                "manipulation",
+
+            outline:
+                "none",
+
+            cursor:
+                "default",
+
+            opacity:
+                "1",
+
+            visibility:
+                "visible"
+
+        }
+
+    );
+
+
+    machine.appendChild(
+        dispensedCapsule
+    );
+
+
+    showChoiceButtons();
+
+}, 300);
