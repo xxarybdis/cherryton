@@ -4019,9 +4019,9 @@ function fleeNoButton() {
 
 
     /*
-       Si YA estamos mostrando cant.png,
-       cada nuevo click reproduce
-       una de las tres risas al azar.
+       Si YA estamos en cant.png,
+       elegimos una risa distinta
+       de la que sonó la vez anterior.
     */
 
     if (
@@ -4036,17 +4036,31 @@ function fleeNoButton() {
         ];
 
 
-        const randomLaugh =
-            laughSounds[
+        let randomLaughIndex;
+
+
+        do {
+
+            randomLaughIndex =
                 Math.floor(
                     Math.random() *
                     laughSounds.length
-                )
-            ];
+                );
+
+        } while (
+            randomLaughIndex ===
+            lastLaughIndex
+        );
+
+
+        lastLaughIndex =
+            randomLaughIndex;
 
 
         playSound(
-            randomLaugh
+            laughSounds[
+                randomLaughIndex
+            ]
         );
 
     }
